@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Price Move $5 + Stochastic Filter</title>
+    <!-- Official cTrader Plugin SDK -->
+    <script src="https://ctrader.com"></script>
+    <style>
+        body {
+            background-color: #1c1c1e;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 15px;
+            margin: 0;
+            font-size: 13px;
+        }
+        .header {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #34c759;
+            border-bottom: 1px solid #2c2c2e;
+            padding-bottom: 6px;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .metric-value {
+            font-family: monospace;
+            color: #0a84ff;
+        }
+        .log-box {
+            margin-top: 12px;
+            background: #2c2c2e;
+            border-radius: 4px;
+            padding: 8px;
+            height: 80px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+            color: #a9a9a9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">Strategy: Price Move & Stoch Filter</div>
+    <div class="metric-row">
+        <span>Target Symbol:</span>
+        <span class="metric-value" id="ui-symbol">Loading...</span>
+    </div>
+    <div class="metric-row">
+        <span>Ref Price:</span>
+        <span class="metric-value" id="ui-ref">--</span>
+    </div>
+    <div class="metric-row">
+        <span>Current Stoch K:</span>
+        <span class="metric-value" id="ui-stoch">--</span>
+    </div>
+    
+    <div class="log-box" id="log">Initializing strategy pipeline...</div>
+
+    <script>
+        // Strategy Inputs (Matching your exact script inputs)
+        const CONFIG = {
+            move: 10.0,
+            profit: 7.0,
+            stop: 7.0,
+            lotSize: 0.01,
+            maxOpen: 1
+        };
+
+        let referencePrice = null;
+        const stochPeriod = 14;
+        const stochSlowing = 3;
+        let priceHistory = []; 
+
+        function logMessage(msg) {
+            const box = document.getElementById('log');
+            box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // Simple Stochastic %K implementation for continuous web streams
+        function calculateStochK(currentClose) {
+            priceHistory.push(currentClose);
+            if (priceHistory.length > stochPeriod + stochSlowing) {
+                priceHistory.shift();
+            }
+            if (priceHistory.length < stochPeriod) return null;
+
+            // Calculate raw %K values for the closing window
+            let rawKValues = [];
+            for (let i = 0; i <= priceHistory.length - stochPeriod; i++) {
+                const window = priceHistory.slice(i, i + stochPeriod);
+                const currentLow = Math.min(...window);
+                const currentHigh = Math.max(...window);
+                const currentCloseVal = window[window.length - 1];
+                
+                const rawK = currentHigh === currentLow ? 50 : ((currentCloseVal - currentLow) / (currentHigh - currentLow)) * 100;
+                rawKValues.push(rawK);
+            }
+
+            // Apply SMA Slowing (3 period moving average of raw %K)
+            if (rawKValues.length < stochSlowing) return null;
+            const targetWindow = rawKValues.slice(-stochSlowing);
+            const sum = targetWindow.reduce((a, b) => a + b, 0);
+            return sum / stochSlowing;
+        }
+
+        window.ctrader.onInit(async (context) => {
+            logMessage("SDK connected. Awaiting market ticks...");
+            
+            // Subscribing to the actively visible chart symbol context
+            context.charts.getActiveChart().then(chart => {
+                const symbol = chart.symbol;
+                document.getElementById('ui-symbol').innerText = symbol;
+
+                // Subscribe to real-time asset pricing feeds
+                context.marketData.subscribeTicks({ symbol: symbol }, (tick) => {
+                    const currentPrice = tick.close;
+                    
+                    // Emulate: if na(referencePrice) -> referencePrice = close
+                    if (!referencePrice) {
+                        referencePrice = currentPrice;
+                        document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
+                    }
+
+                    // Stochastic calculation engine execution
+                    const stochK = calculateStochK(currentPrice);
+                    if (stochK === null) return;
+                    
+                    document.getElementById('ui-stoch').innerText = stochK.toFixed(2);
+
+                    // Singapore 20:00-22:00 window check = UTC 12:00-14:00 parameters
+                    const currentUtcHour = new Date().getUTCHours();
+                    const isTradeTime = currentUtcHour >= 12 && currentUtcHour < 14;
+
+                    // Evaluate directional Stochastic threshold limits
+                    const buyOk = stochK > 80;
+                    const sellOk = stochK < 20;
+
+                    // Query current account parameters to protect allocation limits (max_open = 1)
+                    context.trading.getPositions().then(positions => {
+                        const activePositionCount = positions.filter(p => p.symbol === symbol).length;
+                        const inPosition = activePositionCount >= CONFIG.maxOpen;
+
+                        if (isTradeTime && !inPosition) {
+                            
+                            // LONG Entry Rules evaluation
+                            if (buyOk && currentPrice <= (referencePrice - CONFIG.move)) {
+                                logMessage(`Buy condition triggered at ${currentPrice}`);
+                                context.trading.placeMarketOrder({
+                                    symbol: symbol,
+                                    volume: CONFIG.lotSize * 100000, // Converts Lots to raw Units
+                                    direction: 'Buy',
+                                    stopLoss: currentPrice - CONFIG.stop,
+                                    takeProfit: currentPrice + CONFIG.profit
+                                }).then(() => {
+                                    referencePrice = currentPrice;
+                                    document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
+                                }).catch(err => logMessage(`Long Order Error: ${err.message}`));
+                            }
+
+                            // SHORT Entry Rules evaluation
+                            if (sellOk && currentPrice >= (referencePrice + CONFIG.move)) {
+                                logMessage(`Short condition triggered at ${currentPrice}`);
+                                context.trading.placeMarketOrder({
+                                    symbol: symbol,
+                                    volume: CONFIG.lotSize * 100000,
+                                    direction: 'Sell',
+                                    stopLoss: currentPrice + CONFIG.stop,
+                                    takeProfit: currentPrice - CONFIG.profit
+                                }).then(() => {
+                                    referencePrice = currentPrice;
+                                    document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
+                                }).catch(err => logMessage(`Short Order Error: ${err.message}`));
+                            }
+                        }
+                    });
+                });
+            }).catch(err => logMessage(`Initialization Failed: ${err.message}`));
+        });
+    </script>
+</body>
+</html>
