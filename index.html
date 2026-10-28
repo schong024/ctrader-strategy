@@ -135,7 +135,7 @@
 
                     // Singapore 20:00-22:00 window check = UTC 12:00-14:00 parameters
                     const currentUtcHour = new Date().getUTCHours();
-                    const isTradeTime = currentUtcHour >= 12 && currentUtcHour < 14;
+                    const isTradeTime = currentUtcHour >= 12 && currentUtcHour < 16;
 
                     // Evaluate directional Stochastic threshold limits
                     const buyOk = stochK > 80;
