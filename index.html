@@ -9,8 +9,9 @@
         .header { font-weight: 600; margin-bottom: 12px; color: #34c759; border-bottom: 1px solid #2c2c2e; padding-bottom: 6px; }
         .metric-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
         .metric-value { font-family: monospace; color: #0a84ff; }
-        .log-box { margin-top: 12px; background: #2c2c2e; border-radius: 4px; padding: 8px; height: 110px; overflow-y: auto; font-family: monospace; font-size: 11px; color: #a9a9a9; }
-        .btn { width: 100%; padding: 10px; margin-top: 8px; background: #34c759; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .log-box { margin-top: 12px; background: #2c2c2e; border-radius: 4px; padding: 8px; height: 120px; overflow-y: auto; font-family: monospace; font-size: 11px; color: #a9a9a9; }
+        .btn { width: 100%; padding: 10px; margin-top: 10px; background: #34c759; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn:active { background: #248a3d; }
     </style>
 </head>
 <body>
@@ -30,7 +31,7 @@
     </div>
     
     <button class="btn" id="startBtn">Start Automated Strategy</button>
-    <div class="log-box" id="log">Awaiting SDK initialization...</div>
+    <div class="log-box" id="log">System Ready. Click the button above to run.</div>
 
     <script>
         const CONFIG = { move: 10.0, profit: 7.0, stop: 7.0, lotSize: 0.01, maxOpen: 1 };
@@ -38,7 +39,6 @@
         const stochPeriod = 14;
         const stochSlowing = 3;
         let priceHistory = []; 
-        let activeApiContext = null;
 
         function logMessage(msg) {
             const box = document.getElementById('log');
@@ -64,73 +64,80 @@
             return targetWindow.reduce((a, b) => a + b, 0) / stochSlowing;
         }
 
-        // Connect directly to the global cTrader WebView plugin environment
-        window.ctrader.onInit(async (context) => {
-            activeApiContext = context;
-            logMessage("SDK Handshake established successfully.");
-        });
-
-        document.getElementById('startBtn').addEventListener('click', async () => {
-            if (!activeApiContext) {
-                logMessage("Error: Plugin SDK context still connecting. Please wait a second.");
-                return;
-            }
-
-            logMessage("Subscribing to active trading account environment...");
+        function startStrategyPipeline(apiContext) {
+            logMessage("Connecting to market data feed...");
             const symbol = "XAUUSD";
 
-            try {
-                activeApiContext.marketData.subscribeTicks({ symbol: symbol }, (tick) => {
-                    const currentPrice = tick.close;
-                    
-                    if (!referencePrice) {
-                        referencePrice = currentPrice;
-                        document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
-                        logMessage(`Engine Live. Reference Price set at ${referencePrice.toFixed(2)}`);
-                    }
+            apiContext.marketData.subscribeTicks({ symbol: symbol }, (tick) => {
+                const currentPrice = tick.close;
+                
+                if (!referencePrice) {
+                    referencePrice = currentPrice;
+                    document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
+                    logMessage(`Initial Reference Price set: $${referencePrice.toFixed(2)}`);
+                }
 
-                    const stochK = calculateStochK(currentPrice);
-                    if (stochK !== null) {
-                        document.getElementById('ui-stoch').innerText = stochK.toFixed(2);
-                    }
+                const stochK = calculateStochK(currentPrice);
+                if (stochK !== null) {
+                    document.getElementById('ui-stoch').innerText = stochK.toFixed(2);
+                }
 
-                    const currentUtcHour = new Date().getUTCHours();
-                    const isTradeTime = currentUtcHour >= 12 && currentUtcHour < 16; 
-                    
-                    const buyOk = stochK !== null && stochK > 80;
-                    const sellOk = stochK !== null && stochK < 20;
+                // Singapore 20:00-24:00 window check = UTC 12:00-16:00
+                const currentUtcHour = new Date().getUTCHours();
+                const isTradeTime = currentUtcHour >= 12 && currentUtcHour < 16;
 
-                    activeApiContext.trading.getPositions().then(positions => {
-                        const activePositionCount = positions.filter(p => p.symbol === symbol).length;
-                        const inPosition = activePositionCount >= CONFIG.maxOpen;
+                const buyOk = stochK !== null && stochK > 80;
+                const sellOk = stochK !== null && stochK < 20;
 
-                        if (isTradeTime && !inPosition && stochK !== null) {
-                            if (buyOk && currentPrice <= (referencePrice - CONFIG.move)) {
-                                logMessage(`Executing Market BUY @ ${currentPrice}`);
-                                activeApiContext.trading.placeMarketOrder({
-                                    symbol: symbol, volume: CONFIG.lotSize * 100000, direction: 'Buy',
-                                    stopLoss: currentPrice - CONFIG.stop, takeProfit: currentPrice + CONFIG.profit
-                                }).then(() => {
-                                    referencePrice = currentPrice;
-                                    document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
-                                }).catch(err => logMessage(`Execution Err: ${err.message}`));
-                            }
+                apiContext.trading.getPositions().then(positions => {
+                    const activePositionCount = positions.filter(p => p.symbol === symbol).length;
+                    const inPosition = activePositionCount >= CONFIG.maxOpen;
 
-                            if (sellOk && currentPrice >= (referencePrice + CONFIG.move)) {
-                                logMessage(`Executing Market SELL @ ${currentPrice}`);
-                                activeApiContext.trading.placeMarketOrder({
-                                    symbol: symbol, volume: CONFIG.lotSize * 100000, direction: 'Sell',
-                                    stopLoss: currentPrice + CONFIG.stop, takeProfit: currentPrice - CONFIG.profit
-                                }).then(() => {
-                                    referencePrice = currentPrice;
-                                    document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
-                                }).catch(err => logMessage(`Execution Err: ${err.message}`));
-                            }
+                    if (isTradeTime && !inPosition && stochK !== null) {
+                        
+                        // LONG Rule Evaluation
+                        if (buyOk && currentPrice <= (referencePrice - CONFIG.move)) {
+                            logMessage(`BUY Condition Triggered! Entry: ${currentPrice}`);
+                            apiContext.trading.placeMarketOrder({
+                                symbol: symbol, volume: CONFIG.lotSize * 100000, direction: 'Buy',
+                                stopLoss: currentPrice - CONFIG.stop, takeProfit: currentPrice + CONFIG.profit
+                            }).then(() => {
+                                referencePrice = currentPrice;
+                                document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
+                            }).catch(err => logMessage(`Order Error: ${err.message}`));
                         }
-                    });
+
+                        // SHORT Rule Evaluation
+                        if (sellOk && currentPrice >= (referencePrice + CONFIG.move)) {
+                            logMessage(`SHORT Condition Triggered! Entry: ${currentPrice}`);
+                            apiContext.trading.placeMarketOrder({
+                                symbol: symbol, volume: CONFIG.lotSize * 100000, direction: 'Sell',
+                                stopLoss: currentPrice + CONFIG.stop, takeProfit: currentPrice - CONFIG.profit
+                            }).then(() => {
+                                referencePrice = currentPrice;
+                                document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
+                            }).catch(err => logMessage(`Order Error: ${err.message}`));
+                        }
+                    }
                 });
-            } catch (err) {
-                logMessage(`Connection Error: ${err.message}`);
+            });
+        }
+
+        // Bypasses wrapper events and directly finds the active cTrader object instance
+        document.getElementById('startBtn').addEventListener('click', () => {
+            const apiContext = window.ctrader || (window.parent && window.parent.ctrader);
+            
+            if (apiContext) {
+                document.getElementById('startBtn').style.display = 'none';
+                startStrategyPipeline(apiContext);
+            } else {
+                // Fallback trial if API loading handles asynchronously 
+                if (typeof ctrader !== 'undefined') {
+                    document.getElementById('startBtn').style.display = 'none';
+                    startStrategyPipeline(ctrader);
+                } else {
+                    logMessage("Error: Handshake blocked. Ensure plugin has 'Full Access' enabled under Algo settings.");
+                }
             }
         });
     </script>
