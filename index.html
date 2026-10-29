@@ -1,47 +1,112 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1"
     >
 
-    <title>cTrader Connection Test V1</title>
+    <title>cTrader Connection Test</title>
 
     <style>
         body {
             margin: 0;
             padding: 20px;
+
             background: #1c1c1e;
             color: white;
-            font-family: Arial, sans-serif;
+
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         h1 {
             color: #30d158;
+            font-size: 20px;
+        }
+
+        .box {
+            margin-top: 20px;
+            padding: 15px;
+
+            background: #2c2c2e;
+            border-radius: 6px;
         }
 
         #status {
             color: #ffd60a;
-            font-family: monospace;
-            font-size: 18px;
+
+            font-family: Consolas, monospace;
+            font-size: 16px;
+        }
+
+        #time {
+            margin-top: 10px;
+
+            color: #0a84ff;
+
+            font-family: Consolas, monospace;
         }
     </style>
 </head>
 
+
 <body>
 
-    <h1>CTRADER CONNECTION TEST V1</h1>
+    <h1>
+        CTRADER NEW PAGE TEST 001
+    </h1>
 
-    <div id="status">
-        JavaScript has not started.
+
+    <div class="box">
+
+        <div>
+            JavaScript Status:
+        </div>
+
+        <div id="status">
+            JavaScript has NOT started.
+        </div>
+
+
+        <div id="time">
+            --
+        </div>
+
     </div>
 
+
     <script>
-        document.getElementById("status").textContent =
+
+        const status =
+            document.getElementById("status");
+
+
+        const time =
+            document.getElementById("time");
+
+
+        status.textContent =
             "JavaScript is running successfully.";
+
+
+        status.style.color =
+            "#30d158";
+
+
+        time.textContent =
+            "Page loaded: " +
+            new Date().toLocaleString();
+
+
+        console.log(
+            "CTRADER TEST PAGE JAVASCRIPT RUNNING"
+        );
+
     </script>
 
 </body>
+
 </html>
