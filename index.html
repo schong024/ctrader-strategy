@@ -2,18 +2,16 @@
 <html lang="en">
 
 <head>
-
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1"
     >
 
     <title>
         Price Move + Stochastic Filter
     </title>
-
 
     <style>
 
@@ -25,14 +23,10 @@
         body {
             margin: 0;
             padding: 0;
-            width: 100%;
             min-height: 100%;
             background: #1c1c1e;
             color: #ffffff;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         body {
@@ -42,86 +36,63 @@
 
         .panel {
             width: 100%;
+            max-width: 520px;
         }
 
         .header {
             color: #34c759;
             font-size: 15px;
-            font-weight: 700;
-
-            padding-bottom: 8px;
+            font-weight: bold;
             margin-bottom: 12px;
-
-            border-bottom:
-                1px solid #3a3a3c;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3a3a3c;
         }
 
         .section-title {
             color: #ffffff;
-            font-weight: 700;
-
+            font-size: 13px;
+            font-weight: bold;
             margin-top: 16px;
             margin-bottom: 8px;
         }
 
         .metric-row {
             display: flex;
-
-            justify-content:
-                space-between;
-
-            gap: 12px;
-
-            margin-bottom: 6px;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 7px;
         }
 
-        .metric-name {
+        .metric-label {
             color: #d1d1d6;
         }
 
         .metric-value {
             color: #0a84ff;
-
-            font-family:
-                Consolas,
-                Monaco,
-                monospace;
-
+            font-family: Consolas, Monaco, monospace;
             text-align: right;
         }
 
-        .connected {
-            color: #30d158 !important;
-        }
-
-        .warning {
-            color: #ffd60a !important;
-        }
-
-        .error {
-            color: #ff453a !important;
-        }
-
         .button {
+            display: block;
             width: 100%;
-
             padding: 10px;
-
             margin-top: 8px;
 
             border: none;
-
             border-radius: 5px;
 
             background: #34c759;
-
-            color: white;
+            color: #ffffff;
 
             font-size: 13px;
-
-            font-weight: 700;
+            font-weight: bold;
 
             cursor: pointer;
+        }
+
+        .button:hover:not(:disabled) {
+            background: #2faf4f;
         }
 
         .button.stop {
@@ -134,280 +105,245 @@
 
         .button:disabled {
             background: #48484a;
-
             color: #8e8e93;
-
             cursor: not-allowed;
         }
 
-        .rule-box {
-            background: #2c2c2e;
+        .parameter {
+            color: #d1d1d6;
+            margin-bottom: 4px;
+        }
 
-            padding: 10px;
-
-            border-radius: 5px;
-
-            margin-top: 6px;
-
-            line-height: 1.5;
+        .rule {
+            margin-top: 5px;
+            color: #d1d1d6;
+            line-height: 1.4;
         }
 
         .log-box {
-            height: 170px;
-
-            margin-top: 12px;
-
+            margin-top: 15px;
             padding: 9px;
+
+            height: 190px;
 
             overflow-y: auto;
 
-            background: #2c2c2e;
-
             border-radius: 5px;
 
-            font-family:
-                Consolas,
-                Monaco,
-                monospace;
-
-            font-size: 11px;
-
-            line-height: 1.45;
+            background: #2c2c2e;
 
             color: #d1d1d6;
+
+            font-family: Consolas, Monaco, monospace;
+            font-size: 11px;
+            line-height: 1.45;
         }
 
-        .log-success {
+        .success {
             color: #30d158;
         }
 
-        .log-warning {
+        .warning {
             color: #ffd60a;
         }
 
-        .log-error {
+        .error {
             color: #ff453a;
         }
 
-        .safety {
-            color: #8e8e93;
-
-            font-size: 11px;
-
+        .notice {
             margin-top: 12px;
-
+            color: #8e8e93;
+            font-size: 11px;
             line-height: 1.4;
         }
 
     </style>
-
 </head>
 
 
 <body>
 
-
 <div class="panel">
 
-
     <div class="header">
-
         Strategy: Price Move &amp; Stoch Filter
-
     </div>
 
 
-    <div class="metric-row">
+    <!-- CONNECTION INFORMATION -->
 
-        <span class="metric-name">
+    <div class="metric-row">
+        <span class="metric-label">
             Host Connection:
         </span>
 
         <span
-            class="metric-value warning"
-            id="ui-connection"
+            class="metric-value"
+            id="connection"
         >
-            Connecting...
+            Loading...
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Account:
         </span>
 
         <span
             class="metric-value"
-            id="ui-account"
+            id="account"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Target Symbol:
         </span>
 
         <span
             class="metric-value"
-            id="ui-symbol"
+            id="symbol"
         >
             XAUUSD
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Symbol ID:
         </span>
 
         <span
             class="metric-value"
-            id="ui-symbol-id"
+            id="symbolId"
         >
             --
         </span>
-
     </div>
 
 
-    <div class="metric-row">
+    <!-- LIVE MARKET DATA -->
 
-        <span class="metric-name">
+    <div class="metric-row">
+        <span class="metric-label">
             Current Bid:
         </span>
 
         <span
             class="metric-value"
-            id="ui-bid"
+            id="bid"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Current Ask:
         </span>
 
         <span
             class="metric-value"
-            id="ui-ask"
+            id="ask"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Reference Price:
         </span>
 
         <span
             class="metric-value"
-            id="ui-reference"
+            id="reference"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Price Movement:
         </span>
 
         <span
             class="metric-value"
-            id="ui-movement"
+            id="movement"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Current Stoch K:
         </span>
 
         <span
             class="metric-value"
-            id="ui-stoch"
+            id="stochastic"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Trading Window:
         </span>
 
         <span
             class="metric-value"
-            id="ui-window"
+            id="tradingWindow"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Position:
         </span>
 
         <span
             class="metric-value"
-            id="ui-position"
+            id="position"
         >
             --
         </span>
-
     </div>
 
 
     <div class="metric-row">
-
-        <span class="metric-name">
+        <span class="metric-label">
             Strategy Status:
         </span>
 
         <span
             class="metric-value"
-            id="ui-status"
+            id="strategyStatus"
         >
             Stopped
         </span>
-
     </div>
 
+
+    <!-- BUTTONS -->
 
     <button
         class="button"
@@ -436,160 +372,93 @@
     </button>
 
 
+    <!-- PARAMETERS -->
 
     <div class="section-title">
-
         Strategy Parameters
-
     </div>
 
 
-    <div class="metric-row">
+    <div class="parameter">
+        Required Price Move: $10.00
+    </div>
 
-        <span>Required Price Move:</span>
+    <div class="parameter">
+        Take Profit: $7.00
+    </div>
 
-        <span class="metric-value">
-            $10.00
-        </span>
+    <div class="parameter">
+        Stop Loss: $7.00
+    </div>
 
+    <div class="parameter">
+        Trade Size: 0.01 lot
+    </div>
+
+    <div class="parameter">
+        Maximum Positions: 1
+    </div>
+
+    <div class="parameter">
+        Stochastic: 5, 3, 3
+    </div>
+
+    <div class="parameter">
+        Singapore Trading Time: 20:00–00:00
     </div>
 
 
-    <div class="metric-row">
-
-        <span>Take Profit:</span>
-
-        <span class="metric-value">
-            $7.00
-        </span>
-
-    </div>
-
-
-    <div class="metric-row">
-
-        <span>Stop Loss:</span>
-
-        <span class="metric-value">
-            $7.00
-        </span>
-
-    </div>
-
-
-    <div class="metric-row">
-
-        <span>Trade Size:</span>
-
-        <span class="metric-value">
-            0.01 lot
-        </span>
-
-    </div>
-
-
-    <div class="metric-row">
-
-        <span>Maximum Positions:</span>
-
-        <span class="metric-value">
-            1
-        </span>
-
-    </div>
-
-
-    <div class="metric-row">
-
-        <span>Stochastic:</span>
-
-        <span class="metric-value">
-            5, 3, 3
-        </span>
-
-    </div>
-
-
-    <div class="metric-row">
-
-        <span>
-            Singapore Trading Time:
-        </span>
-
-        <span class="metric-value">
-            20:00–00:00
-        </span>
-
-    </div>
-
-
+    <!-- RULES -->
 
     <div class="section-title">
-
         Entry Rules
-
     </div>
 
 
-    <div class="rule-box">
-
-        BUY when price falls $10 from the
-        reference price and Stochastic K is
-        above 80.
-
-        <br><br>
-
-        SELL when price rises $10 from the
-        reference price and Stochastic K is
-        below 20.
-
+    <div class="rule">
+        BUY when price falls $10 from the reference
+        price and Stochastic K is above 80.
     </div>
 
 
+    <div class="rule">
+        SELL when price rises $10 from the reference
+        price and Stochastic K is below 20.
+    </div>
+
+
+    <!-- LOG -->
 
     <div
         class="log-box"
         id="log"
     >
-
         <div>
             System loading...
         </div>
-
     </div>
 
 
-    <div class="safety">
-
-        Connection-test version.
-        Automatic order execution is disabled.
-
+    <div class="notice">
+        Connection-test version. Automatic order execution
+        is disabled. Test using a demo account before
+        enabling trading.
     </div>
-
 
 </div>
 
 
-
 <script type="module">
 
-
-/* ============================================================
-   OFFICIAL CTRADER SDK IMPORTS
-
-   These load directly from esm.sh.
-
-   No npm.
-   No Vite.
-   No package.json required.
-   ============================================================ */
-
+/*
+============================================================
+CTRADER CDN IMPORTS
+============================================================
+*/
 
 import {
     createClientAdapter
-}
-from
-"https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5";
+} from "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5";
 
 
 import {
@@ -601,345 +470,233 @@ import {
     registerEvent,
     subscribeQuotes,
     unsubscribeQuotes
-}
-from
-"https://esm.sh/@spotware-web-team/sdk@0.0.20";
+} from "https://esm.sh/@spotware-web-team/sdk";
 
 
 import {
-    take,
-    tap,
     catchError,
-    of
-}
-from
-"https://esm.sh/rxjs@7.8.2";
+    of,
+    take,
+    tap
+} from "https://esm.sh/rxjs";
 
 
 import {
     createLogger
-}
-from
-"https://esm.sh/@veksa/logger@0.0.3";
+} from "https://esm.sh/@veksa/logger";
 
 
-
-/* ============================================================
-   SETTINGS
-   ============================================================ */
-
+/*
+============================================================
+CONFIGURATION
+============================================================
+*/
 
 const CONFIG = {
 
-    symbolName:
-        "XAUUSD",
+    symbolName: "XAUUSD",
 
-    requiredMove:
-        10.0,
+    requiredMove: 10.0,
 
-    takeProfit:
-        7.0,
+    takeProfit: 7.0,
 
-    stopLoss:
-        7.0,
+    stopLoss: 7.0,
 
-    lotSize:
-        0.01,
+    lotSize: 0.01,
 
-    maximumPositions:
-        1,
+    maxPositions: 1,
 
-    stochasticK:
-        5,
+    singaporeStartHour: 20,
 
-    stochasticD:
-        3,
+    stochasticKPeriod: 5,
 
-    stochasticSlowing:
-        3
+    stochasticDPeriod: 3,
 
+    stochasticSlowing: 3
 };
 
 
-
-/* ============================================================
-   STATE
-   ============================================================ */
-
+/*
+============================================================
+STATE
+============================================================
+*/
 
 const state = {
 
-    connected:
-        false,
+    connected: false,
 
-    accountId:
-        null,
+    quotesSubscribed: false,
 
-    symbolId:
-        null,
+    strategyRunning: false,
 
-    symbol:
-        null,
+    accountId: null,
 
-    digits:
-        2,
+    symbolId: null,
 
-    bid:
-        null,
+    symbolName: "XAUUSD",
 
-    ask:
-        null,
+    symbolDetails: null,
 
-    reference:
-        null,
+    digits: 2,
 
-    movement:
-        null,
+    bid: null,
 
-    quoteSubscription:
-        null,
+    ask: null,
 
-    quotesSubscribed:
-        false,
+    referencePrice: null,
 
-    strategyRunning:
-        false
-
+    quoteStream: null
 };
 
 
-
-/* ============================================================
-   HTML ELEMENTS
-   ============================================================ */
-
+/*
+============================================================
+DOM
+============================================================
+*/
 
 const ui = {
 
     connection:
-        document.getElementById(
-            "ui-connection"
-        ),
+        document.getElementById("connection"),
 
     account:
-        document.getElementById(
-            "ui-account"
-        ),
+        document.getElementById("account"),
 
     symbol:
-        document.getElementById(
-            "ui-symbol"
-        ),
+        document.getElementById("symbol"),
 
     symbolId:
-        document.getElementById(
-            "ui-symbol-id"
-        ),
+        document.getElementById("symbolId"),
 
     bid:
-        document.getElementById(
-            "ui-bid"
-        ),
+        document.getElementById("bid"),
 
     ask:
-        document.getElementById(
-            "ui-ask"
-        ),
+        document.getElementById("ask"),
 
     reference:
-        document.getElementById(
-            "ui-reference"
-        ),
+        document.getElementById("reference"),
 
     movement:
-        document.getElementById(
-            "ui-movement"
-        ),
+        document.getElementById("movement"),
 
-    stoch:
-        document.getElementById(
-            "ui-stoch"
-        ),
+    stochastic:
+        document.getElementById("stochastic"),
 
-    window:
-        document.getElementById(
-            "ui-window"
-        ),
+    tradingWindow:
+        document.getElementById("tradingWindow"),
 
     position:
-        document.getElementById(
-            "ui-position"
-        ),
+        document.getElementById("position"),
 
-    status:
-        document.getElementById(
-            "ui-status"
-        ),
+    strategyStatus:
+        document.getElementById("strategyStatus"),
 
-    start:
-        document.getElementById(
-            "startBtn"
-        ),
+    startBtn:
+        document.getElementById("startBtn"),
 
-    stop:
-        document.getElementById(
-            "stopBtn"
-        ),
+    stopBtn:
+        document.getElementById("stopBtn"),
 
-    reset:
-        document.getElementById(
-            "resetBtn"
-        ),
+    resetBtn:
+        document.getElementById("resetBtn"),
 
     log:
-        document.getElementById(
-            "log"
-        )
-
+        document.getElementById("log")
 };
 
 
-
-/* ============================================================
-   LOG
-   ============================================================ */
-
+/*
+============================================================
+LOGGING
+============================================================
+*/
 
 function log(
     message,
-    type = "normal"
+    type = ""
 ) {
 
-    console.log(
-        message
-    );
-
+    console.log(message);
 
     const row =
-        document.createElement(
-            "div"
-        );
-
-
-    const time =
-        new Date()
-            .toLocaleTimeString(
-                "en-SG",
-                {
-                    hour12:
-                        false
-                }
-            );
-
+        document.createElement("div");
 
     row.textContent =
-        `[${time}] ${message}`;
+        `[${new Date().toLocaleTimeString("en-SG")}] ${message}`;
 
-
-    if (
-        type === "success"
-    ) {
+    if (type) {
 
         row.className =
-            "log-success";
-
+            type;
     }
-
-
-    if (
-        type === "warning"
-    ) {
-
-        row.className =
-            "log-warning";
-
-    }
-
-
-    if (
-        type === "error"
-    ) {
-
-        row.className =
-            "log-error";
-
-    }
-
 
     ui.log.appendChild(
         row
     );
 
-
     ui.log.scrollTop =
         ui.log.scrollHeight;
-
 }
 
 
-
-/* ============================================================
-   ERROR FORMATTER
-   ============================================================ */
-
-
-function errorText(
+function showError(
+    prefix,
     error
 ) {
 
-    if (
-        error === null ||
-        error === undefined
-    ) {
+    console.error(
+        prefix,
+        error
+    );
 
-        return "Unknown error";
-
-    }
-
+    let message =
+        "Unknown error";
 
     if (
-        typeof error ===
-        "string"
+        typeof error === "string"
     ) {
 
-        return error;
+        message =
+            error;
 
-    }
-
-
-    if (
-        error.message
+    } else if (
+        error?.message
     ) {
 
-        return error.message;
+        message =
+            error.message;
 
+    } else {
+
+        try {
+
+            message =
+                JSON.stringify(
+                    error
+                );
+
+        } catch {
+
+            message =
+                String(error);
+        }
     }
 
-
-    try {
-
-        return JSON.stringify(
-            error
-        );
-
-    }
-
-    catch {
-
-        return String(
-            error
-        );
-
-    }
-
+    log(
+        `${prefix}: ${message}`,
+        "error"
+    );
 }
 
 
-
-/* ============================================================
-   SINGAPORE TIME
-   ============================================================ */
-
+/*
+============================================================
+SINGAPORE TRADING WINDOW
+============================================================
+*/
 
 function singaporeHour() {
 
@@ -947,7 +704,6 @@ function singaporeHour() {
         new Intl.DateTimeFormat(
             "en-SG",
             {
-
                 timeZone:
                     "Asia/Singapore",
 
@@ -956,425 +712,351 @@ function singaporeHour() {
 
                 hourCycle:
                     "h23"
-
             }
-
-        ).formatToParts(
+        )
+        .formatToParts(
             new Date()
         );
 
 
-    const result =
+    const hour =
         parts.find(
-            x =>
-                x.type ===
+            part =>
+                part.type ===
                 "hour"
         );
 
 
-    return result
-        ?
-        Number(
-            result.value
-        )
-        :
-        0;
-
+    return Number(
+        hour?.value ?? 0
+    );
 }
 
 
-
-function tradingWindowOpen() {
+function updateTradingWindow() {
 
     const hour =
         singaporeHour();
 
 
-    return (
-        hour >= 20
-        &&
-        hour < 24
-    );
-
-}
-
-
-
-function updateWindow() {
-
     const open =
-        tradingWindowOpen();
+        hour >= 20 &&
+        hour < 24;
 
 
-    ui.window.textContent =
+    ui.tradingWindow.textContent =
         open
-            ?
-            "OPEN"
-            :
-            "CLOSED";
+            ? "OPEN"
+            : "CLOSED";
 
 
-    ui.window.className =
+    ui.tradingWindow.style.color =
         open
-            ?
-            "metric-value connected"
-            :
-            "metric-value warning";
-
+            ? "#30d158"
+            : "#ff9f0a";
 }
 
 
-
-updateWindow();
-
-
-setInterval(
-    updateWindow,
-    30000
-);
-
-
-
-/* ============================================================
-   PRICE DISPLAY
-   ============================================================ */
-
+/*
+============================================================
+PRICE HELPERS
+============================================================
+*/
 
 function formatPrice(
     value
 ) {
 
-    const number =
-        Number(
-            value
-        );
-
-
     if (
+        value === null ||
+        value === undefined ||
         !Number.isFinite(
-            number
+            Number(value)
         )
     ) {
 
         return "--";
-
     }
 
 
-    return number.toFixed(
+    return Number(
+        value
+    ).toFixed(
         state.digits
     );
-
 }
 
 
-
-function updateMovement() {
-
-    if (
-        state.reference === null
-        ||
-        state.bid === null
-    ) {
-
-        return;
-
-    }
-
-
-    state.movement =
-        state.bid -
-        state.reference;
-
-
-    const prefix =
-        state.movement > 0
-            ?
-            "+"
-            :
-            "";
-
-
-    ui.movement.textContent =
-        prefix +
-        state.movement.toFixed(
-            state.digits
-        );
-
-}
-
-
-
-/* ============================================================
-   RESET REFERENCE
-   ============================================================ */
-
-
-function resetReference() {
+function setReferencePrice(
+    value
+) {
 
     const price =
-        state.bid !== null
-            ?
-            state.bid
-            :
-            state.ask;
+        Number(value);
 
 
     if (
-        price === null
+        !Number.isFinite(
+            price
+        )
     ) {
 
-        log(
-            "Cannot reset reference. No quote available.",
-            "warning"
-        );
-
         return;
-
     }
 
 
-    state.reference =
-        Number(
-            price
-        );
+    state.referencePrice =
+        price;
 
 
     ui.reference.textContent =
         formatPrice(
-            state.reference
+            price
         );
 
 
     ui.movement.textContent =
-        Number(0).toFixed(
-            state.digits
-        );
+        "0.00";
 
 
     log(
-
-        "Reference price reset to " +
-        formatPrice(
-            state.reference
-        ),
-
+        `Reference price set: ${formatPrice(price)}`,
         "success"
-
     );
-
 }
 
 
-
-/* ============================================================
-   ADAPTER
-   ============================================================ */
-
+/*
+============================================================
+CREATE CTRADER ADAPTER
+============================================================
+*/
 
 log(
-    "Creating cTrader adapter..."
+    "Creating cTrader client adapter..."
 );
 
 
+/*
+The official integration example creates a logger and then
+passes the logger to createClientAdapter().
+*/
+
 const logger =
     createLogger(
-        true
+        location.href.includes(
+            "showLogs"
+        )
     );
 
 
 const adapter =
     createClientAdapter({
-
-        logger:
-            logger
-
+        logger
     });
 
 
+log(
+    "Client adapter created.",
+    "success"
+);
 
-/* ============================================================
-   CONNECTION
-   ============================================================ */
 
+/*
+============================================================
+CTRADER HANDSHAKE
+============================================================
+*/
 
 function connect() {
 
+    ui.connection.textContent =
+        "Connecting...";
+
+
+    ui.connection.style.color =
+        "#ffd60a";
+
 
     log(
-        "Waiting for cTrader host..."
+        "Starting cTrader handshake..."
     );
 
 
     /*
-        Initial handshake
+    STEP 1
+    First confirm message
     */
-
 
     handleConfirmEvent(
         adapter,
         {}
     )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
 
-    .pipe(
+            next: value => {
 
-        take(1),
-
-        catchError(
-
-            error => {
+                console.log(
+                    "Initial confirmation:",
+                    value
+                );
 
                 log(
-
-                    "Initial handshake error: " +
-                    errorText(
-                        error
-                    ),
-
-                    "error"
-
+                    "Initial confirmation completed.",
+                    "success"
                 );
+            },
 
+            error: error => {
 
-                return of(
-                    null
+                showError(
+                    "Initial confirmation failed",
+                    error
                 );
-
             }
-
-        )
-
-    )
-
-    .subscribe();
-
+        });
 
 
     /*
-        Main registration
+    STEP 2
+    Wait for host registration
     */
+
+    log(
+        "Waiting for cTrader host registration..."
+    );
 
 
     registerEvent(
         adapter
     )
+        .pipe(
 
-    .pipe(
+            take(1),
 
-        take(1),
+            tap(
+                registration => {
 
-
-        tap(
-
-            result => {
-
-
-                console.log(
-                    "Register:",
-                    result
-                );
+                    console.log(
+                        "Registration:",
+                        registration
+                    );
 
 
-                state.connected =
-                    true;
+                    log(
+                        "Host registration received.",
+                        "success"
+                    );
 
 
-                ui.connection.textContent =
-                    "Connected";
+                    /*
+                    STEP 3
+                    Second required confirm
+                    */
+
+                    handleConfirmEvent(
+                        adapter,
+                        {}
+                    )
+                        .pipe(
+                            take(1)
+                        )
+                        .subscribe({
+
+                            next:
+                                confirmation => {
+
+                                    console.log(
+                                        "Second confirmation:",
+                                        confirmation
+                                    );
 
 
-                ui.connection.className =
-                    "metric-value connected";
+                                    log(
+                                        "Second confirmation completed.",
+                                        "success"
+                                    );
+                                },
+
+                            error:
+                                error => {
+
+                                    showError(
+                                        "Second confirmation failed",
+                                        error
+                                    );
+                                }
+                        });
 
 
-                log(
-                    "Connected to cTrader Desktop.",
-                    "success"
-                );
+                    /*
+                    CONNECTION READY
+                    */
+
+                    state.connected =
+                        true;
 
 
-
-                /*
-                    Confirm registration
-                */
+                    ui.connection.textContent =
+                        "Connected";
 
 
-                handleConfirmEvent(
-                    adapter,
-                    {}
-                )
-
-                .pipe(
-                    take(1)
-                )
-
-                .subscribe();
+                    ui.connection.style.color =
+                        "#30d158";
 
 
-
-                /*
-                    Load trading information
-                */
-
-
-                loadAccount();
-
-                loadSymbols();
+                    log(
+                        "Connected to cTrader Desktop.",
+                        "success"
+                    );
 
 
-            }
+                    loadAccount();
 
-        ),
-
-
-        catchError(
-
-            error => {
+                    loadSymbols();
+                }
+            ),
 
 
-                ui.connection.textContent =
-                    "Connection Failed";
+            catchError(
+                error => {
+
+                    state.connected =
+                        false;
 
 
-                ui.connection.className =
-                    "metric-value error";
+                    ui.connection.textContent =
+                        "FAILED";
 
 
-                log(
+                    ui.connection.style.color =
+                        "#ff453a";
 
-                    "Registration failed: " +
-                    errorText(
+
+                    showError(
+                        "cTrader host registration failed",
                         error
-                    ),
-
-                    "error"
-
-                );
+                    );
 
 
-                return of(
-                    null
-                );
-
-            }
-
+                    return [];
+                }
+            )
         )
-
-    )
-
-    .subscribe();
-
+        .subscribe();
 }
 
 
-
-/* ============================================================
-   ACCOUNT
-   ============================================================ */
-
+/*
+============================================================
+ACCOUNT INFORMATION
+============================================================
+*/
 
 function loadAccount() {
-
 
     log(
         "Requesting account information..."
@@ -1385,25 +1067,22 @@ function loadAccount() {
         adapter,
         {}
     )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
 
-    .pipe(
-
-        take(1),
-
-
-        tap(
-
-            result => {
-
+            next: result => {
 
                 console.log(
-                    "Account:",
+                    "ACCOUNT RESPONSE:",
                     result
                 );
 
 
                 const account =
                     result?.account ??
+                    result?.accountInformation ??
                     result?.payload?.account ??
                     result;
 
@@ -1412,8 +1091,7 @@ function loadAccount() {
                     account?.accountId ??
                     account?.ctidTraderAccountId ??
                     account?.id ??
-                    account?.login ??
-                    "--";
+                    account?.login;
 
 
                 state.accountId =
@@ -1421,68 +1099,42 @@ function loadAccount() {
 
 
                 ui.account.textContent =
-                    String(
-                        id
-                    );
+                    id ??
+                    "Connected";
 
 
                 log(
-
-                    "Account loaded: " +
-                    id,
-
+                    "Account information received.",
                     "success"
+                );
+            },
 
+
+            error: error => {
+
+                showError(
+                    "Account request failed",
+                    error
                 );
 
+
+                ui.account.textContent =
+                    "Unavailable";
             }
-
-        ),
-
-
-        catchError(
-
-            error => {
-
-
-                log(
-
-                    "Account request error: " +
-                    errorText(
-                        error
-                    ),
-
-                    "warning"
-
-                );
-
-
-                return of(
-                    null
-                );
-
-            }
-
-        )
-
-    )
-
-    .subscribe();
-
+        });
 }
 
 
-
-/* ============================================================
-   SYMBOL LIST
-   ============================================================ */
-
+/*
+============================================================
+SYMBOL LIST
+============================================================
+*/
 
 function loadSymbols() {
 
-
     log(
-        "Searching for XAUUSD..."
+        "Requesting broker symbol list..."
     );
 
 
@@ -1490,360 +1142,299 @@ function loadSymbols() {
         adapter,
         {}
     )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
 
-    .pipe(
-
-        take(1),
-
-
-        tap(
-
-            result => {
-
+            next: result => {
 
                 console.log(
-                    "Symbols:",
+                    "SYMBOL LIST RESPONSE:",
                     result
                 );
 
 
-                const symbols =
-
-                    result?.symbol ??
-                    result?.symbols ??
-                    result?.payload?.symbol ??
-                    result?.payload?.symbols ??
-                    [];
-
-
-                if (
-                    !Array.isArray(
-                        symbols
-                    )
-                ) {
-
-
-                    log(
-                        "Symbol response did not contain a symbol array.",
-                        "error"
-                    );
-
-
-                    return;
-
-                }
-
-
-
-                /*
-                    Exact XAUUSD match first
-                */
-
-
-                let selected =
-
-                    symbols.find(
-
-                        x => {
-
-                            const name =
-                                String(
-                                    x.symbolName ??
-                                    x.name ??
-                                    ""
-                                )
-                                .toUpperCase();
-
-
-                            return (
-                                name ===
-                                "XAUUSD"
-                            );
-
-                        }
-
-                    );
-
-
-
-                /*
-                    Broker suffix fallback
-                */
-
-
-                if (
-                    !selected
-                ) {
-
-
-                    selected =
-
-                        symbols.find(
-
-                            x => {
-
-                                const name =
-                                    String(
-                                        x.symbolName ??
-                                        x.name ??
-                                        ""
-                                    )
-                                    .toUpperCase();
-
-
-                                return (
-                                    name.startsWith(
-                                        "XAUUSD"
-                                    )
-                                );
-
-                            }
-
-                        );
-
-                }
-
-
-
-                /*
-                    GOLD fallback
-                */
-
-
-                if (
-                    !selected
-                ) {
-
-
-                    selected =
-
-                        symbols.find(
-
-                            x => {
-
-                                const name =
-                                    String(
-                                        x.symbolName ??
-                                        x.name ??
-                                        ""
-                                    )
-                                    .toUpperCase();
-
-
-                                return (
-                                    name.includes(
-                                        "GOLD"
-                                    )
-                                );
-
-                            }
-
-                        );
-
-                }
-
-
-
-                if (
-                    !selected
-                ) {
-
-
-                    log(
-                        "XAUUSD/GOLD was not found in the account symbol list.",
-                        "error"
-                    );
-
-
-                    return;
-
-                }
-
-
-
-                const symbolName =
-                    selected.symbolName ??
-                    selected.name ??
-                    "XAUUSD";
-
-
-                const symbolId =
-                    selected.symbolId ??
-                    selected.id;
-
-
-
-                if (
-                    symbolId ===
-                    undefined
-                ) {
-
-
-                    log(
-                        "Gold symbol found but no Symbol ID was returned.",
-                        "error"
-                    );
-
-
-                    console.log(
-                        selected
-                    );
-
-
-                    return;
-
-                }
-
-
-
-                state.symbolId =
-                    Number(
-                        symbolId
-                    );
-
-
-                ui.symbol.textContent =
-                    symbolName;
-
-
-                ui.symbolId.textContent =
-                    String(
-                        state.symbolId
-                    );
-
-
-                log(
-
-                    symbolName +
-                    " found. Symbol ID: " +
-                    state.symbolId,
-
-                    "success"
-
+                findGoldSymbol(
+                    result
                 );
+            },
 
 
-                loadSymbolDetails();
+            error: error => {
 
+                showError(
+                    "Symbol-list request failed",
+                    error
+                );
             }
-
-        ),
-
-
-        catchError(
-
-            error => {
-
-
-                log(
-
-                    "Symbol request error: " +
-                    errorText(
-                        error
-                    ),
-
-                    "error"
-
-                );
-
-
-                return of(
-                    null
-                );
-
-            }
-
-        )
-
-    )
-
-    .subscribe();
-
+        });
 }
 
 
+/*
+============================================================
+FIND XAUUSD
+============================================================
+*/
 
-/* ============================================================
-   SYMBOL DETAILS
-   ============================================================ */
+function findGoldSymbol(
+    response
+) {
+
+    const symbols =
+        response?.symbol ??
+        response?.symbols ??
+        response?.lightSymbol ??
+        response?.lightSymbols ??
+        response?.payload?.symbol ??
+        response?.payload?.symbols ??
+        [];
 
 
-function loadSymbolDetails() {
+    if (
+        !Array.isArray(
+            symbols
+        )
+    ) {
+
+        log(
+            "Symbol response received but symbol array was not recognised.",
+            "error"
+        );
+
+
+        console.log(
+            response
+        );
+
+
+        return;
+    }
 
 
     log(
-        "Loading XAUUSD symbol details..."
+        `Received ${symbols.length} symbols.`
+    );
+
+
+    const target =
+        CONFIG.symbolName
+            .toUpperCase();
+
+
+    /*
+    Exact XAUUSD first
+    */
+
+    let match =
+        symbols.find(
+            symbol => {
+
+                const name =
+                    symbolName(
+                        symbol
+                    );
+
+
+                return (
+                    name === target
+                );
+            }
+        );
+
+
+    /*
+    Then broker suffixes such as:
+
+    XAUUSD.c
+    XAUUSDm
+    XAUUSD-STD
+    */
+
+    if (
+        !match
+    ) {
+
+        match =
+            symbols.find(
+                symbol => {
+
+                    return (
+                        symbolName(
+                            symbol
+                        )
+                        .startsWith(
+                            target
+                        )
+                    );
+                }
+            );
+    }
+
+
+    /*
+    GOLD fallback
+    */
+
+    if (
+        !match
+    ) {
+
+        const candidates =
+            symbols.filter(
+                symbol => {
+
+                    const name =
+                        symbolName(
+                            symbol
+                        );
+
+
+                    return (
+                        name.includes(
+                            "XAU"
+                        )
+                        ||
+                        name.includes(
+                            "GOLD"
+                        )
+                    );
+                }
+            );
+
+
+        console.log(
+            "GOLD CANDIDATES:",
+            candidates
+        );
+
+
+        log(
+            "XAUUSD exact/suffix symbol not found. See browser console for gold candidates.",
+            "error"
+        );
+
+
+        return;
+    }
+
+
+    console.log(
+        "SELECTED SYMBOL:",
+        match
+    );
+
+
+    state.symbolId =
+        match?.symbolId ??
+        match?.id;
+
+
+    state.symbolName =
+        symbolName(
+            match
+        );
+
+
+    ui.symbol.textContent =
+        state.symbolName;
+
+
+    ui.symbolId.textContent =
+        state.symbolId;
+
+
+    log(
+        `Selected ${state.symbolName}, ID ${state.symbolId}.`,
+        "success"
+    );
+
+
+    loadSymbolDetails();
+}
+
+
+function symbolName(
+    symbol
+) {
+
+    return String(
+
+        symbol?.symbolName ??
+        symbol?.name ??
+        symbol?.symbol ??
+        symbol?.ticker ??
+        ""
+
+    ).toUpperCase();
+}
+
+
+/*
+============================================================
+DETAILED SYMBOL INFORMATION
+============================================================
+*/
+
+function loadSymbolDetails() {
+
+    log(
+        "Requesting detailed symbol information..."
     );
 
 
     getSymbol(
-
         adapter,
-
         {
-
             symbolId: [
-                state.symbolId
+                Number(
+                    state.symbolId
+                )
             ]
-
         }
-
     )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
 
-    .pipe(
-
-        take(1),
-
-
-        tap(
-
-            result => {
-
+            next: result => {
 
                 console.log(
-                    "Symbol detail:",
+                    "SYMBOL DETAILS RESPONSE:",
                     result
                 );
 
 
                 const symbols =
-
                     result?.symbol ??
                     result?.symbols ??
                     result?.payload?.symbol ??
                     result?.payload?.symbols ??
                     [];
-
-
-                let symbol;
 
 
                 if (
                     Array.isArray(
                         symbols
                     )
+                    &&
+                    symbols.length
                 ) {
 
-                    symbol =
+                    state.symbolDetails =
                         symbols[0];
-
                 }
-
-                else {
-
-                    symbol =
-                        symbols;
-
-                }
-
-
-                state.symbol =
-                    symbol ?? null;
 
 
                 const digits =
-                    state.symbol?.digits ??
-                    state.symbol?.precision;
+                    state
+                        .symbolDetails
+                        ?.digits ??
+                    state
+                        .symbolDetails
+                        ?.precision;
 
 
                 if (
@@ -1858,165 +1449,123 @@ function loadSymbolDetails() {
                         Number(
                             digits
                         );
-
                 }
 
 
                 log(
-
-                    "Symbol information loaded.",
-
+                    `Symbol details loaded. Digits: ${state.digits}.`,
                     "success"
-
                 );
 
 
-                startQuotes();
-
-            }
-
-        ),
+                startQuoteFeed();
+            },
 
 
-        catchError(
+            error: error => {
 
-            error => {
-
-
-                log(
-
-                    "Symbol detail warning: " +
-                    errorText(
-                        error
-                    ),
-
-                    "warning"
-
+                showError(
+                    "Symbol-detail request failed",
+                    error
                 );
 
 
                 /*
-                    Quotes can still be tested.
+                Try quote subscription anyway.
                 */
 
-
-                startQuotes();
-
-
-                return of(
-                    null
-                );
-
+                startQuoteFeed();
             }
-
-        )
-
-    )
-
-    .subscribe();
-
+        });
 }
 
 
+/*
+============================================================
+QUOTE FEED
+============================================================
+*/
 
-/* ============================================================
-   RECEIVE QUOTES
-   ============================================================ */
+function startQuoteFeed() {
+
+    if (
+        !state.symbolId
+    ) {
+
+        log(
+            "Cannot start quote feed. Symbol ID missing.",
+            "error"
+        );
 
 
-function startQuotes() {
+        return;
+    }
 
 
     log(
-        "Opening quote event stream..."
+        "Starting quote event listener..."
     );
 
 
-
-    state.quoteSubscription =
-
+    state.quoteStream =
         quoteEvent(
             adapter
         )
+            .pipe(
 
-        .pipe(
+                tap(
+                    quote => {
 
-            tap(
-
-                event => {
-
-
-                    processQuote(
-                        event
-                    );
-
-                }
-
-            ),
-
-
-            catchError(
-
-                error => {
-
-
-                    log(
-
-                        "Quote stream error: " +
-                        errorText(
-                            error
-                        ),
-
-                        "error"
-
-                    );
-
-
-                    return of(
-                        null
-                    );
-
-                }
+                        processQuote(
+                            quote
+                        );
+                    }
+                )
 
             )
+            .subscribe({
 
-        )
+                error: error => {
 
-        .subscribe();
-
+                    showError(
+                        "Quote stream failed",
+                        error
+                    );
+                }
+            });
 
 
     log(
-        "Subscribing to XAUUSD quotes..."
+        `Subscribing to ${state.symbolName} quotes...`
     );
 
 
     subscribeQuotes(
-
         adapter,
-
         {
 
             symbolId: [
-                state.symbolId
-            ]
+                Number(
+                    state.symbolId
+                )
+            ],
 
+            enableStaleQuotesFiltering:
+                true,
+
+            subscribeToSpotTimestamp:
+                true
         }
-
     )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
 
-    .pipe(
-
-        take(1),
-
-
-        tap(
-
-            result => {
-
+            next: result => {
 
                 console.log(
-                    "Quote subscription:",
+                    "QUOTE SUBSCRIPTION RESPONSE:",
                     result
                 );
 
@@ -2025,509 +1574,497 @@ function startQuotes() {
                     true;
 
 
-                ui.start.disabled =
+                ui.startBtn.disabled =
                     false;
 
 
-                ui.start.textContent =
+                ui.startBtn.textContent =
                     "Start Automated Strategy";
 
 
-                ui.reset.disabled =
+                ui.resetBtn.disabled =
                     false;
 
 
                 log(
-                    "Live XAUUSD subscription accepted.",
+                    "Live quote subscription accepted.",
                     "success"
                 );
-
-            }
-
-        ),
+            },
 
 
-        catchError(
+            error: error => {
 
-            error => {
-
-
-                log(
-
-                    "Quote subscription failed: " +
-                    errorText(
-                        error
-                    ),
-
-                    "error"
-
+                showError(
+                    "Quote subscription failed",
+                    error
                 );
-
-
-                return of(
-                    null
-                );
-
             }
-
-        )
-
-    )
-
-    .subscribe();
-
+        });
 }
 
 
-
-/* ============================================================
-   PROCESS QUOTES
-   ============================================================ */
-
+/*
+============================================================
+QUOTE PROCESSING
+============================================================
+*/
 
 function processQuote(
-    event
+    result
 ) {
 
-
-    if (
-        !event
-    ) {
-
-        return;
-
-    }
+    console.log(
+        "QUOTE EVENT:",
+        result
+    );
 
 
     const quote =
-
-        event?.quote ??
-        event?.payload?.quote ??
-        event?.payload ??
-        event;
-
+        result?.quote ??
+        result?.payload?.quote ??
+        result?.payload ??
+        result;
 
 
-    const eventSymbolId =
-
+    const eventSymbol =
         quote?.symbolId ??
-        event?.symbolId;
-
+        result?.symbolId;
 
 
     if (
-        eventSymbolId !==
-        undefined
+        eventSymbol !== undefined
         &&
-        Number(
-            eventSymbolId
-        )
+        Number(eventSymbol)
         !==
-        state.symbolId
+        Number(state.symbolId)
     ) {
 
         return;
-
     }
 
 
+    const bid =
+        getNumber(
+            quote,
+            [
+                "bid",
+                "bidPrice"
+            ]
+        );
 
-    const bidValue =
 
-        quote?.bid ??
-        quote?.bidPrice;
-
-
-    const askValue =
-
-        quote?.ask ??
-        quote?.askPrice;
-
+    const ask =
+        getNumber(
+            quote,
+            [
+                "ask",
+                "askPrice"
+            ]
+        );
 
 
     if (
-        bidValue !==
-        undefined
-        &&
-        bidValue !==
-        null
+        bid !== null
     ) {
 
-
-        const bid =
-            Number(
-                bidValue
-            );
+        state.bid =
+            bid;
 
 
-        if (
-            Number.isFinite(
+        ui.bid.textContent =
+            formatPrice(
                 bid
-            )
-        ) {
-
-
-            state.bid =
-                bid;
-
-
-            ui.bid.textContent =
-                formatPrice(
-                    bid
-                );
-
-        }
-
+            );
     }
-
 
 
     if (
-        askValue !==
-        undefined
-        &&
-        askValue !==
-        null
+        ask !== null
     ) {
 
-
-        const ask =
-            Number(
-                askValue
-            );
+        state.ask =
+            ask;
 
 
-        if (
-            Number.isFinite(
+        ui.ask.textContent =
+            formatPrice(
                 ask
-            )
-        ) {
-
-
-            state.ask =
-                ask;
-
-
-            ui.ask.textContent =
-                formatPrice(
-                    ask
-                );
-
-        }
-
+            );
     }
 
+
+    const currentPrice =
+        state.bid ??
+        state.ask;
+
+
+    if (
+        currentPrice === null
+        ||
+        currentPrice === undefined
+    ) {
+
+        return;
+    }
 
 
     /*
-        Set initial reference
+    First quote becomes reference
     */
 
-
     if (
-        state.reference ===
-        null
-        &&
-        state.bid !==
-        null
+        state.referencePrice === null
     ) {
 
-
-        state.reference =
-            state.bid;
-
-
-        ui.reference.textContent =
-            formatPrice(
-                state.reference
-            );
-
-
-        log(
-
-            "Initial reference price: " +
-            formatPrice(
-                state.reference
-            ),
-
-            "success"
-
+        setReferencePrice(
+            currentPrice
         );
-
     }
 
 
+    /*
+    Calculate movement
+    */
 
-    updateMovement();
+    const movement =
+        currentPrice -
+        state.referencePrice;
 
+
+    const sign =
+        movement > 0
+            ? "+"
+            : "";
+
+
+    ui.movement.textContent =
+        sign +
+        movement.toFixed(
+            state.digits
+        );
+
+
+    /*
+    Monitor threshold only.
+
+    NO ORDER EXECUTION YET.
+    */
+
+    if (
+        state.strategyRunning
+    ) {
+
+        monitorPriceMovement(
+            movement
+        );
+    }
 }
 
 
+function getNumber(
+    object,
+    properties
+) {
 
-/* ============================================================
-   START STRATEGY MONITORING
-   ============================================================ */
-
-
-function startStrategy() {
-
-
-    if (
-        !state.connected
-        ||
-        !state.quotesSubscribed
+    for (
+        const property
+        of properties
     ) {
 
-
-        log(
-            "Live market connection is not ready.",
-            "error"
-        );
+        const value =
+            object?.[property];
 
 
-        return;
+        if (
+            value !== undefined
+            &&
+            value !== null
+            &&
+            Number.isFinite(
+                Number(
+                    value
+                )
+            )
+        ) {
 
+            return Number(
+                value
+            );
+        }
     }
 
 
-    state.strategyRunning =
-        true;
+    return null;
+}
 
 
-    ui.status.textContent =
-        "Running - Monitor Only";
+/*
+============================================================
+STRATEGY MONITOR
+============================================================
+*/
+
+function monitorPriceMovement(
+    movement
+) {
+
+    if (
+        movement <=
+        -CONFIG.requiredMove
+    ) {
+
+        ui.position.textContent =
+            "BUY threshold reached - awaiting Stoch > 80";
 
 
-    ui.status.className =
-        "metric-value connected";
+        return;
+    }
 
 
-    ui.start.disabled =
-        true;
+    if (
+        movement >=
+        CONFIG.requiredMove
+    ) {
+
+        ui.position.textContent =
+            "SELL threshold reached - awaiting Stoch < 20";
 
 
-    ui.start.textContent =
-        "Strategy Running";
-
-
-    ui.stop.disabled =
-        false;
+        return;
+    }
 
 
     ui.position.textContent =
         "No entry condition";
-
-
-    log(
-        "Strategy monitoring started.",
-        "success"
-    );
-
-
-    log(
-        "Order execution remains disabled in this connection-test version.",
-        "warning"
-    );
-
 }
 
 
+/*
+============================================================
+BUTTONS
+============================================================
+*/
 
-/* ============================================================
-   STOP STRATEGY
-   ============================================================ */
-
-
-function stopStrategy() {
-
-
-    state.strategyRunning =
-        false;
-
-
-    ui.status.textContent =
-        "Stopped";
-
-
-    ui.status.className =
-        "metric-value";
-
-
-    ui.start.disabled =
-        false;
-
-
-    ui.start.textContent =
-        "Start Automated Strategy";
-
-
-    ui.stop.disabled =
-        true;
-
-
-    ui.position.textContent =
-        "--";
-
-
-    log(
-        "Strategy monitoring stopped.",
-        "warning"
-    );
-
-}
-
-
-
-/* ============================================================
-   BUTTON EVENTS
-   ============================================================ */
-
-
-ui.start.addEventListener(
+ui.startBtn.addEventListener(
     "click",
-    startStrategy
-);
-
-
-ui.stop.addEventListener(
-    "click",
-    stopStrategy
-);
-
-
-ui.reset.addEventListener(
-    "click",
-    resetReference
-);
-
-
-
-/* ============================================================
-   JAVASCRIPT ERRORS
-   ============================================================ */
-
-
-window.addEventListener(
-
-    "error",
-
-    event => {
-
-
-        log(
-
-            "JavaScript error: " +
-            event.message,
-
-            "error"
-
-        );
-
-    }
-
-);
-
-
-
-window.addEventListener(
-
-    "unhandledrejection",
-
-    event => {
-
-
-        log(
-
-            "Unhandled error: " +
-            errorText(
-                event.reason
-            ),
-
-            "error"
-
-        );
-
-    }
-
-);
-
-
-
-/* ============================================================
-   PAGE CLOSE
-   ============================================================ */
-
-
-window.addEventListener(
-
-    "beforeunload",
-
     () => {
 
+        if (
+            !state.connected
+            ||
+            !state.quotesSubscribed
+        ) {
+
+            log(
+                "Cannot start. Market data is not ready.",
+                "error"
+            );
+
+
+            return;
+        }
+
+
+        state.strategyRunning =
+            true;
+
+
+        ui.strategyStatus.textContent =
+            "Running - monitoring";
+
+
+        ui.strategyStatus.style.color =
+            "#30d158";
+
+
+        ui.startBtn.disabled =
+            true;
+
+
+        ui.startBtn.textContent =
+            "Strategy Running";
+
+
+        ui.stopBtn.disabled =
+            false;
+
+
+        log(
+            "Strategy monitoring started.",
+            "success"
+        );
+
+
+        log(
+            "Order execution remains disabled.",
+            "warning"
+        );
+    }
+);
+
+
+ui.stopBtn.addEventListener(
+    "click",
+    () => {
+
+        state.strategyRunning =
+            false;
+
+
+        ui.strategyStatus.textContent =
+            "Stopped";
+
+
+        ui.strategyStatus.style.color =
+            "";
+
+
+        ui.startBtn.disabled =
+            false;
+
+
+        ui.startBtn.textContent =
+            "Start Automated Strategy";
+
+
+        ui.stopBtn.disabled =
+            true;
+
+
+        log(
+            "Strategy monitoring stopped.",
+            "warning"
+        );
+    }
+);
+
+
+ui.resetBtn.addEventListener(
+    "click",
+    () => {
+
+        const price =
+            state.bid ??
+            state.ask;
+
+
+        if (
+            price === null
+            ||
+            price === undefined
+        ) {
+
+            log(
+                "Cannot reset reference. Live price unavailable.",
+                "error"
+            );
+
+
+            return;
+        }
+
+
+        setReferencePrice(
+            price
+        );
+    }
+);
+
+
+/*
+============================================================
+GLOBAL ERROR HANDLERS
+============================================================
+*/
+
+window.addEventListener(
+    "error",
+    event => {
+
+        showError(
+            "JavaScript error",
+            event.error ??
+            event.message
+        );
+    }
+);
+
+
+window.addEventListener(
+    "unhandledrejection",
+    event => {
+
+        showError(
+            "Unhandled promise rejection",
+            event.reason
+        );
+    }
+);
+
+
+/*
+============================================================
+CLEANUP
+============================================================
+*/
+
+window.addEventListener(
+    "beforeunload",
+    () => {
 
         if (
             state.quotesSubscribed
             &&
-            state.symbolId !==
-            null
+            state.symbolId
         ) {
 
-
             unsubscribeQuotes(
-
                 adapter,
-
                 {
-
                     symbolId: [
-                        state.symbolId
+                        Number(
+                            state.symbolId
+                        )
                     ]
-
                 }
-
             )
-
-            .pipe(
-                take(1)
-            )
-
-            .subscribe();
-
+                .pipe(
+                    take(1)
+                )
+                .subscribe();
         }
 
 
         if (
-            state.quoteSubscription
+            state.quoteStream
         ) {
 
-
-            state.quoteSubscription
+            state.quoteStream
                 .unsubscribe();
-
         }
-
     }
-
 );
 
 
+/*
+============================================================
+START
+============================================================
+*/
 
-/* ============================================================
-   START
-   ============================================================ */
+updateTradingWindow();
 
 
-log(
-    "Starting cTrader connection..."
+setInterval(
+    updateTradingWindow,
+    30000
 );
 
 
 connect();
 
-
 </script>
 
-
 </body>
-
 </html>
