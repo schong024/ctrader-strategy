@@ -1,7 +1,7 @@
 {
   "name": "ctrader-price-move-plugin",
-  "version": "1.0.0",
   "private": true,
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,11 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@spotware-web-team/sdk": "latest",
-    "@spotware-web-team/sdk-external-api": "latest",
+    "@spotware-web-team/sdk": "0.0.5",
+    "@spotware-web-team/sdk-external-api": "0.0.5",
+    "@veksa/logger": "latest",
     "rxjs": "latest"
   },
   "devDependencies": {
-    "vite": "latest"
+    "vite": "^8.3.5"
   }
 }
