@@ -46,10 +46,11 @@
         }
 
         .section-title {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: bold;
             margin-top: 16px;
             margin-bottom: 8px;
-            color: #ffffff;
-            font-weight: bold;
         }
 
         .metric-row {
@@ -84,6 +85,10 @@
             cursor: pointer;
         }
 
+        .button:hover:not(:disabled) {
+            background: #2faf4f;
+        }
+
         .button.stop {
             background: #ff453a;
         }
@@ -98,17 +103,21 @@
             cursor: not-allowed;
         }
 
-        .parameter,
-        .rule {
+        .parameter {
             color: #d1d1d6;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+        }
+
+        .rule {
+            margin-top: 5px;
+            color: #d1d1d6;
             line-height: 1.4;
         }
 
         .log-box {
-            height: 250px;
             margin-top: 15px;
             padding: 9px;
+            height: 250px;
             overflow-y: auto;
             border-radius: 5px;
             background: #2c2c2e;
@@ -287,8 +296,8 @@
     </div>
 
     <div class="notice">
-        Live-market connection test. Stochastic calculation and
-        automatic order execution remain disabled.
+        Connection and market-data test version.
+        Stochastic calculation and automatic order execution are disabled.
     </div>
 
 </div>
@@ -296,7 +305,7 @@
 <script type="module">
 
 /* ============================================================
-   PINNED IMPORTS FROM CTRADER'S BUILD-LESS EXAMPLE
+   OFFICIAL PINNED CTRADER SDK IMPORTS
    ============================================================ */
 
 import {
@@ -321,10 +330,6 @@ import {
     tap
 } from "https://esm.sh/rxjs@7.8.2";
 
-import {
-    createLogger
-} from "https://esm.sh/@veksa/logger";
-
 
 /* ============================================================
    CONFIGURATION
@@ -342,44 +347,81 @@ const CONFIG = {
 
 
 /* ============================================================
-   STATE AND UI
+   STATE
    ============================================================ */
 
 const state = {
-    connected* false,
-    quotesSubscribed: fals*,
+    connected: false,
+    quotesSubscribed: false,
     strategyRunning: false,
 
-   *accountId: null,
+    accountId: null,
 
-    symbolId: nu*l,
+    symbolId: null,
     symbolName: "XAUUSD",
-    s*mbolDetails: null,
+    symbolDetails: null,
     digits: 2,
-*    bid: null,
-    ask: null,
-    *eferencePrice: null,
 
-    quoteSub*cription: null
+    bid: null,
+    ask: null,
+    referencePrice: null,
+
+    quoteSubscription: null
 };
 
+
+/* ============================================================
+   USER INTERFACE
+   ============================================================ */
+
 const ui = {
-  * connection: document.getElementBy*d("connection"),
-    account: docu*ent.getElementById("account"),
-   *symbol: document.getElementById("s*mbol"),
-    symbolId: document.get*lementById("symbolId"),
-    bid: d*cument.getElementById("bid"),
-    *sk: document.getElementById("ask")*
-    reference: document.getElementById("reference"),
-    movement: document.getElementById("movement"),
-    stochastic: document.getElementById("stochastic"),
-    tradingWindow: document.getElementById("tradingWindow"),
-    position: document.getElementById("position"),
-    strategyStatus: document.getElementById("strategyStatus"),
-    startBtn: document.getElementById("startBtn"),
-    stopBtn: document.getElementById("stopBtn"),
-    resetBtn: document.getElementById("resetBtn"),
-    log: document.getElementById("log")
+    connection:
+        document.getElementById("connection"),
+
+    account:
+        document.getElementById("account"),
+
+    symbol:
+        document.getElementById("symbol"),
+
+    symbolId:
+        document.getElementById("symbolId"),
+
+    bid:
+        document.getElementById("bid"),
+
+    ask:
+        document.getElementById("ask"),
+
+    reference:
+        document.getElementById("reference"),
+
+    movement:
+        document.getElementById("movement"),
+
+    stochastic:
+        document.getElementById("stochastic"),
+
+    tradingWindow:
+        document.getElementById("tradingWindow"),
+
+    position:
+        document.getElementById("position"),
+
+    strategyStatus:
+        document.getElementById("strategyStatus"),
+
+    startBtn:
+        document.getElementById("startBtn"),
+
+    stopBtn:
+        document.getElementById("stopBtn"),
+
+    resetBtn:
+        document.getElementById("resetBtn"),
+
+    log:
+        document.getElementById("log")
 };
 
 
@@ -387,36 +429,38 @@ const ui = {
    LOGGING
    ============================================================ */
 
-function log(message, type = ""* {
+function log(message, type = "") {
     const time =
-        new Da*e().toLocaleTimeString(
-          * "en-SG",
+        new Date().toLocaleTimeString(
+            "en-SG",
             {
-          *     hour12: false
+                hour12: false
             }
- *      );
+        );
 
     console.log(
-       *`[${time}] ${message}`
+        `[${time}] ${message}`
     );
 
-   *const row =
-        document.creat*Element("div");
+    const row =
+        document.createElement("div");
 
-    row.textConte*t =
-        `[${time}] ${message}`*
+    row.textContent =
+        `[${time}] ${message}`;
 
     if (type) {
-        row.clas*Name = type;
+        row.className = type;
     }
 
-    ui.log.app*ndChild(row);
-    ui.log.scrollTop*= ui.log.scrollHeight;
+    ui.log.appendChild(row);
+
+    ui.log.scrollTop =
+        ui.log.scrollHeight;
 }
 
-function*errorText(error) {
+function errorText(error) {
     if (
-      * error === null ||
+        error === null ||
         error === undefined
     ) {
         return "Unknown error";
@@ -453,7 +497,7 @@ function showError(prefix, error) {
 
 
 /* ============================================================
-   GLOBAL ERROR REPORTING
+   GLOBAL JAVASCRIPT ERRORS
    ============================================================ */
 
 window.addEventListener(
@@ -478,26 +522,26 @@ window.addEventListener(
 
 
 /* ============================================================
-   SINGAPORE TIME
+   SINGAPORE TRADING WINDOW
    ============================================================ */
 
 function singaporeHour() {
-    *onst parts =
-        new Intl.Date*imeFormat(
+    const parts =
+        new Intl.DateTimeFormat(
             "en-SG",
-  *         {
-                timeZon*: "Asia/Singapore",
-              * hour: "2-digit",
-                *ourCycle: "h23"
+            {
+                timeZone: "Asia/Singapore",
+                hour: "2-digit",
+                hourCycle: "h23"
             }
-    *   )
+        )
         .formatToParts(
-     *      new Date()
+            new Date()
         );
 
-    r*turn Number(
+    return Number(
         parts.find(
- *          part =>
+            part =>
                 part.type === "hour"
         )?.value ?? 0
     );
@@ -531,165 +575,239 @@ setInterval(
 
 
 /* ============================================================
-   NESTED RESPONSE SEARCH
+   LOCAL LOGGER FOR CTRADER ADAPTER
 
-   Handles plain objects, nested payloads, protobuf objects
-   and repeated-field wrappers.
+   This removes the extra logger-package dependency.
+   ============================================================ */
+
+const adapterLogger = {
+    trace: (...args) =>
+        console.debug(
+            "[cTrader TRACE]",
+            ...args
+        ),
+
+    debug: (...args) =>
+        console.debug(
+            "[cTrader DEBUG]",
+            ...args
+        ),
+
+    info: (...args) =>
+        console.info(
+            "[cTrader INFO]",
+            ...args
+        ),
+
+    warn: (...args) =>
+        console.warn(
+            "[cTrader WARN]",
+            ...args
+        ),
+
+    error: (...args) =>
+        console.error(
+            "[cTrader ERROR]",
+            ...args
+        ),
+
+    log: (...args) =>
+        console.log(
+            "[cTrader LOG]",
+            ...args
+        ),
+
+    child: function () {
+        return this;
+    },
+
+    withContext: function () {
+        return this;
+    }
+};
+
+
+/* ============================================================
+   NESTED/PROTOBUF RESPONSE SEARCH
    ============================================================ */
 
 function visitObjects(
-    valu*,
+    value,
     visitor,
-    visited = new W*akSet(),
+    visited = new WeakSet(),
     depth = 0
 ) {
-    if *
+    if (
         value === null ||
-       *value === undefined ||
-        typ*of value !== "object" ||
-        d*pth > 15
+        value === undefined ||
+        typeof value !== "object" ||
+        depth > 18
     ) {
         return;
- *  }
-
-    if (visited.has(value)) {*        return;
     }
 
-    visited*add(value);
+    if (visited.has(value)) {
+        return;
+    }
+
+    visited.add(value);
 
     visitor(value);
 
-*   if (Array.isArray(value)) {
-   *    for (const item of value) {
-  *         visitObjects(
-           *    item,
-                visitor,*                visited,
-         *      depth + 1
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            visitObjects(
+                item,
+                visitor,
+                visited,
+                depth + 1
             );
-   *    }
+        }
 
         return;
     }
 
-    *or (const child of Object.values(v*lue)) {
+    if (
+        typeof value[Symbol.iterator] === "function" &&
+        typeof value !== "string"
+    ) {
+        try {
+            for (const item of value) {
+                visitObjects(
+                    item,
+                    visitor,
+                    visited,
+                    depth + 1
+                );
+            }
+        } catch {
+            /* Ignore non-standard iterators. */
+        }
+    }
+
+    for (const child of Object.values(value)) {
         visitObjects(
-    *       child,
-            visitor,*            visited,
-            d*pth + 1
+            child,
+            visitor,
+            visited,
+            depth + 1
         );
     }
 }
 
-functi*n findFirstValue(
+function findFirstValue(
     root,
-    ke*s
+    keys
 ) {
     let found;
 
-    visitObj*cts(
+    visitObjects(
         root,
-        object *> {
-            if (found !== unde*ined) {
+        object => {
+            if (found !== undefined) {
                 return;
-  *         }
+            }
 
-            for (const*key of keys) {
-                con*t value =
-                    obje*t?.[key];
+            for (const key of keys) {
+                const value =
+                    object?.[key];
 
                 if (
-  *                 value !== null &&*                    value !== unde*ined &&
-                    value *== ""
+                    value !== null &&
+                    value !== undefined &&
+                    value !== ""
                 ) {
-        *           found = value;
-        *           return;
-               *}
+                    found = value;
+                    return;
+                }
             }
         }
     );
 
-*   return found;
+    return found;
 }
 
-function symbo*DisplayName(symbol) {
-    return S*ring(
-        symbol?.symbolName ?*
+function symbolDisplayName(symbol) {
+    return String(
+        symbol?.symbolName ??
         symbol?.name ??
-        s*mbol?.ticker ??
-        symbol?.sy*bol ??
+        symbol?.ticker ??
+        symbol?.symbol ??
         ""
-    ).toUpperCas*();
+    ).toUpperCase();
 }
 
-function findSymbolObjects(*oot) {
+function findSymbolObjects(root) {
     const symbols = [];
-   *const seen = new Set();
+    const seen = new Set();
 
-    visit*bjects(
+    visitObjects(
         root,
-        obje*t => {
+        object => {
             const id =
-    *           object?.symbolId ??
-   *            object?.id;
+                object?.symbolId ??
+                object?.id;
 
-         *  const name =
-                obj*ct?.symbolName ??
-                *bject?.name ??
-                obj*ct?.ticker;
+            const name =
+                object?.symbolName ??
+                object?.name ??
+                object?.ticker;
 
             if (
-    *           id === null ||
-        *       id === undefined ||
-       *        name === null ||
-         *      name === undefined
-         *  ) {
+                id === null ||
+                id === undefined ||
+                name === null ||
+                name === undefined
+            ) {
                 return;
-    *       }
-
-            const normal*zedName =
-                String(n*me).toUpperCase();
-
-            co*st key =
-                `${id}:${*ormalizedName}`;
-
-            if (*een.has(key)) {
-                re*urn;
             }
 
-            se*n.add(key);
+            const normalizedName =
+                String(name).toUpperCase();
 
-            symbols.p*sh(object);
+            const uniqueKey =
+                `${id}:${normalizedName}`;
+
+            if (seen.has(uniqueKey)) {
+                return;
+            }
+
+            seen.add(uniqueKey);
+
+            symbols.push(object);
         }
     );
 
-    *eturn symbols;
+    return symbols;
 }
 
-function diagnos*icSummary(
+function diagnosticSummary(
     label,
     result
-)*{
+) {
     try {
         const keys =
- *          Object.keys(
-           *    result ?? {}
+            Object.keys(
+                result ?? {}
             );
 
- *      log(
-            `${label} k*ys: ${
-                keys.length*                    ? keys.join(",*")
+        log(
+            `${label} keys: ${
+                keys.length
+                    ? keys.join(", ")
                     : "[none]"
-*           }`,
-            "warnin*"
+            }`,
+            "warning"
         );
 
-        const text =*            JSON.stringify(result);
+        const text =
+            JSON.stringify(result);
 
         if (text) {
             log(
                 `${label} preview: ${
-                    text.length > 1500
-                        ? text.substring(0, 1500) +
+                    text.length > 1400
+                        ? text.substring(0, 1400) +
                           "... [truncated]"
                         : text
                 }`,
@@ -711,19 +829,19 @@ function diagnos*icSummary(
    PRICE FUNCTIONS
    ============================================================ */
 
-function formatPrice(value* {
+function formatPrice(value) {
     const number =
-        Numb*r(value);
+        Number(value);
 
     if (
-        !Numbe*.isFinite(number)
+        !Number.isFinite(number)
     ) {
-        *eturn "--";
+        return "--";
     }
 
-    return numb*r.toFixed(
+    return number.toFixed(
         state.digits
-  * );
+    );
 }
 
 function setReferencePrice(value) {
@@ -770,13 +888,13 @@ function updateMovement() {
         Number(currentPrice) -
         Number(state.referencePrice);
 
-    const sign =
+    const prefix =
         movement > 0
             ? "+"
             : "";
 
     ui.movement.textContent =
-        sign +
+        prefix +
         movement.toFixed(
             state.digits
         );
@@ -813,7 +931,7 @@ function updateMovement() {
 
 
 /* ============================================================
-   CREATE ADAPTER
+   CREATE CTRADER ADAPTER
    ============================================================ */
 
 log(
@@ -821,18 +939,31 @@ log(
     "success"
 );
 
-const logger =
-    createLogger(false);
+let adapter;
 
-const adapter =
-    createClientAdapter({
-        logger
-    });
+try {
+    adapter =
+        createClientAdapter({
+            logger: adapterLogger
+        });
 
-log(
-    "cTrader client adapter created.",
-    "success"
-);
+    log(
+        "cTrader client adapter created.",
+        "success"
+    );
+
+} catch (error) {
+    ui.connection.textContent =
+        "Adapter failed";
+
+    ui.connection.style.color =
+        "#ff453a";
+
+    showError(
+        "Adapter creation failed",
+        error
+    );
+}
 
 
 /* ============================================================
@@ -840,6 +971,10 @@ log(
    ============================================================ */
 
 function connect() {
+    if (!adapter) {
+        return;
+    }
+
     ui.connection.textContent =
         "Connecting...";
 
@@ -933,6 +1068,9 @@ function connect() {
 
             catchError(
                 error => {
+                    state.connected =
+                        false;
+
                     ui.connection.textContent =
                         "Connection failed";
 
@@ -953,7 +1091,7 @@ function connect() {
 
 
 /* ============================================================
-   ACCOUNT
+   ACCOUNT INFORMATION
    ============================================================ */
 
 function loadAccount() {
@@ -1074,7 +1212,7 @@ function loadSymbols() {
                     !symbols.length
                 ) {
                     log(
-                        "No nested symbol objects containing both ID and name were found.",
+                        "No nested symbol objects with both ID and name were found.",
                         "error"
                     );
 
@@ -1194,7 +1332,7 @@ function loadSymbols() {
 
 
 /* ============================================================
-   SYMBOL DETAILS
+   DETAILED SYMBOL INFORMATION
    ============================================================ */
 
 function loadSymbolDetails() {
@@ -1228,13 +1366,13 @@ function loadSymbolDetails() {
                     result
                 );
 
-                const matchingSymbols =
+                const detailedSymbols =
                     findSymbolObjects(
                         result
                     );
 
                 state.symbolDetails =
-                    matchingSymbols.find(
+                    detailedSymbols.find(
                         symbol =>
                             Number(
                                 symbol?.symbolId ??
@@ -1242,7 +1380,7 @@ function loadSymbolDetails() {
                             ) ===
                             Number(state.symbolId)
                     ) ??
-                    matchingSymbols[0] ??
+                    detailedSymbols[0] ??
                     null;
 
                 const digits =
@@ -1285,7 +1423,7 @@ function loadSymbolDetails() {
 
 
 /* ============================================================
-   QUOTE SUBSCRIPTION
+   LIVE QUOTE SUBSCRIPTION
    ============================================================ */
 
 function startQuotes() {
@@ -1382,7 +1520,7 @@ function startQuotes() {
 
 
 /* ============================================================
-   QUOTE PARSER
+   QUOTE RESPONSE PARSER
    ============================================================ */
 
 function findQuoteObject(result) {
@@ -1448,12 +1586,12 @@ function processQuote(result) {
         return;
     }
 
-    const eventSymbolId =
+    const quoteSymbolId =
         quote?.symbolId;
 
     if (
-        eventSymbolId !== undefined &&
-        Number(eventSymbolId) !==
+        quoteSymbolId !== undefined &&
+        Number(quoteSymbolId) !==
         Number(state.symbolId)
     ) {
         return;
@@ -1667,7 +1805,7 @@ window.addEventListener(
 
 
 /* ============================================================
-   START
+   START APPLICATION
    ============================================================ */
 
 connect();
