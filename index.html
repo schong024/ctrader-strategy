@@ -46,11 +46,10 @@
         }
 
         .section-title {
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: bold;
             margin-top: 16px;
             margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: bold;
         }
 
         .metric-row {
@@ -85,10 +84,6 @@
             cursor: pointer;
         }
 
-        .button:hover:not(:disabled) {
-            background: #2faf4f;
-        }
-
         .button.stop {
             background: #ff453a;
         }
@@ -103,21 +98,17 @@
             cursor: not-allowed;
         }
 
-        .parameter {
-            color: #d1d1d6;
-            margin-bottom: 4px;
-        }
-
+        .parameter,
         .rule {
-            margin-top: 5px;
             color: #d1d1d6;
+            margin-bottom: 5px;
             line-height: 1.4;
         }
 
         .log-box {
+            height: 250px;
             margin-top: 15px;
             padding: 9px;
-            height: 240px;
             overflow-y: auto;
             border-radius: 5px;
             background: #2c2c2e;
@@ -296,8 +287,8 @@
     </div>
 
     <div class="notice">
-        Connection and market-data test version.
-        Automatic order execution and Stochastic calculation are disabled.
+        Live-market connection test. Stochastic calculation and
+        automatic order execution remain disabled.
     </div>
 
 </div>
@@ -305,7 +296,38 @@
 <script type="module">
 
 /* ============================================================
-   CONFIGURATION AND STATE
+   PINNED IMPORTS FROM CTRADER'S BUILD-LESS EXAMPLE
+   ============================================================ */
+
+import {
+    createClientAdapter
+} from "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5";
+
+import {
+    getAccountInformation,
+    getLightSymbolList,
+    getSymbol,
+    handleConfirmEvent,
+    quoteEvent,
+    registerEvent,
+    subscribeQuotes,
+    unsubscribeQuotes
+} from "https://esm.sh/@spotware-web-team/sdk@0.2.0";
+
+import {
+    catchError,
+    of,
+    take,
+    tap
+} from "https://esm.sh/rxjs@7.8.2";
+
+import {
+    createLogger
+} from "https://esm.sh/@veksa/logger";
+
+
+/* ============================================================
+   CONFIGURATION
    ============================================================ */
 
 const CONFIG = {
@@ -318,37 +340,36 @@ const CONFIG = {
     singaporeStartHour: 20
 };
 
-const state = {
-    connected: false,
-    quotesSubscribed: false,
-    strategyRunning: false,
-
-    accountId: null,
-
-    symbolId: null,
-    symbolName: "XAUUSD",
-    symbolDetails: null,
-    digits: 2,
-
-    bid: null,
-    ask: null,
-    referencePrice: null,
-
-    quoteSubscription: null
-};
-
 
 /* ============================================================
-   USER INTERFACE
+   STATE AND UI
    ============================================================ */
 
+const state = {
+    connected* false,
+    quotesSubscribed: fals*,
+    strategyRunning: false,
+
+   *accountId: null,
+
+    symbolId: nu*l,
+    symbolName: "XAUUSD",
+    s*mbolDetails: null,
+    digits: 2,
+*    bid: null,
+    ask: null,
+    *eferencePrice: null,
+
+    quoteSub*cription: null
+};
+
 const ui = {
-    connection: document.getElementById("connection"),
-    account: document.getElementById("account"),
-    symbol: document.getElementById("symbol"),
-    symbolId: document.getElementById("symbolId"),
-    bid: document.getElementById("bid"),
-    ask: document.getElementById("ask"),
+  * connection: document.getElementBy*d("connection"),
+    account: docu*ent.getElementById("account"),
+   *symbol: document.getElementById("s*mbol"),
+    symbolId: document.get*lementById("symbolId"),
+    bid: d*cument.getElementById("bid"),
+    *sk: document.getElementById("ask")*
     reference: document.getElementById("reference"),
     movement: document.getElementById("movement"),
     stochastic: document.getElementById("stochastic"),
@@ -366,38 +387,36 @@ const ui = {
    LOGGING
    ============================================================ */
 
-function log(message, type = "") {
+function log(message, type = ""* {
     const time =
-        new Date().toLocaleTimeString(
-            "en-SG",
+        new Da*e().toLocaleTimeString(
+          * "en-SG",
             {
-                hour12: false
+          *     hour12: false
             }
-        );
+ *      );
 
     console.log(
-        `[${time}] ${message}`
+       *`[${time}] ${message}`
     );
 
-    const row =
-        document.createElement("div");
+   *const row =
+        document.creat*Element("div");
 
-    row.textContent =
-        `[${time}] ${message}`;
+    row.textConte*t =
+        `[${time}] ${message}`*
 
     if (type) {
-        row.className = type;
+        row.clas*Name = type;
     }
 
-    ui.log.appendChild(row);
-
-    ui.log.scrollTop =
-        ui.log.scrollHeight;
+    ui.log.app*ndChild(row);
+    ui.log.scrollTop*= ui.log.scrollHeight;
 }
 
-function errorText(error) {
+function*errorText(error) {
     if (
-        error === null ||
+      * error === null ||
         error === undefined
     ) {
         return "Unknown error";
@@ -459,26 +478,26 @@ window.addEventListener(
 
 
 /* ============================================================
-   SINGAPORE TRADING WINDOW
+   SINGAPORE TIME
    ============================================================ */
 
 function singaporeHour() {
-    const parts =
-        new Intl.DateTimeFormat(
+    *onst parts =
+        new Intl.Date*imeFormat(
             "en-SG",
-            {
-                timeZone: "Asia/Singapore",
-                hour: "2-digit",
-                hourCycle: "h23"
+  *         {
+                timeZon*: "Asia/Singapore",
+              * hour: "2-digit",
+                *ourCycle: "h23"
             }
-        )
+    *   )
         .formatToParts(
-            new Date()
+     *      new Date()
         );
 
-    return Number(
+    r*turn Number(
         parts.find(
-            part =>
+ *          part =>
                 part.type === "hour"
         )?.value ?? 0
     );
@@ -512,168 +531,165 @@ setInterval(
 
 
 /* ============================================================
-   NESTED/PROTOBUF RESPONSE SEARCH
+   NESTED RESPONSE SEARCH
+
+   Handles plain objects, nested payloads, protobuf objects
+   and repeated-field wrappers.
    ============================================================ */
 
 function visitObjects(
-    value,
+    valu*,
     visitor,
-    visited = new WeakSet(),
+    visited = new W*akSet(),
     depth = 0
 ) {
-    if (
+    if *
         value === null ||
-        value === undefined ||
-        typeof value !== "object" ||
-        depth > 15
+       *value === undefined ||
+        typ*of value !== "object" ||
+        d*pth > 15
     ) {
         return;
+ *  }
+
+    if (visited.has(value)) {*        return;
     }
 
-    if (visited.has(value)) {
-        return;
-    }
-
-    visited.add(value);
+    visited*add(value);
 
     visitor(value);
 
-    if (Array.isArray(value)) {
-        for (const item of value) {
-            visitObjects(
-                item,
-                visitor,
-                visited,
-                depth + 1
+*   if (Array.isArray(value)) {
+   *    for (const item of value) {
+  *         visitObjects(
+           *    item,
+                visitor,*                visited,
+         *      depth + 1
             );
-        }
+   *    }
 
         return;
     }
 
-    for (const child of Object.values(value)) {
+    *or (const child of Object.values(v*lue)) {
         visitObjects(
-            child,
-            visitor,
-            visited,
-            depth + 1
+    *       child,
+            visitor,*            visited,
+            d*pth + 1
         );
     }
 }
 
-function findFirstValue(
+functi*n findFirstValue(
     root,
-    keys
+    ke*s
 ) {
     let found;
 
-    visitObjects(
+    visitObj*cts(
         root,
-        object => {
-            if (found !== undefined) {
+        object *> {
+            if (found !== unde*ined) {
                 return;
-            }
+  *         }
 
-            for (const key of keys) {
-                const value =
-                    object?.[key];
+            for (const*key of keys) {
+                con*t value =
+                    obje*t?.[key];
 
                 if (
-                    value !== null &&
-                    value !== undefined &&
-                    value !== ""
+  *                 value !== null &&*                    value !== unde*ined &&
+                    value *== ""
                 ) {
-                    found = value;
-                    return;
-                }
+        *           found = value;
+        *           return;
+               *}
             }
         }
     );
 
-    return found;
+*   return found;
 }
 
-function symbolDisplayName(symbol) {
-    return String(
-        symbol?.symbolName ??
+function symbo*DisplayName(symbol) {
+    return S*ring(
+        symbol?.symbolName ?*
         symbol?.name ??
-        symbol?.ticker ??
-        symbol?.symbol ??
+        s*mbol?.ticker ??
+        symbol?.sy*bol ??
         ""
-    ).toUpperCase();
+    ).toUpperCas*();
 }
 
-function findSymbolObjects(root) {
+function findSymbolObjects(*oot) {
     const symbols = [];
-    const seen = new Set();
+   *const seen = new Set();
 
-    visitObjects(
+    visit*bjects(
         root,
-        object => {
+        obje*t => {
             const id =
-                object?.symbolId ??
-                object?.id;
+    *           object?.symbolId ??
+   *            object?.id;
 
-            const name =
-                object?.symbolName ??
-                object?.name ??
-                object?.ticker;
+         *  const name =
+                obj*ct?.symbolName ??
+                *bject?.name ??
+                obj*ct?.ticker;
 
             if (
-                id === null ||
-                id === undefined ||
-                name === null ||
-                name === undefined
-            ) {
+    *           id === null ||
+        *       id === undefined ||
+       *        name === null ||
+         *      name === undefined
+         *  ) {
                 return;
+    *       }
+
+            const normal*zedName =
+                String(n*me).toUpperCase();
+
+            co*st key =
+                `${id}:${*ormalizedName}`;
+
+            if (*een.has(key)) {
+                re*urn;
             }
 
-            const normalName =
-                String(name).toUpperCase();
+            se*n.add(key);
 
-            const uniqueKey =
-                `${id}:${normalName}`;
-
-            if (seen.has(uniqueKey)) {
-                return;
-            }
-
-            seen.add(uniqueKey);
-
-            symbols.push(object);
+            symbols.p*sh(object);
         }
     );
 
-    return symbols;
+    *eturn symbols;
 }
 
-function diagnosticSummary(
+function diagnos*icSummary(
     label,
     result
-) {
+)*{
     try {
         const keys =
-            Object.keys(
-                result ?? {}
+ *          Object.keys(
+           *    result ?? {}
             );
 
-        log(
-            `${label} keys: ${
-                keys.length
-                    ? keys.join(", ")
+ *      log(
+            `${label} k*ys: ${
+                keys.length*                    ? keys.join(",*")
                     : "[none]"
-            }`,
-            "warning"
+*           }`,
+            "warnin*"
         );
 
-        const text =
-            JSON.stringify(result);
+        const text =*            JSON.stringify(result);
 
         if (text) {
             log(
                 `${label} preview: ${
-                    text.length > 1800
-                        ? text.substring(0, 1800) +
+                    text.length > 1500
+                        ? text.substring(0, 1500) +
                           "... [truncated]"
                         : text
                 }`,
@@ -682,7 +698,7 @@ function diagnosticSummary(
         }
     } catch (error) {
         log(
-            `${label} could not be inspected: ${
+            `${label} inspection failed: ${
                 errorText(error)
             }`,
             "warning"
@@ -692,22 +708,22 @@ function diagnosticSummary(
 
 
 /* ============================================================
-   PRICE HELPERS
+   PRICE FUNCTIONS
    ============================================================ */
 
-function formatPrice(value) {
+function formatPrice(value* {
     const number =
-        Number(value);
+        Numb*r(value);
 
     if (
-        !Number.isFinite(number)
+        !Numbe*.isFinite(number)
     ) {
-        return "--";
+        *eturn "--";
     }
 
-    return number.toFixed(
+    return numb*r.toFixed(
         state.digits
-    );
+  * );
 }
 
 function setReferencePrice(value) {
@@ -737,7 +753,7 @@ function setReferencePrice(value) {
     );
 }
 
-function updatePriceMovement() {
+function updateMovement() {
     const currentPrice =
         state.bid ??
         state.ask;
@@ -754,13 +770,13 @@ function updatePriceMovement() {
         Number(currentPrice) -
         Number(state.referencePrice);
 
-    const prefix =
+    const sign =
         movement > 0
             ? "+"
             : "";
 
     ui.movement.textContent =
-        prefix +
+        sign +
         movement.toFixed(
             state.digits
         );
@@ -797,197 +813,33 @@ function updatePriceMovement() {
 
 
 /* ============================================================
-   SDK VARIABLES
+   CREATE ADAPTER
    ============================================================ */
 
-let createClientAdapter;
+log(
+    "Pinned cTrader SDK modules loaded.",
+    "success"
+);
 
-let getAccountInformation;
-let getLightSymbolList;
-let getSymbol;
-let handleConfirmEvent;
-let quoteEvent;
-let registerEvent;
-let subscribeQuotes;
-let unsubscribeQuotes;
+const logger =
+    createLogger(false);
 
-let catchError;
-let of;
-let take;
-let tap;
+const adapter =
+    createClientAdapter({
+        logger
+    });
 
-let createLogger;
-
-let adapter;
+log(
+    "cTrader client adapter created.",
+    "success"
+);
 
 
 /* ============================================================
-   DYNAMIC SDK LOADING
+   CONNECT TO CTRADER
    ============================================================ */
 
-async function startApplication() {
-    try {
-        log(
-            "Loading cTrader SDK modules..."
-        );
-
-        const externalApiModule =
-            await import(
-                "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5"
-            );
-
-        log(
-            "External API module loaded.",
-            "success"
-        );
-
-        const sdkModule =
-            await import(
-                "https://esm.sh/@spotware-web-team/sdk"
-            );
-
-        log(
-            "Main cTrader SDK module loaded.",
-            "success"
-        );
-
-        const rxjsModule =
-            await import(
-                "https://esm.sh/rxjs"
-            );
-
-        log(
-            "RxJS module loaded.",
-            "success"
-        );
-
-        const loggerModule =
-            await import(
-                "https://esm.sh/@veksa/logger"
-            );
-
-        log(
-            "Logger module loaded.",
-            "success"
-        );
-
-        createClientAdapter =
-            externalApiModule.createClientAdapter;
-
-        getAccountInformation =
-            sdkModule.getAccountInformation;
-
-        getLightSymbolList =
-            sdkModule.getLightSymbolList;
-
-        getSymbol =
-            sdkModule.getSymbol;
-
-        handleConfirmEvent =
-            sdkModule.handleConfirmEvent;
-
-        quoteEvent =
-            sdkModule.quoteEvent;
-
-        registerEvent =
-            sdkModule.registerEvent;
-
-        subscribeQuotes =
-            sdkModule.subscribeQuotes;
-
-        unsubscribeQuotes =
-            sdkModule.unsubscribeQuotes;
-
-        catchError =
-            rxjsModule.catchError;
-
-        of =
-            rxjsModule.of;
-
-        take =
-            rxjsModule.take;
-
-        tap =
-            rxjsModule.tap;
-
-        createLogger =
-            loggerModule.createLogger;
-
-        const functions = {
-            createClientAdapter,
-            getAccountInformation,
-            getLightSymbolList,
-            getSymbol,
-            handleConfirmEvent,
-            quoteEvent,
-            registerEvent,
-            subscribeQuotes,
-            unsubscribeQuotes,
-            catchError,
-            of,
-            take,
-            tap,
-            createLogger
-        };
-
-        for (
-            const [name, value]
-            of Object.entries(functions)
-        ) {
-            if (
-                typeof value !== "function"
-            ) {
-                const availableSdkExports =
-                    Object.keys(sdkModule)
-                        .sort()
-                        .join(", ");
-
-                throw new Error(
-                    `${name} is unavailable. SDK exports: ${availableSdkExports}`
-                );
-            }
-        }
-
-        log(
-            "Required SDK functions verified.",
-            "success"
-        );
-
-        const logger =
-            createLogger(false);
-
-        adapter =
-            createClientAdapter({
-                logger
-            });
-
-        log(
-            "cTrader client adapter created.",
-            "success"
-        );
-
-        connectToCTrader();
-
-    } catch (error) {
-        ui.connection.textContent =
-            "SDK load failed";
-
-        ui.connection.style.color =
-            "#ff453a";
-
-        showError(
-            "SDK initialisation failed",
-            error
-        );
-    }
-}
-
-
-/* ============================================================
-   CTRADER CONNECTION
-   ============================================================ */
-
-function connectToCTrader() {
+function connect() {
     ui.connection.textContent =
         "Connecting...";
 
@@ -1074,15 +926,13 @@ function connectToCTrader() {
                     );
 
                     loadAccount();
+
                     loadSymbols();
                 }
             ),
 
             catchError(
                 error => {
-                    state.connected =
-                        false;
-
                     ui.connection.textContent =
                         "Connection failed";
 
@@ -1090,7 +940,7 @@ function connectToCTrader() {
                         "#ff453a";
 
                     showError(
-                        "cTrader host registration failed",
+                        "Host registration failed",
                         error
                     );
 
@@ -1103,7 +953,7 @@ function connectToCTrader() {
 
 
 /* ============================================================
-   ACCOUNT INFORMATION
+   ACCOUNT
    ============================================================ */
 
 function loadAccount() {
@@ -1131,27 +981,7 @@ function loadAccount() {
                     result
                 );
 
-                let traderObject =
-                    null;
-
-                visitObjects(
-                    result,
-                    object => {
-                        if (
-                            traderObject === null &&
-                            object?.trader &&
-                            typeof object.trader === "object"
-                        ) {
-                            traderObject =
-                                object.trader;
-                        }
-                    }
-                );
-
                 const accountId =
-                    traderObject?.login ??
-                    traderObject?.accountId ??
-                    traderObject?.ctidTraderAccountId ??
                     findFirstValue(
                         result,
                         [
@@ -1170,7 +1000,7 @@ function loadAccount() {
                         "Connected";
 
                     log(
-                        "Account response received, but the login ID was not found.",
+                        "Account connected, but no account login was found.",
                         "warning"
                     );
 
@@ -1203,7 +1033,7 @@ function loadAccount() {
 
 
 /* ============================================================
-   SYMBOL LOOKUP
+   SYMBOL LIST
    ============================================================ */
 
 function loadSymbols() {
@@ -1222,7 +1052,7 @@ function loadSymbols() {
 
             next: result => {
                 console.log(
-                    "LIGHT SYMBOL RESPONSE:",
+                    "SYMBOL RESPONSE:",
                     result
                 );
 
@@ -1244,7 +1074,7 @@ function loadSymbols() {
                     !symbols.length
                 ) {
                     log(
-                        "The response was received, but no symbol objects with both an ID and a name were found.",
+                        "No nested symbol objects containing both ID and name were found.",
                         "error"
                     );
 
@@ -1288,7 +1118,7 @@ function loadSymbols() {
                 }
 
                 if (!selected) {
-                    const goldCandidates =
+                    const candidates =
                         symbols
                             .map(
                                 symbolDisplayName
@@ -1300,10 +1130,10 @@ function loadSymbols() {
                             );
 
                     log(
-                        "XAUUSD was not found. Gold candidates: " +
+                        "XAUUSD not found. Gold candidates: " +
                         (
-                            goldCandidates.length
-                                ? goldCandidates.join(", ")
+                            candidates.length
+                                ? candidates.join(", ")
                                 : "none"
                         ),
                         "error"
@@ -1326,7 +1156,7 @@ function loadSymbols() {
                     selectedId === undefined
                 ) {
                     log(
-                        "The Gold symbol was found, but its Symbol ID was unavailable.",
+                        "Gold symbol found, but Symbol ID was unavailable.",
                         "error"
                     );
 
@@ -1364,7 +1194,7 @@ function loadSymbols() {
 
 
 /* ============================================================
-   DETAILED SYMBOL INFORMATION
+   SYMBOL DETAILS
    ============================================================ */
 
 function loadSymbolDetails() {
@@ -1389,12 +1219,12 @@ function loadSymbolDetails() {
 
             next: result => {
                 console.log(
-                    "SYMBOL DETAIL RESPONSE:",
+                    "SYMBOL DETAILS:",
                     result
                 );
 
                 diagnosticSummary(
-                    "Symbol-detail response",
+                    "Symbol details",
                     result
                 );
 
@@ -1439,7 +1269,7 @@ function loadSymbolDetails() {
                     "success"
                 );
 
-                startQuoteFeed();
+                startQuotes();
             },
 
             error: error => {
@@ -1448,23 +1278,23 @@ function loadSymbolDetails() {
                     "warning"
                 );
 
-                startQuoteFeed();
+                startQuotes();
             }
         });
 }
 
 
 /* ============================================================
-   LIVE QUOTE FEED
+   QUOTE SUBSCRIPTION
    ============================================================ */
 
-function startQuoteFeed() {
+function startQuotes() {
     if (
         state.symbolId === null ||
         state.symbolId === undefined
     ) {
         log(
-            "Cannot start the quote feed because Symbol ID is missing.",
+            "Cannot subscribe because Symbol ID is missing.",
             "error"
         );
 
@@ -1472,7 +1302,7 @@ function startQuoteFeed() {
     }
 
     log(
-        "Starting quote-event listener..."
+        "Starting quote listener..."
     );
 
     state.quoteSubscription =
@@ -1499,7 +1329,7 @@ function startQuoteFeed() {
             });
 
     log(
-        `Subscribing to ${state.symbolName} live quotes...`
+        `Subscribing to ${state.symbolName} quotes...`
     );
 
     subscribeQuotes(
@@ -1509,13 +1339,7 @@ function startQuoteFeed() {
                 Number(
                     state.symbolId
                 )
-            ],
-
-            enableStaleQuotesFiltering:
-                true,
-
-            subscribeToSpotTimestamp:
-                true
+            ]
         }
     )
         .pipe(
@@ -1525,7 +1349,7 @@ function startQuoteFeed() {
 
             next: result => {
                 console.log(
-                    "QUOTE SUBSCRIPTION RESPONSE:",
+                    "QUOTE SUBSCRIPTION:",
                     result
                 );
 
@@ -1558,11 +1382,11 @@ function startQuoteFeed() {
 
 
 /* ============================================================
-   QUOTE PARSING
+   QUOTE PARSER
    ============================================================ */
 
 function findQuoteObject(result) {
-    let matchedQuote =
+    let matchingQuote =
         null;
 
     let fallbackQuote =
@@ -1593,23 +1417,23 @@ function findQuoteObject(result) {
                     object;
             }
 
-            const objectSymbolId =
+            const quoteSymbolId =
                 object?.symbolId ??
                 object?.id;
 
             if (
-                objectSymbolId !== undefined &&
-                Number(objectSymbolId) ===
+                quoteSymbolId !== undefined &&
+                Number(quoteSymbolId) ===
                 Number(state.symbolId)
             ) {
-                matchedQuote =
+                matchingQuote =
                     object;
             }
         }
     );
 
     return (
-        matchedQuote ??
+        matchingQuote ??
         fallbackQuote
     );
 }
@@ -1621,11 +1445,6 @@ function processQuote(result) {
         );
 
     if (!quote) {
-        console.log(
-            "Quote event without Bid/Ask:",
-            result
-        );
-
         return;
     }
 
@@ -1689,7 +1508,7 @@ function processQuote(result) {
         );
     }
 
-    updatePriceMovement();
+    updateMovement();
 }
 
 
@@ -1749,7 +1568,7 @@ ui.startBtn.addEventListener(
             "warning"
         );
 
-        updatePriceMovement();
+        updateMovement();
     }
 );
 
@@ -1796,7 +1615,7 @@ ui.resetBtn.addEventListener(
             price === undefined
         ) {
             log(
-                "Cannot reset the reference price because no live price is available.",
+                "Cannot reset reference because no live price is available.",
                 "error"
             );
 
@@ -1819,8 +1638,7 @@ window.addEventListener(
     () => {
         if (
             state.quotesSubscribed &&
-            state.symbolId !== null &&
-            typeof unsubscribeQuotes === "function"
+            state.symbolId !== null
         ) {
             unsubscribeQuotes(
                 adapter,
@@ -1849,10 +1667,10 @@ window.addEventListener(
 
 
 /* ============================================================
-   START APPLICATION
+   START
    ============================================================ */
 
-startApplication();
+connect();
 
 </script>
 
