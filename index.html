@@ -1,6 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -8,298 +10,2524 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <meta
-        http-equiv="Content-Security-Policy"
-        content="
-            default-src 'self';
-            script-src 'self';
-            style-src 'self' 'unsafe-inline';
-            connect-src 'self';
-            img-src 'self' data:;
-            font-src 'self';
-        "
-    >
+    <title>
+        Price Move + Stochastic Filter
+    </title>
 
-    <title>Price Move + Stochastic Filter</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: #1c1c1e;
+            color: #ffffff;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+        }
+
+        body {
+            padding: 14px;
+            font-size: 13px;
+        }
+
+        .panel {
+            width: 100%;
+        }
+
+        .header {
+            color: #34c759;
+            font-size: 15px;
+            font-weight: 700;
+
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+
+            border-bottom:
+                1px solid #3a3a3c;
+        }
+
+        .section-title {
+            color: #ffffff;
+            font-weight: 700;
+
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .metric-row {
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            gap: 12px;
+
+            margin-bottom: 6px;
+        }
+
+        .metric-name {
+            color: #d1d1d6;
+        }
+
+        .metric-value {
+            color: #0a84ff;
+
+            font-family:
+                Consolas,
+                Monaco,
+                monospace;
+
+            text-align: right;
+        }
+
+        .connected {
+            color: #30d158 !important;
+        }
+
+        .warning {
+            color: #ffd60a !important;
+        }
+
+        .error {
+            color: #ff453a !important;
+        }
+
+        .button {
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 8px;
+
+            border: none;
+
+            border-radius: 5px;
+
+            background: #34c759;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .button.stop {
+            background: #ff453a;
+        }
+
+        .button.secondary {
+            background: #636366;
+        }
+
+        .button:disabled {
+            background: #48484a;
+
+            color: #8e8e93;
+
+            cursor: not-allowed;
+        }
+
+        .rule-box {
+            background: #2c2c2e;
+
+            padding: 10px;
+
+            border-radius: 5px;
+
+            margin-top: 6px;
+
+            line-height: 1.5;
+        }
+
+        .log-box {
+            height: 170px;
+
+            margin-top: 12px;
+
+            padding: 9px;
+
+            overflow-y: auto;
+
+            background: #2c2c2e;
+
+            border-radius: 5px;
+
+            font-family:
+                Consolas,
+                Monaco,
+                monospace;
+
+            font-size: 11px;
+
+            line-height: 1.45;
+
+            color: #d1d1d6;
+        }
+
+        .log-success {
+            color: #30d158;
+        }
+
+        .log-warning {
+            color: #ffd60a;
+        }
+
+        .log-error {
+            color: #ff453a;
+        }
+
+        .safety {
+            color: #8e8e93;
+
+            font-size: 11px;
+
+            margin-top: 12px;
+
+            line-height: 1.4;
+        }
+
+    </style>
+
 </head>
 
+
 <body>
-    <main class="plugin-panel">
 
-        <!-- Plugin heading -->
-        <div class="header">
-            Strategy: Price Move &amp; Stoch Filter
-        </div>
 
-        <!-- cTrader host status -->
-        <div class="metric-row">
-            <span>Host Connection:</span>
+<div class="panel">
 
-            <span
-                class="metric-value status-connecting"
-                id="ui-connection"
-            >
-                Connecting...
-            </span>
-        </div>
 
-        <!-- Account status -->
-        <div class="metric-row">
-            <span>Account:</span>
+    <div class="header">
 
-            <span
-                class="metric-value"
-                id="ui-account"
-            >
-                --
-            </span>
-        </div>
+        Strategy: Price Move &amp; Stoch Filter
 
-        <!-- Target trading symbol -->
-        <div class="metric-row">
-            <span>Target Symbol:</span>
+    </div>
 
-            <span
-                class="metric-value"
-                id="ui-symbol"
-            >
-                XAUUSD
-            </span>
-        </div>
 
-        <!-- Broker symbol ID -->
-        <div class="metric-row">
-            <span>Symbol ID:</span>
+    <div class="metric-row">
 
-            <span
-                class="metric-value"
-                id="ui-symbol-id"
-            >
-                --
-            </span>
-        </div>
+        <span class="metric-name">
+            Host Connection:
+        </span>
 
-        <div class="section-divider"></div>
-
-        <!-- Live Bid -->
-        <div class="metric-row">
-            <span>Current Bid:</span>
-
-            <span
-                class="metric-value"
-                id="ui-bid"
-            >
-                --
-            </span>
-        </div>
-
-        <!-- Live Ask -->
-        <div class="metric-row">
-            <span>Current Ask:</span>
-
-            <span
-                class="metric-value"
-                id="ui-ask"
-            >
-                --
-            </span>
-        </div>
-
-        <!-- Strategy reference price -->
-        <div class="metric-row">
-            <span>Reference Price:</span>
-
-            <span
-                class="metric-value"
-                id="ui-ref"
-            >
-                --
-            </span>
-        </div>
-
-        <!-- Price movement from reference -->
-        <div class="metric-row">
-            <span>Price Movement:</span>
-
-            <span
-                class="metric-value"
-                id="ui-price-move"
-            >
-                --
-            </span>
-        </div>
-
-        <div class="section-divider"></div>
-
-        <!-- Stochastic value -->
-        <div class="metric-row">
-            <span>Current Stoch K:</span>
-
-            <span
-                class="metric-value"
-                id="ui-stoch"
-            >
-                --
-            </span>
-        </div>
-
-        <!-- Singapore trading time status -->
-        <div class="metric-row">
-            <span>Trading Window:</span>
-
-            <span
-                class="metric-value"
-                id="ui-trading-window"
-            >
-                --
-            </span>
-        </div>
-
-        <!-- Open-position status -->
-        <div class="metric-row">
-            <span>Position:</span>
-
-            <span
-                class="metric-value"
-                id="ui-position"
-            >
-                --
-            </span>
-        </div>
-
-        <!-- Strategy status -->
-        <div class="metric-row">
-            <span>Strategy Status:</span>
-
-            <span
-                class="metric-value"
-                id="ui-strategy-status"
-            >
-                Stopped
-            </span>
-        </div>
-
-        <!-- Start button -->
-        <button
-            class="btn btn-start"
-            id="startBtn"
-            type="button"
-            disabled
+        <span
+            class="metric-value warning"
+            id="ui-connection"
         >
-            Connecting to cTrader...
-        </button>
+            Connecting...
+        </span>
 
-        <!-- Stop button -->
-        <button
-            class="btn btn-stop"
-            id="stopBtn"
-            type="button"
-            disabled
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Account:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-account"
         >
-            Stop Automated Strategy
-        </button>
+            --
+        </span>
 
-        <!-- Reset reference price -->
-        <button
-            class="btn btn-secondary"
-            id="resetRefBtn"
-            type="button"
-            disabled
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Target Symbol:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-symbol"
         >
-            Reset Reference Price
-        </button>
+            XAUUSD
+        </span>
 
-        <!-- Strategy parameters -->
-        <section class="settings-panel">
+    </div>
 
-            <div class="settings-title">
-                Strategy Parameters
-            </div>
 
-            <div class="metric-row">
-                <span>Required Price Move:</span>
-                <span class="setting-value">$10.00</span>
-            </div>
+    <div class="metric-row">
 
-            <div class="metric-row">
-                <span>Take Profit:</span>
-                <span class="setting-value">$7.00</span>
-            </div>
+        <span class="metric-name">
+            Symbol ID:
+        </span>
 
-            <div class="metric-row">
-                <span>Stop Loss:</span>
-                <span class="setting-value">$7.00</span>
-            </div>
-
-            <div class="metric-row">
-                <span>Trade Size:</span>
-                <span class="setting-value">0.01 lot</span>
-            </div>
-
-            <div class="metric-row">
-                <span>Maximum Positions:</span>
-                <span class="setting-value">1</span>
-            </div>
-
-            <div class="metric-row">
-                <span>Stochastic:</span>
-                <span class="setting-value">5, 3, 3</span>
-            </div>
-
-            <div class="metric-row">
-                <span>Singapore Trading Time:</span>
-                <span class="setting-value">20:00–00:00</span>
-            </div>
-
-        </section>
-
-        <!-- Strategy rules -->
-        <section class="rules-panel">
-
-            <div class="settings-title">
-                Entry Rules
-            </div>
-
-            <div class="rule rule-buy">
-                BUY when price falls $10 from the reference price
-                and Stochastic K is above 80.
-            </div>
-
-            <div class="rule rule-sell">
-                SELL when price rises $10 from the reference price
-                and Stochastic K is below 20.
-            </div>
-
-        </section>
-
-        <!-- Runtime log -->
-        <div
-            class="log-box"
-            id="log"
-            aria-live="polite"
+        <span
+            class="metric-value"
+            id="ui-symbol-id"
         >
-            <div class="log-entry">
-                System loading. Connecting to cTrader Desktop...
-            </div>
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Current Bid:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-bid"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Current Ask:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-ask"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Reference Price:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-reference"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Price Movement:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-movement"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Current Stoch K:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-stoch"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Trading Window:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-window"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Position:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-position"
+        >
+            --
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span class="metric-name">
+            Strategy Status:
+        </span>
+
+        <span
+            class="metric-value"
+            id="ui-status"
+        >
+            Stopped
+        </span>
+
+    </div>
+
+
+    <button
+        class="button"
+        id="startBtn"
+        disabled
+    >
+        Connecting to cTrader...
+    </button>
+
+
+    <button
+        class="button stop"
+        id="stopBtn"
+        disabled
+    >
+        Stop Automated Strategy
+    </button>
+
+
+    <button
+        class="button secondary"
+        id="resetBtn"
+        disabled
+    >
+        Reset Reference Price
+    </button>
+
+
+
+    <div class="section-title">
+
+        Strategy Parameters
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>Required Price Move:</span>
+
+        <span class="metric-value">
+            $10.00
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>Take Profit:</span>
+
+        <span class="metric-value">
+            $7.00
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>Stop Loss:</span>
+
+        <span class="metric-value">
+            $7.00
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>Trade Size:</span>
+
+        <span class="metric-value">
+            0.01 lot
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>Maximum Positions:</span>
+
+        <span class="metric-value">
+            1
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>Stochastic:</span>
+
+        <span class="metric-value">
+            5, 3, 3
+        </span>
+
+    </div>
+
+
+    <div class="metric-row">
+
+        <span>
+            Singapore Trading Time:
+        </span>
+
+        <span class="metric-value">
+            20:00–00:00
+        </span>
+
+    </div>
+
+
+
+    <div class="section-title">
+
+        Entry Rules
+
+    </div>
+
+
+    <div class="rule-box">
+
+        BUY when price falls $10 from the
+        reference price and Stochastic K is
+        above 80.
+
+        <br><br>
+
+        SELL when price rises $10 from the
+        reference price and Stochastic K is
+        below 20.
+
+    </div>
+
+
+
+    <div
+        class="log-box"
+        id="log"
+    >
+
+        <div>
+            System loading...
         </div>
 
-        <!-- Safety notice -->
-        <div class="safety-notice">
-            Test the strategy on a demo account before enabling live
-            order execution.
-        </div>
+    </div>
 
-    </main>
 
-    <!--
-        Vite will load, bundle and deploy this JavaScript module.
+    <div class="safety">
 
-        Do not replace this with:
-        https://ctrader.com
+        Connection-test version.
+        Automatic order execution is disabled.
 
-        The cTrader SDK imports and connection code belong in:
-        src/main.js
-    -->
-<script type="module" src="./src/main.js"></script>
+    </div>
+
+
+</div>
+
+
+
+<script type="module">
+
+
+/* ============================================================
+   OFFICIAL CTRADER SDK IMPORTS
+
+   These load directly from esm.sh.
+
+   No npm.
+   No Vite.
+   No package.json required.
+   ============================================================ */
+
+
+import {
+    createClientAdapter
+}
+from
+"https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5";
+
+
+import {
+    getAccountInformation,
+    getLightSymbolList,
+    getSymbol,
+    handleConfirmEvent,
+    quoteEvent,
+    registerEvent,
+    subscribeQuotes,
+    unsubscribeQuotes
+}
+from
+"https://esm.sh/@spotware-web-team/sdk@0.0.20";
+
+
+import {
+    take,
+    tap,
+    catchError,
+    of
+}
+from
+"https://esm.sh/rxjs@7.8.2";
+
+
+import {
+    createLogger
+}
+from
+"https://esm.sh/@veksa/logger@0.0.3";
+
+
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+
+
+const CONFIG = {
+
+    symbolName:
+        "XAUUSD",
+
+    requiredMove:
+        10.0,
+
+    takeProfit:
+        7.0,
+
+    stopLoss:
+        7.0,
+
+    lotSize:
+        0.01,
+
+    maximumPositions:
+        1,
+
+    stochasticK:
+        5,
+
+    stochasticD:
+        3,
+
+    stochasticSlowing:
+        3
+
+};
+
+
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+
+const state = {
+
+    connected:
+        false,
+
+    accountId:
+        null,
+
+    symbolId:
+        null,
+
+    symbol:
+        null,
+
+    digits:
+        2,
+
+    bid:
+        null,
+
+    ask:
+        null,
+
+    reference:
+        null,
+
+    movement:
+        null,
+
+    quoteSubscription:
+        null,
+
+    quotesSubscribed:
+        false,
+
+    strategyRunning:
+        false
+
+};
+
+
+
+/* ============================================================
+   HTML ELEMENTS
+   ============================================================ */
+
+
+const ui = {
+
+    connection:
+        document.getElementById(
+            "ui-connection"
+        ),
+
+    account:
+        document.getElementById(
+            "ui-account"
+        ),
+
+    symbol:
+        document.getElementById(
+            "ui-symbol"
+        ),
+
+    symbolId:
+        document.getElementById(
+            "ui-symbol-id"
+        ),
+
+    bid:
+        document.getElementById(
+            "ui-bid"
+        ),
+
+    ask:
+        document.getElementById(
+            "ui-ask"
+        ),
+
+    reference:
+        document.getElementById(
+            "ui-reference"
+        ),
+
+    movement:
+        document.getElementById(
+            "ui-movement"
+        ),
+
+    stoch:
+        document.getElementById(
+            "ui-stoch"
+        ),
+
+    window:
+        document.getElementById(
+            "ui-window"
+        ),
+
+    position:
+        document.getElementById(
+            "ui-position"
+        ),
+
+    status:
+        document.getElementById(
+            "ui-status"
+        ),
+
+    start:
+        document.getElementById(
+            "startBtn"
+        ),
+
+    stop:
+        document.getElementById(
+            "stopBtn"
+        ),
+
+    reset:
+        document.getElementById(
+            "resetBtn"
+        ),
+
+    log:
+        document.getElementById(
+            "log"
+        )
+
+};
+
+
+
+/* ============================================================
+   LOG
+   ============================================================ */
+
+
+function log(
+    message,
+    type = "normal"
+) {
+
+    console.log(
+        message
+    );
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    const time =
+        new Date()
+            .toLocaleTimeString(
+                "en-SG",
+                {
+                    hour12:
+                        false
+                }
+            );
+
+
+    row.textContent =
+        `[${time}] ${message}`;
+
+
+    if (
+        type === "success"
+    ) {
+
+        row.className =
+            "log-success";
+
+    }
+
+
+    if (
+        type === "warning"
+    ) {
+
+        row.className =
+            "log-warning";
+
+    }
+
+
+    if (
+        type === "error"
+    ) {
+
+        row.className =
+            "log-error";
+
+    }
+
+
+    ui.log.appendChild(
+        row
+    );
+
+
+    ui.log.scrollTop =
+        ui.log.scrollHeight;
+
+}
+
+
+
+/* ============================================================
+   ERROR FORMATTER
+   ============================================================ */
+
+
+function errorText(
+    error
+) {
+
+    if (
+        error === null ||
+        error === undefined
+    ) {
+
+        return "Unknown error";
+
+    }
+
+
+    if (
+        typeof error ===
+        "string"
+    ) {
+
+        return error;
+
+    }
+
+
+    if (
+        error.message
+    ) {
+
+        return error.message;
+
+    }
+
+
+    try {
+
+        return JSON.stringify(
+            error
+        );
+
+    }
+
+    catch {
+
+        return String(
+            error
+        );
+
+    }
+
+}
+
+
+
+/* ============================================================
+   SINGAPORE TIME
+   ============================================================ */
+
+
+function singaporeHour() {
+
+    const parts =
+        new Intl.DateTimeFormat(
+            "en-SG",
+            {
+
+                timeZone:
+                    "Asia/Singapore",
+
+                hour:
+                    "2-digit",
+
+                hourCycle:
+                    "h23"
+
+            }
+
+        ).formatToParts(
+            new Date()
+        );
+
+
+    const result =
+        parts.find(
+            x =>
+                x.type ===
+                "hour"
+        );
+
+
+    return result
+        ?
+        Number(
+            result.value
+        )
+        :
+        0;
+
+}
+
+
+
+function tradingWindowOpen() {
+
+    const hour =
+        singaporeHour();
+
+
+    return (
+        hour >= 20
+        &&
+        hour < 24
+    );
+
+}
+
+
+
+function updateWindow() {
+
+    const open =
+        tradingWindowOpen();
+
+
+    ui.window.textContent =
+        open
+            ?
+            "OPEN"
+            :
+            "CLOSED";
+
+
+    ui.window.className =
+        open
+            ?
+            "metric-value connected"
+            :
+            "metric-value warning";
+
+}
+
+
+
+updateWindow();
+
+
+setInterval(
+    updateWindow,
+    30000
+);
+
+
+
+/* ============================================================
+   PRICE DISPLAY
+   ============================================================ */
+
+
+function formatPrice(
+    value
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    if (
+        !Number.isFinite(
+            number
+        )
+    ) {
+
+        return "--";
+
+    }
+
+
+    return number.toFixed(
+        state.digits
+    );
+
+}
+
+
+
+function updateMovement() {
+
+    if (
+        state.reference === null
+        ||
+        state.bid === null
+    ) {
+
+        return;
+
+    }
+
+
+    state.movement =
+        state.bid -
+        state.reference;
+
+
+    const prefix =
+        state.movement > 0
+            ?
+            "+"
+            :
+            "";
+
+
+    ui.movement.textContent =
+        prefix +
+        state.movement.toFixed(
+            state.digits
+        );
+
+}
+
+
+
+/* ============================================================
+   RESET REFERENCE
+   ============================================================ */
+
+
+function resetReference() {
+
+    const price =
+        state.bid !== null
+            ?
+            state.bid
+            :
+            state.ask;
+
+
+    if (
+        price === null
+    ) {
+
+        log(
+            "Cannot reset reference. No quote available.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    state.reference =
+        Number(
+            price
+        );
+
+
+    ui.reference.textContent =
+        formatPrice(
+            state.reference
+        );
+
+
+    ui.movement.textContent =
+        Number(0).toFixed(
+            state.digits
+        );
+
+
+    log(
+
+        "Reference price reset to " +
+        formatPrice(
+            state.reference
+        ),
+
+        "success"
+
+    );
+
+}
+
+
+
+/* ============================================================
+   ADAPTER
+   ============================================================ */
+
+
+log(
+    "Creating cTrader adapter..."
+);
+
+
+const logger =
+    createLogger(
+        true
+    );
+
+
+const adapter =
+    createClientAdapter({
+
+        logger:
+            logger
+
+    });
+
+
+
+/* ============================================================
+   CONNECTION
+   ============================================================ */
+
+
+function connect() {
+
+
+    log(
+        "Waiting for cTrader host..."
+    );
+
+
+    /*
+        Initial handshake
+    */
+
+
+    handleConfirmEvent(
+        adapter,
+        {}
+    )
+
+    .pipe(
+
+        take(1),
+
+        catchError(
+
+            error => {
+
+                log(
+
+                    "Initial handshake error: " +
+                    errorText(
+                        error
+                    ),
+
+                    "error"
+
+                );
+
+
+                return of(
+                    null
+                );
+
+            }
+
+        )
+
+    )
+
+    .subscribe();
+
+
+
+    /*
+        Main registration
+    */
+
+
+    registerEvent(
+        adapter
+    )
+
+    .pipe(
+
+        take(1),
+
+
+        tap(
+
+            result => {
+
+
+                console.log(
+                    "Register:",
+                    result
+                );
+
+
+                state.connected =
+                    true;
+
+
+                ui.connection.textContent =
+                    "Connected";
+
+
+                ui.connection.className =
+                    "metric-value connected";
+
+
+                log(
+                    "Connected to cTrader Desktop.",
+                    "success"
+                );
+
+
+
+                /*
+                    Confirm registration
+                */
+
+
+                handleConfirmEvent(
+                    adapter,
+                    {}
+                )
+
+                .pipe(
+                    take(1)
+                )
+
+                .subscribe();
+
+
+
+                /*
+                    Load trading information
+                */
+
+
+                loadAccount();
+
+                loadSymbols();
+
+
+            }
+
+        ),
+
+
+        catchError(
+
+            error => {
+
+
+                ui.connection.textContent =
+                    "Connection Failed";
+
+
+                ui.connection.className =
+                    "metric-value error";
+
+
+                log(
+
+                    "Registration failed: " +
+                    errorText(
+                        error
+                    ),
+
+                    "error"
+
+                );
+
+
+                return of(
+                    null
+                );
+
+            }
+
+        )
+
+    )
+
+    .subscribe();
+
+}
+
+
+
+/* ============================================================
+   ACCOUNT
+   ============================================================ */
+
+
+function loadAccount() {
+
+
+    log(
+        "Requesting account information..."
+    );
+
+
+    getAccountInformation(
+        adapter,
+        {}
+    )
+
+    .pipe(
+
+        take(1),
+
+
+        tap(
+
+            result => {
+
+
+                console.log(
+                    "Account:",
+                    result
+                );
+
+
+                const account =
+                    result?.account ??
+                    result?.payload?.account ??
+                    result;
+
+
+                const id =
+                    account?.accountId ??
+                    account?.ctidTraderAccountId ??
+                    account?.id ??
+                    account?.login ??
+                    "--";
+
+
+                state.accountId =
+                    id;
+
+
+                ui.account.textContent =
+                    String(
+                        id
+                    );
+
+
+                log(
+
+                    "Account loaded: " +
+                    id,
+
+                    "success"
+
+                );
+
+            }
+
+        ),
+
+
+        catchError(
+
+            error => {
+
+
+                log(
+
+                    "Account request error: " +
+                    errorText(
+                        error
+                    ),
+
+                    "warning"
+
+                );
+
+
+                return of(
+                    null
+                );
+
+            }
+
+        )
+
+    )
+
+    .subscribe();
+
+}
+
+
+
+/* ============================================================
+   SYMBOL LIST
+   ============================================================ */
+
+
+function loadSymbols() {
+
+
+    log(
+        "Searching for XAUUSD..."
+    );
+
+
+    getLightSymbolList(
+        adapter,
+        {}
+    )
+
+    .pipe(
+
+        take(1),
+
+
+        tap(
+
+            result => {
+
+
+                console.log(
+                    "Symbols:",
+                    result
+                );
+
+
+                const symbols =
+
+                    result?.symbol ??
+                    result?.symbols ??
+                    result?.payload?.symbol ??
+                    result?.payload?.symbols ??
+                    [];
+
+
+                if (
+                    !Array.isArray(
+                        symbols
+                    )
+                ) {
+
+
+                    log(
+                        "Symbol response did not contain a symbol array.",
+                        "error"
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                /*
+                    Exact XAUUSD match first
+                */
+
+
+                let selected =
+
+                    symbols.find(
+
+                        x => {
+
+                            const name =
+                                String(
+                                    x.symbolName ??
+                                    x.name ??
+                                    ""
+                                )
+                                .toUpperCase();
+
+
+                            return (
+                                name ===
+                                "XAUUSD"
+                            );
+
+                        }
+
+                    );
+
+
+
+                /*
+                    Broker suffix fallback
+                */
+
+
+                if (
+                    !selected
+                ) {
+
+
+                    selected =
+
+                        symbols.find(
+
+                            x => {
+
+                                const name =
+                                    String(
+                                        x.symbolName ??
+                                        x.name ??
+                                        ""
+                                    )
+                                    .toUpperCase();
+
+
+                                return (
+                                    name.startsWith(
+                                        "XAUUSD"
+                                    )
+                                );
+
+                            }
+
+                        );
+
+                }
+
+
+
+                /*
+                    GOLD fallback
+                */
+
+
+                if (
+                    !selected
+                ) {
+
+
+                    selected =
+
+                        symbols.find(
+
+                            x => {
+
+                                const name =
+                                    String(
+                                        x.symbolName ??
+                                        x.name ??
+                                        ""
+                                    )
+                                    .toUpperCase();
+
+
+                                return (
+                                    name.includes(
+                                        "GOLD"
+                                    )
+                                );
+
+                            }
+
+                        );
+
+                }
+
+
+
+                if (
+                    !selected
+                ) {
+
+
+                    log(
+                        "XAUUSD/GOLD was not found in the account symbol list.",
+                        "error"
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                const symbolName =
+                    selected.symbolName ??
+                    selected.name ??
+                    "XAUUSD";
+
+
+                const symbolId =
+                    selected.symbolId ??
+                    selected.id;
+
+
+
+                if (
+                    symbolId ===
+                    undefined
+                ) {
+
+
+                    log(
+                        "Gold symbol found but no Symbol ID was returned.",
+                        "error"
+                    );
+
+
+                    console.log(
+                        selected
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                state.symbolId =
+                    Number(
+                        symbolId
+                    );
+
+
+                ui.symbol.textContent =
+                    symbolName;
+
+
+                ui.symbolId.textContent =
+                    String(
+                        state.symbolId
+                    );
+
+
+                log(
+
+                    symbolName +
+                    " found. Symbol ID: " +
+                    state.symbolId,
+
+                    "success"
+
+                );
+
+
+                loadSymbolDetails();
+
+            }
+
+        ),
+
+
+        catchError(
+
+            error => {
+
+
+                log(
+
+                    "Symbol request error: " +
+                    errorText(
+                        error
+                    ),
+
+                    "error"
+
+                );
+
+
+                return of(
+                    null
+                );
+
+            }
+
+        )
+
+    )
+
+    .subscribe();
+
+}
+
+
+
+/* ============================================================
+   SYMBOL DETAILS
+   ============================================================ */
+
+
+function loadSymbolDetails() {
+
+
+    log(
+        "Loading XAUUSD symbol details..."
+    );
+
+
+    getSymbol(
+
+        adapter,
+
+        {
+
+            symbolId: [
+                state.symbolId
+            ]
+
+        }
+
+    )
+
+    .pipe(
+
+        take(1),
+
+
+        tap(
+
+            result => {
+
+
+                console.log(
+                    "Symbol detail:",
+                    result
+                );
+
+
+                const symbols =
+
+                    result?.symbol ??
+                    result?.symbols ??
+                    result?.payload?.symbol ??
+                    result?.payload?.symbols ??
+                    [];
+
+
+                let symbol;
+
+
+                if (
+                    Array.isArray(
+                        symbols
+                    )
+                ) {
+
+                    symbol =
+                        symbols[0];
+
+                }
+
+                else {
+
+                    symbol =
+                        symbols;
+
+                }
+
+
+                state.symbol =
+                    symbol ?? null;
+
+
+                const digits =
+                    state.symbol?.digits ??
+                    state.symbol?.precision;
+
+
+                if (
+                    Number.isFinite(
+                        Number(
+                            digits
+                        )
+                    )
+                ) {
+
+                    state.digits =
+                        Number(
+                            digits
+                        );
+
+                }
+
+
+                log(
+
+                    "Symbol information loaded.",
+
+                    "success"
+
+                );
+
+
+                startQuotes();
+
+            }
+
+        ),
+
+
+        catchError(
+
+            error => {
+
+
+                log(
+
+                    "Symbol detail warning: " +
+                    errorText(
+                        error
+                    ),
+
+                    "warning"
+
+                );
+
+
+                /*
+                    Quotes can still be tested.
+                */
+
+
+                startQuotes();
+
+
+                return of(
+                    null
+                );
+
+            }
+
+        )
+
+    )
+
+    .subscribe();
+
+}
+
+
+
+/* ============================================================
+   RECEIVE QUOTES
+   ============================================================ */
+
+
+function startQuotes() {
+
+
+    log(
+        "Opening quote event stream..."
+    );
+
+
+
+    state.quoteSubscription =
+
+        quoteEvent(
+            adapter
+        )
+
+        .pipe(
+
+            tap(
+
+                event => {
+
+
+                    processQuote(
+                        event
+                    );
+
+                }
+
+            ),
+
+
+            catchError(
+
+                error => {
+
+
+                    log(
+
+                        "Quote stream error: " +
+                        errorText(
+                            error
+                        ),
+
+                        "error"
+
+                    );
+
+
+                    return of(
+                        null
+                    );
+
+                }
+
+            )
+
+        )
+
+        .subscribe();
+
+
+
+    log(
+        "Subscribing to XAUUSD quotes..."
+    );
+
+
+    subscribeQuotes(
+
+        adapter,
+
+        {
+
+            symbolId: [
+                state.symbolId
+            ]
+
+        }
+
+    )
+
+    .pipe(
+
+        take(1),
+
+
+        tap(
+
+            result => {
+
+
+                console.log(
+                    "Quote subscription:",
+                    result
+                );
+
+
+                state.quotesSubscribed =
+                    true;
+
+
+                ui.start.disabled =
+                    false;
+
+
+                ui.start.textContent =
+                    "Start Automated Strategy";
+
+
+                ui.reset.disabled =
+                    false;
+
+
+                log(
+                    "Live XAUUSD subscription accepted.",
+                    "success"
+                );
+
+            }
+
+        ),
+
+
+        catchError(
+
+            error => {
+
+
+                log(
+
+                    "Quote subscription failed: " +
+                    errorText(
+                        error
+                    ),
+
+                    "error"
+
+                );
+
+
+                return of(
+                    null
+                );
+
+            }
+
+        )
+
+    )
+
+    .subscribe();
+
+}
+
+
+
+/* ============================================================
+   PROCESS QUOTES
+   ============================================================ */
+
+
+function processQuote(
+    event
+) {
+
+
+    if (
+        !event
+    ) {
+
+        return;
+
+    }
+
+
+    const quote =
+
+        event?.quote ??
+        event?.payload?.quote ??
+        event?.payload ??
+        event;
+
+
+
+    const eventSymbolId =
+
+        quote?.symbolId ??
+        event?.symbolId;
+
+
+
+    if (
+        eventSymbolId !==
+        undefined
+        &&
+        Number(
+            eventSymbolId
+        )
+        !==
+        state.symbolId
+    ) {
+
+        return;
+
+    }
+
+
+
+    const bidValue =
+
+        quote?.bid ??
+        quote?.bidPrice;
+
+
+    const askValue =
+
+        quote?.ask ??
+        quote?.askPrice;
+
+
+
+    if (
+        bidValue !==
+        undefined
+        &&
+        bidValue !==
+        null
+    ) {
+
+
+        const bid =
+            Number(
+                bidValue
+            );
+
+
+        if (
+            Number.isFinite(
+                bid
+            )
+        ) {
+
+
+            state.bid =
+                bid;
+
+
+            ui.bid.textContent =
+                formatPrice(
+                    bid
+                );
+
+        }
+
+    }
+
+
+
+    if (
+        askValue !==
+        undefined
+        &&
+        askValue !==
+        null
+    ) {
+
+
+        const ask =
+            Number(
+                askValue
+            );
+
+
+        if (
+            Number.isFinite(
+                ask
+            )
+        ) {
+
+
+            state.ask =
+                ask;
+
+
+            ui.ask.textContent =
+                formatPrice(
+                    ask
+                );
+
+        }
+
+    }
+
+
+
+    /*
+        Set initial reference
+    */
+
+
+    if (
+        state.reference ===
+        null
+        &&
+        state.bid !==
+        null
+    ) {
+
+
+        state.reference =
+            state.bid;
+
+
+        ui.reference.textContent =
+            formatPrice(
+                state.reference
+            );
+
+
+        log(
+
+            "Initial reference price: " +
+            formatPrice(
+                state.reference
+            ),
+
+            "success"
+
+        );
+
+    }
+
+
+
+    updateMovement();
+
+}
+
+
+
+/* ============================================================
+   START STRATEGY MONITORING
+   ============================================================ */
+
+
+function startStrategy() {
+
+
+    if (
+        !state.connected
+        ||
+        !state.quotesSubscribed
+    ) {
+
+
+        log(
+            "Live market connection is not ready.",
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    state.strategyRunning =
+        true;
+
+
+    ui.status.textContent =
+        "Running - Monitor Only";
+
+
+    ui.status.className =
+        "metric-value connected";
+
+
+    ui.start.disabled =
+        true;
+
+
+    ui.start.textContent =
+        "Strategy Running";
+
+
+    ui.stop.disabled =
+        false;
+
+
+    ui.position.textContent =
+        "No entry condition";
+
+
+    log(
+        "Strategy monitoring started.",
+        "success"
+    );
+
+
+    log(
+        "Order execution remains disabled in this connection-test version.",
+        "warning"
+    );
+
+}
+
+
+
+/* ============================================================
+   STOP STRATEGY
+   ============================================================ */
+
+
+function stopStrategy() {
+
+
+    state.strategyRunning =
+        false;
+
+
+    ui.status.textContent =
+        "Stopped";
+
+
+    ui.status.className =
+        "metric-value";
+
+
+    ui.start.disabled =
+        false;
+
+
+    ui.start.textContent =
+        "Start Automated Strategy";
+
+
+    ui.stop.disabled =
+        true;
+
+
+    ui.position.textContent =
+        "--";
+
+
+    log(
+        "Strategy monitoring stopped.",
+        "warning"
+    );
+
+}
+
+
+
+/* ============================================================
+   BUTTON EVENTS
+   ============================================================ */
+
+
+ui.start.addEventListener(
+    "click",
+    startStrategy
+);
+
+
+ui.stop.addEventListener(
+    "click",
+    stopStrategy
+);
+
+
+ui.reset.addEventListener(
+    "click",
+    resetReference
+);
+
+
+
+/* ============================================================
+   JAVASCRIPT ERRORS
+   ============================================================ */
+
+
+window.addEventListener(
+
+    "error",
+
+    event => {
+
+
+        log(
+
+            "JavaScript error: " +
+            event.message,
+
+            "error"
+
+        );
+
+    }
+
+);
+
+
+
+window.addEventListener(
+
+    "unhandledrejection",
+
+    event => {
+
+
+        log(
+
+            "Unhandled error: " +
+            errorText(
+                event.reason
+            ),
+
+            "error"
+
+        );
+
+    }
+
+);
+
+
+
+/* ============================================================
+   PAGE CLOSE
+   ============================================================ */
+
+
+window.addEventListener(
+
+    "beforeunload",
+
+    () => {
+
+
+        if (
+            state.quotesSubscribed
+            &&
+            state.symbolId !==
+            null
+        ) {
+
+
+            unsubscribeQuotes(
+
+                adapter,
+
+                {
+
+                    symbolId: [
+                        state.symbolId
+                    ]
+
+                }
+
+            )
+
+            .pipe(
+                take(1)
+            )
+
+            .subscribe();
+
+        }
+
+
+        if (
+            state.quoteSubscription
+        ) {
+
+
+            state.quoteSubscription
+                .unsubscribe();
+
+        }
+
+    }
+
+);
+
+
+
+/* ============================================================
+   START
+   ============================================================ */
+
+
+log(
+    "Starting cTrader connection..."
+);
+
+
+connect();
+
+
+</script>
+
+
 </body>
+
 </html>
