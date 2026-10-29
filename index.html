@@ -1,137 +1,1672 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>Price Move + Stochastic Filter</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            background: #1c1c1e;
+            color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            padding: 14px;
+            font-size: 13px;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .header {
+            color: #34c759;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        .section-title {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 7px;
+        }
+
+        .metric-label {
+            color: #d1d1d6;
+        }
+
+        .metric-value {
+            color: #0a84ff;
+            font-family: Consolas, Monaco, monospace;
+            text-align: right;
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 5px;
+            background: #34c759;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .button:hover:not(:disabled) {
+            background: #2faf4f;
+        }
+
+        .button.stop {
+            background: #ff453a;
+        }
+
+        .button.secondary {
+            background: #636366;
+        }
+
+        .button:disabled {
+            background: #48484a;
+            color: #8e8e93;
+            cursor: not-allowed;
+        }
+
+        .parameter {
+            color: #d1d1d6;
+            margin-bottom: 4px;
+        }
+
+        .rule {
+            margin-top: 5px;
+            color: #d1d1d6;
+            line-height: 1.4;
+        }
+
+        .log-box {
+            margin-top: 15px;
+            padding: 9px;
+            height: 190px;
+            overflow-y: auto;
+            border-radius: 5px;
+            background: #2c2c2e;
+            color: #d1d1d6;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .success {
+            color: #30d158;
+        }
+
+        .warning {
+            color: #ffd60a;
+        }
+
+        .error {
+            color: #ff453a;
+        }
+
+        .notice {
+            margin-top: 12px;
+            color: #8e8e93;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="panel">
+
+    <div class="header">
+        Strategy: Price Move &amp; Stoch Filter
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Host Connection:</span>
+        <span class="metric-value" id="connection">Loading...</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Account:</span>
+        <span class="metric-value" id="account">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Target Symbol:</span>
+        <span class="metric-value" id="symbol">XAUUSD</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Symbol ID:</span>
+        <span class="metric-value" id="symbolId">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Current Bid:</span>
+        <span class="metric-value" id="bid">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Current Ask:</span>
+        <span class="metric-value" id="ask">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Reference Price:</span>
+        <span class="metric-value" id="reference">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Price Movement:</span>
+        <span class="metric-value" id="movement">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Current Stoch K:</span>
+        <span class="metric-value" id="stochastic">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Trading Window:</span>
+        <span class="metric-value" id="tradingWindow">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Position:</span>
+        <span class="metric-value" id="position">--</span>
+    </div>
+
+    <div class="metric-row">
+        <span class="metric-label">Strategy Status:</span>
+        <span class="metric-value" id="strategyStatus">Stopped</span>
+    </div>
+
+    <button
+        class="button"
+        id="startBtn"
+        disabled
+    >
+        Connecting to cTrader...
+    </button>
+
+    <button
+        class="button stop"
+        id="stopBtn"
+        disabled
+    >
+        Stop Automated Strategy
+    </button>
+
+    <button
+        class="button secondary"
+        id="resetBtn"
+        disabled
+    >
+        Reset Reference Price
+    </button>
+
+    <div class="section-title">
+        Strategy Parameters
+    </div>
+
+    <div class="parameter">
+        Required Price Move: $10.00
+    </div>
+
+    <div class="parameter">
+        Take Profit: $7.00
+    </div>
+
+    <div class="parameter">
+        Stop Loss: $7.00
+    </div>
+
+    <div class="parameter">
+        Trade Size: 0.01 lot
+    </div>
+
+    <div class="parameter">
+        Maximum Positions: 1
+    </div>
+
+    <div class="parameter">
+        Stochastic: 5, 3, 3
+    </div>
+
+    <div class="parameter">
+        Singapore Trading Time: 20:00–00:00
+    </div>
+
+    <div class="section-title">
+        Entry Rules
+    </div>
+
+    <div class="rule">
+        BUY when price falls $10 from the reference price
+        and Stochastic K is above 80.
+    </div>
+
+    <div class="rule">
+        SELL when price rises $10 from the reference price
+        and Stochastic K is below 20.
+    </div>
+
+    <div
+        class="log-box"
+        id="log"
+    >
+        <div>System loading...</div>
+    </div>
+
+    <div class="notice">
+        Connection-test version. Automatic order execution is disabled.
+        Test using a demo account before enabling trading.
+    </div>
+
+</div>
+
 <script type="module">
 
-/*
-============================================================
-CTRADER PLUGIN DIAGNOSTIC
-============================================================
+/* ============================================================
+   CTRADER SDK IMPORTS
+   ============================================================ */
 
-This version DOES NOT:
-- place trades
-- subscribe to XAUUSD
-- calculate Stochastic
-- change positions
+import {
+    createClientAdapter
+} from "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5";
 
-It only diagnoses the cTrader Plugin SDK connection.
-============================================================
-*/
+import {
+    getAccountInformation,
+    getLightSymbolList,
+    getSymbol,
+    handleConfirmEvent,
+    quoteEvent,
+    registerEvent,
+    subscribeQuotes,
+    unsubscribeQuotes
+} from "https://esm.sh/@spotware-web-team/sdk";
 
-const logBox = document.getElementById("log");
-const connectionUi = document.getElementById("connection");
-const accountUi = document.getElementById("account");
-const symbolIdUi = document.getElementById("symbolId");
-const bidUi = document.getElementById("bid");
-const askUi = document.getElementById("ask");
+import {
+    catchError,
+    take,
+    tap
+} from "https://esm.sh/rxjs";
+
+import {
+    createLogger
+} from "https://esm.sh/@veksa/logger";
 
 
-/*
-============================================================
-LOGGING
-============================================================
-*/
+/* ============================================================
+   CONFIGURATION
+   ============================================================ */
 
-function log(message, type = "normal") {
+const CONFIG = {
+    symbolName: "XAUUSD",
 
-    const time =
-        new Date().toLocaleTimeString(
-            "en-SG",
-            {
-                hour12: false
-            }
-        );
+    requiredMove: 10.0,
 
-    const text =
-        `[${time}] ${message}`;
+    takeProfit: 7.0,
 
-    console.log(text);
+    stopLoss: 7.0,
 
-    if (!logBox) {
-        return;
-    }
+    lotSize: 0.01,
+
+    maxPositions: 1,
+
+    singaporeStartHour: 20,
+
+    stochasticKPeriod: 5,
+
+    stochasticDPeriod: 3,
+
+    stochasticSlowing: 3
+};
+
+
+/* ============================================================
+   PLUGIN STATE
+   ============================================================ */
+
+const state = {
+    connected: false,
+
+    quotesSubscribed: false,
+
+    strategyRunning: false,
+
+    accountId: null,
+
+    symbolId: null,
+
+    symbolName: "XAUUSD",
+
+    symbolDetails: null,
+
+    digits: 2,
+
+    bid: null,
+
+    ask: null,
+
+    referencePrice: null,
+
+    quoteStream: null
+};
+
+
+/* ============================================================
+   UI REFERENCES
+   ============================================================ */
+
+const ui = {
+    connection:
+        document.getElementById("connection"),
+
+    account:
+        document.getElementById("account"),
+
+    symbol:
+        document.getElementById("symbol"),
+
+    symbolId:
+        document.getElementById("symbolId"),
+
+    bid:
+        document.getElementById("bid"),
+
+    ask:
+        document.getElementById("ask"),
+
+    reference:
+        document.getElementById("reference"),
+
+    movement:
+        document.getElementById("movement"),
+
+    stochastic:
+        document.getElementById("stochastic"),
+
+    tradingWindow:
+        document.getElementById("tradingWindow"),
+
+    position:
+        document.getElementById("position"),
+
+    strategyStatus:
+        document.getElementById("strategyStatus"),
+
+    startBtn:
+        document.getElementById("startBtn"),
+
+    stopBtn:
+        document.getElementById("stopBtn"),
+
+    resetBtn:
+        document.getElementById("resetBtn"),
+
+    log:
+        document.getElementById("log")
+};
+
+
+/* ============================================================
+   LOGGING
+   ============================================================ */
+
+function log(message, type = "") {
+
+    console.log(message);
 
     const row =
         document.createElement("div");
 
     row.textContent =
-        text;
+        `[${new Date().toLocaleTimeString("en-SG")}] ${message}`;
 
-    if (type === "success") {
+    if (type) {
+        row.className = type;
+    }
 
-        row.style.color =
-            "#30d158";
+    ui.log.appendChild(row);
 
-    } else if (type === "warning") {
+    ui.log.scrollTop =
+        ui.log.scrollHeight;
+}
 
-        row.style.color =
-            "#ffd60a";
 
-    } else if (type === "error") {
+function showError(prefix, error) {
 
-        row.style.color =
-            "#ff453a";
+    console.error(prefix, error);
+
+    let message = "Unknown error";
+
+    if (typeof error === "string") {
+        message = error;
+
+    } else if (error?.message) {
+        message = error.message;
 
     } else {
 
-        row.style.color =
-            "#d1d1d6";
+        try {
+            message =
+                JSON.stringify(error);
+
+        } catch {
+            message =
+                String(error);
+        }
     }
 
-    logBox.appendChild(row);
-
-    logBox.scrollTop =
-        logBox.scrollHeight;
+    log(
+        `${prefix}: ${message}`,
+        "error"
+    );
 }
 
 
-function formatError(error) {
+/* ============================================================
+   SINGAPORE TRADING WINDOW
+   ============================================================ */
 
-    if (!error) {
+function singaporeHour() {
 
-        return "Unknown error";
+    const parts =
+        new Intl.DateTimeFormat(
+            "en-SG",
+            {
+                timeZone: "Asia/Singapore",
+
+                hour: "2-digit",
+
+                hourCycle: "h23"
+            }
+        )
+        .formatToParts(
+            new Date()
+        );
+
+    const hour =
+        parts.find(
+            part =>
+                part.type === "hour"
+        );
+
+    return Number(
+        hour?.value ?? 0
+    );
+}
+
+
+function updateTradingWindow() {
+
+    const hour =
+        singaporeHour();
+
+    const open =
+        hour >= 20 &&
+        hour < 24;
+
+    ui.tradingWindow.textContent =
+        open
+            ? "OPEN"
+            : "CLOSED";
+
+    ui.tradingWindow.style.color =
+        open
+            ? "#30d158"
+            : "#ff9f0a";
+}
+
+
+/* ============================================================
+   PRICE HELPERS
+   ============================================================ */
+
+function formatPrice(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        !Number.isFinite(Number(value))
+    ) {
+        return "--";
     }
 
-    if (typeof error === "string") {
+    return Number(value)
+        .toFixed(state.digits);
+}
 
-        return error;
+
+function setReferencePrice(value) {
+
+    const price =
+        Number(value);
+
+    if (!Number.isFinite(price)) {
+        return;
     }
 
-    if (error.message) {
+    state.referencePrice =
+        price;
 
-        return error.message;
+    ui.reference.textContent =
+        formatPrice(price);
+
+    ui.movement.textContent =
+        Number(0)
+            .toFixed(state.digits);
+
+    log(
+        `Reference price set: ${formatPrice(price)}`,
+        "success"
+    );
+}
+
+
+/* ============================================================
+   CREATE CTRADER CLIENT ADAPTER
+   ============================================================ */
+
+log(
+    "Creating cTrader client adapter..."
+);
+
+const logger =
+    createLogger(
+        location.href.includes("showLogs")
+    );
+
+const adapter =
+    createClientAdapter({
+        logger
+    });
+
+log(
+    "Client adapter created.",
+    "success"
+);
+
+
+/* ============================================================
+   CONNECT TO CTRADER DESKTOP
+   ============================================================ */
+
+function connect() {
+
+    ui.connection.textContent =
+        "Connecting...";
+
+    ui.connection.style.color =
+        "#ffd60a";
+
+    log(
+        "Starting cTrader handshake..."
+    );
+
+
+    /*
+        STEP 1
+        Initial confirmation.
+    */
+
+    handleConfirmEvent(
+        adapter,
+        {}
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: value => {
+
+                console.log(
+                    "INITIAL CONFIRMATION:",
+                    value
+                );
+
+                log(
+                    "Initial confirmation completed.",
+                    "success"
+                );
+            },
+
+            error: error => {
+
+                showError(
+                    "Initial confirmation failed",
+                    error
+                );
+            }
+        });
+
+
+    /*
+        STEP 2
+        Wait for registration event from cTrader.
+    */
+
+    log(
+        "Waiting for cTrader host registration..."
+    );
+
+    registerEvent(
+        adapter
+    )
+        .pipe(
+
+            take(1),
+
+            tap(
+                registration => {
+
+                    console.log(
+                        "REGISTRATION RESPONSE:",
+                        registration
+                    );
+
+                    log(
+                        "Host registration received.",
+                        "success"
+                    );
+
+
+                    /*
+                        STEP 3
+                        Confirm registration.
+                    */
+
+                    handleConfirmEvent(
+                        adapter,
+                        {}
+                    )
+                        .pipe(
+                            take(1)
+                        )
+                        .subscribe({
+
+                            next: confirmation => {
+
+                                console.log(
+                                    "SECOND CONFIRMATION:",
+                                    confirmation
+                                );
+
+                                log(
+                                    "Second confirmation completed.",
+                                    "success"
+                                );
+                            },
+
+                            error: error => {
+
+                                showError(
+                                    "Second confirmation failed",
+                                    error
+                                );
+                            }
+                        });
+
+
+                    /*
+                        HOST CONNECTION READY
+                    */
+
+                    state.connected =
+                        true;
+
+                    ui.connection.textContent =
+                        "Connected";
+
+                    ui.connection.style.color =
+                        "#30d158";
+
+                    log(
+                        "Connected to cTrader Desktop.",
+                        "success"
+                    );
+
+
+                    loadAccount();
+
+                    loadSymbols();
+                }
+            ),
+
+            catchError(
+                error => {
+
+                    state.connected =
+                        false;
+
+                    ui.connection.textContent =
+                        "FAILED";
+
+                    ui.connection.style.color =
+                        "#ff453a";
+
+                    showError(
+                        "cTrader host registration failed",
+                        error
+                    );
+
+                    return [];
+                }
+            )
+        )
+        .subscribe();
+}
+
+
+/* ============================================================
+   ACCOUNT INFORMATION
+   ============================================================ */
+
+function loadAccount() {
+
+    log(
+        "Requesting account information..."
+    );
+
+    getAccountInformation(
+        adapter,
+        {}
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: result => {
+
+                console.log(
+                    "ACCOUNT RESPONSE:",
+                    result
+                );
+
+                const account =
+                    result?.account ??
+                    result?.accountInformation ??
+                    result?.payload?.account ??
+                    result;
+
+                const id =
+                    account?.accountId ??
+                    account?.ctidTraderAccountId ??
+                    account?.id ??
+                    account?.login;
+
+                state.accountId =
+                    id;
+
+                ui.account.textContent =
+                    id ?? "Connected";
+
+                log(
+                    "Account information received.",
+                    "success"
+                );
+            },
+
+            error: error => {
+
+                showError(
+                    "Account request failed",
+                    error
+                );
+
+                ui.account.textContent =
+                    "Unavailable";
+            }
+        });
+}
+
+
+/* ============================================================
+   LOAD SYMBOLS
+   ============================================================ */
+
+function loadSymbols() {
+
+    log(
+        "Requesting broker symbol list..."
+    );
+
+    getLightSymbolList(
+        adapter,
+        {}
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: result => {
+
+                console.log(
+                    "SYMBOL LIST RESPONSE:",
+                    result
+                );
+
+                findGoldSymbol(
+                    result
+                );
+            },
+
+            error: error => {
+
+                showError(
+                    "Symbol-list request failed",
+                    error
+                );
+            }
+        });
+}
+
+
+/* ============================================================
+   FIND XAUUSD
+   ============================================================ */
+
+function findGoldSymbol(response) {
+
+    const symbols =
+        response?.symbol ??
+        response?.symbols ??
+        response?.lightSymbol ??
+        response?.lightSymbols ??
+        response?.payload?.symbol ??
+        response?.payload?.symbols ??
+        [];
+
+    if (!Array.isArray(symbols)) {
+
+        log(
+            "Symbol response received but symbol array was not recognised.",
+            "error"
+        );
+
+        console.log(
+            "UNRECOGNISED SYMBOL RESPONSE:",
+            response
+        );
+
+        return;
     }
 
-    try {
+    log(
+        `Received ${symbols.length} broker symbols.`
+    );
 
-        return JSON.stringify(error);
+    const target =
+        CONFIG.symbolName
+            .toUpperCase();
 
-    } catch {
 
-        return String(error);
+    /*
+        First try exact XAUUSD.
+    */
+
+    let match =
+        symbols.find(
+            symbol =>
+                symbolName(symbol) ===
+                target
+        );
+
+
+    /*
+        Then try broker suffixes:
+        XAUUSD.c
+        XAUUSDm
+        XAUUSD-STD
+        etc.
+    */
+
+    if (!match) {
+
+        match =
+            symbols.find(
+                symbol =>
+                    symbolName(symbol)
+                        .startsWith(target)
+            );
+    }
+
+
+    /*
+        Show potential Gold symbols if no XAUUSD found.
+    */
+
+    if (!match) {
+
+        const candidates =
+            symbols.filter(
+                symbol => {
+
+                    const name =
+                        symbolName(symbol);
+
+                    return (
+                        name.includes("XAU") ||
+                        name.includes("GOLD")
+                    );
+                }
+            );
+
+        console.log(
+            "GOLD SYMBOL CANDIDATES:",
+            candidates
+        );
+
+        log(
+            "XAUUSD was not found. Check console for Gold symbol candidates.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "SELECTED SYMBOL:",
+        match
+    );
+
+
+    state.symbolId =
+        match?.symbolId ??
+        match?.id;
+
+
+    state.symbolName =
+        symbolName(match);
+
+
+    ui.symbol.textContent =
+        state.symbolName;
+
+
+    ui.symbolId.textContent =
+        state.symbolId;
+
+
+    log(
+        `Selected ${state.symbolName}, ID ${state.symbolId}.`,
+        "success"
+    );
+
+
+    loadSymbolDetails();
+}
+
+
+function symbolName(symbol) {
+
+    return String(
+        symbol?.symbolName ??
+        symbol?.name ??
+        symbol?.symbol ??
+        symbol?.ticker ??
+        ""
+    )
+        .toUpperCase();
+}
+
+
+/* ============================================================
+   LOAD DETAILED SYMBOL INFORMATION
+   ============================================================ */
+
+function loadSymbolDetails() {
+
+    log(
+        "Requesting detailed symbol information..."
+    );
+
+
+    getSymbol(
+        adapter,
+        {
+            symbolId: [
+                Number(state.symbolId)
+            ]
+        }
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: result => {
+
+                console.log(
+                    "SYMBOL DETAILS RESPONSE:",
+                    result
+                );
+
+
+                const symbols =
+                    result?.symbol ??
+                    result?.symbols ??
+                    result?.payload?.symbol ??
+                    result?.payload?.symbols ??
+                    [];
+
+
+                if (
+                    Array.isArray(symbols) &&
+                    symbols.length
+                ) {
+                    state.symbolDetails =
+                        symbols[0];
+                }
+
+
+                const digits =
+                    state.symbolDetails?.digits ??
+                    state.symbolDetails?.precision;
+
+
+                if (
+                    Number.isFinite(
+                        Number(digits)
+                    )
+                ) {
+                    state.digits =
+                        Number(digits);
+                }
+
+
+                log(
+                    `Symbol details loaded. Digits: ${state.digits}.`,
+                    "success"
+                );
+
+
+                startQuoteFeed();
+            },
+
+
+            error: error => {
+
+                showError(
+                    "Symbol-detail request failed",
+                    error
+                );
+
+
+                /*
+                    Attempt quotes even if detailed
+                    symbol lookup failed.
+                */
+
+                startQuoteFeed();
+            }
+        });
+}
+
+
+/* ============================================================
+   START LIVE QUOTE FEED
+   ============================================================ */
+
+function startQuoteFeed() {
+
+    if (
+        state.symbolId === null ||
+        state.symbolId === undefined
+    ) {
+
+        log(
+            "Cannot start quote feed because Symbol ID is missing.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    log(
+        "Starting quote event listener..."
+    );
+
+
+    state.quoteStream =
+        quoteEvent(
+            adapter
+        )
+            .pipe(
+
+                tap(
+                    quote => {
+
+                        processQuote(
+                            quote
+                        );
+                    }
+                )
+
+            )
+            .subscribe({
+
+                error: error => {
+
+                    showError(
+                        "Quote stream failed",
+                        error
+                    );
+                }
+            });
+
+
+    log(
+        `Subscribing to ${state.symbolName} live quotes...`
+    );
+
+
+    subscribeQuotes(
+        adapter,
+        {
+            symbolId: [
+                Number(state.symbolId)
+            ],
+
+            enableStaleQuotesFiltering:
+                true,
+
+            subscribeToSpotTimestamp:
+                true
+        }
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: result => {
+
+                console.log(
+                    "QUOTE SUBSCRIPTION RESPONSE:",
+                    result
+                );
+
+
+                state.quotesSubscribed =
+                    true;
+
+
+                ui.startBtn.disabled =
+                    false;
+
+
+                ui.startBtn.textContent =
+                    "Start Automated Strategy";
+
+
+                ui.resetBtn.disabled =
+                    false;
+
+
+                log(
+                    "Live XAUUSD quote subscription accepted.",
+                    "success"
+                );
+            },
+
+
+            error: error => {
+
+                showError(
+                    "Quote subscription failed",
+                    error
+                );
+            }
+        });
+}
+
+
+/* ============================================================
+   PROCESS LIVE QUOTES
+   ============================================================ */
+
+function processQuote(result) {
+
+    console.log(
+        "QUOTE EVENT:",
+        result
+    );
+
+
+    const quote =
+        result?.quote ??
+        result?.payload?.quote ??
+        result?.payload ??
+        result;
+
+
+    const eventSymbol =
+        quote?.symbolId ??
+        result?.symbolId;
+
+
+    /*
+        Ignore events belonging to another symbol.
+    */
+
+    if (
+        eventSymbol !== undefined &&
+        Number(eventSymbol) !==
+        Number(state.symbolId)
+    ) {
+        return;
+    }
+
+
+    const bid =
+        getNumber(
+            quote,
+            [
+                "bid",
+                "bidPrice"
+            ]
+        );
+
+
+    const ask =
+        getNumber(
+            quote,
+            [
+                "ask",
+                "askPrice"
+            ]
+        );
+
+
+    if (bid !== null) {
+
+        state.bid =
+            bid;
+
+        ui.bid.textContent =
+            formatPrice(bid);
+    }
+
+
+    if (ask !== null) {
+
+        state.ask =
+            ask;
+
+        ui.ask.textContent =
+            formatPrice(ask);
+    }
+
+
+    const currentPrice =
+        state.bid ??
+        state.ask;
+
+
+    if (
+        currentPrice === null ||
+        currentPrice === undefined
+    ) {
+        return;
+    }
+
+
+    /*
+        First received price becomes
+        the strategy reference price.
+    */
+
+    if (
+        state.referencePrice === null
+    ) {
+
+        setReferencePrice(
+            currentPrice
+        );
+    }
+
+
+    /*
+        Price movement from reference.
+    */
+
+    const movement =
+        currentPrice -
+        state.referencePrice;
+
+
+    const sign =
+        movement > 0
+            ? "+"
+            : "";
+
+
+    ui.movement.textContent =
+        sign +
+        movement.toFixed(
+            state.digits
+        );
+
+
+    /*
+        Monitor price threshold only.
+
+        No order is executed by this version.
+    */
+
+    if (
+        state.strategyRunning
+    ) {
+
+        monitorPriceMovement(
+            movement
+        );
     }
 }
 
 
-/*
-============================================================
-GLOBAL ERROR HANDLERS
-============================================================
-*/
+/* ============================================================
+   EXTRACT NUMERIC PRICE
+   ============================================================ */
+
+function getNumber(
+    object,
+    properties
+) {
+
+    for (
+        const property
+        of properties
+    ) {
+
+        const value =
+            object?.[property];
+
+
+        if (
+            value !== undefined &&
+            value !== null &&
+            Number.isFinite(
+                Number(value)
+            )
+        ) {
+
+            return Number(value);
+        }
+    }
+
+
+    return null;
+}
+
+
+/* ============================================================
+   PRICE MOVEMENT MONITOR
+   ============================================================ */
+
+function monitorPriceMovement(
+    movement
+) {
+
+    /*
+        Intended BUY:
+
+        Price <= Reference - $10
+        AND
+        Stochastic K > 80
+
+        Stochastic is not enabled yet.
+    */
+
+    if (
+        movement <=
+        -CONFIG.requiredMove
+    ) {
+
+        ui.position.textContent =
+            "BUY threshold reached - waiting for Stoch > 80";
+
+        return;
+    }
+
+
+    /*
+        Intended SELL:
+
+        Price >= Reference + $10
+        AND
+        Stochastic K < 20
+    */
+
+    if (
+        movement >=
+        CONFIG.requiredMove
+    ) {
+
+        ui.position.textContent =
+            "SELL threshold reached - waiting for Stoch < 20";
+
+        return;
+    }
+
+
+    ui.position.textContent =
+        "No entry condition";
+}
+
+
+/* ============================================================
+   START BUTTON
+   ============================================================ */
+
+ui.startBtn.addEventListener(
+    "click",
+    () => {
+
+        if (
+            !state.connected ||
+            !state.quotesSubscribed
+        ) {
+
+            log(
+                "Cannot start. Market data is not ready.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        /*
+            Set reference if required.
+        */
+
+        if (
+            state.referencePrice === null
+        ) {
+
+            const price =
+                state.bid ??
+                state.ask;
+
+
+            if (
+                price !== null &&
+                price !== undefined
+            ) {
+
+                setReferencePrice(
+                    price
+                );
+            }
+        }
+
+
+        state.strategyRunning =
+            true;
+
+
+        ui.strategyStatus.textContent =
+            "Running - monitoring";
+
+
+        ui.strategyStatus.style.color =
+            "#30d158";
+
+
+        ui.startBtn.disabled =
+            true;
+
+
+        ui.startBtn.textContent =
+            "Strategy Running";
+
+
+        ui.stopBtn.disabled =
+            false;
+
+
+        log(
+            "Strategy monitoring started.",
+            "success"
+        );
+
+
+        log(
+            "Automatic order execution remains disabled.",
+            "warning"
+        );
+    }
+);
+
+
+/* ============================================================
+   STOP BUTTON
+   ============================================================ */
+
+ui.stopBtn.addEventListener(
+    "click",
+    () => {
+
+        state.strategyRunning =
+            false;
+
+
+        ui.strategyStatus.textContent =
+            "Stopped";
+
+
+        ui.strategyStatus.style.color =
+            "";
+
+
+        ui.startBtn.disabled =
+            false;
+
+
+        ui.startBtn.textContent =
+            "Start Automated Strategy";
+
+
+        ui.stopBtn.disabled =
+            true;
+
+
+        log(
+            "Strategy monitoring stopped.",
+            "warning"
+        );
+    }
+);
+
+
+/* ============================================================
+   RESET REFERENCE PRICE
+   ============================================================ */
+
+ui.resetBtn.addEventListener(
+    "click",
+    () => {
+
+        const price =
+            state.bid ??
+            state.ask;
+
+
+        if (
+            price === null ||
+            price === undefined
+        ) {
+
+            log(
+                "Cannot reset reference because live price is unavailable.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        setReferencePrice(
+            price
+        );
+    }
+);
+
+
+/* ============================================================
+   GLOBAL JAVASCRIPT ERROR LOGGING
+   ============================================================ */
 
 window.addEventListener(
     "error",
     event => {
 
-        log(
-            "GLOBAL JS ERROR: " +
-            (
-                event.message ||
-                "Unknown JavaScript error"
-            ),
-            "error"
-        );
-
-        console.error(
-            "Full window.error event:",
-            event
+        showError(
+            "JavaScript error",
+            event.error ??
+            event.message
         );
     }
 );
@@ -141,686 +1676,72 @@ window.addEventListener(
     "unhandledrejection",
     event => {
 
-        log(
-            "UNHANDLED PROMISE: " +
-            formatError(event.reason),
-            "error"
-        );
-
-        console.error(
-            "Full rejection:",
+        showError(
+            "Unhandled promise rejection",
             event.reason
         );
     }
 );
 
 
-/*
-============================================================
-RESET SCREEN FOR DIAGNOSTIC
-============================================================
-*/
-
-if (connectionUi) {
-    connectionUi.textContent =
-        "Diagnostic...";
-}
-
-if (accountUi) {
-    accountUi.textContent =
-        "--";
-}
-
-if (symbolIdUi) {
-    symbolIdUi.textContent =
-        "--";
-}
-
-if (bidUi) {
-    bidUi.textContent =
-        "--";
-}
-
-if (askUi) {
-    askUi.textContent =
-        "--";
-}
-
-
-log(
-    "================================"
-);
-
-log(
-    "cTrader diagnostic started."
-);
-
-log(
-    "JavaScript module is running.",
-    "success"
-);
-
-
-/*
-============================================================
-STEP 1
-LOAD EXTERNAL API
-============================================================
-*/
-
-let externalApi;
-
-try {
-
-    log(
-        "STEP 1: Loading sdk-external-api..."
-    );
-
-    externalApi =
-        await import(
-            "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5"
-        );
-
-    log(
-        "sdk-external-api loaded.",
-        "success"
-    );
-
-    console.log(
-        "EXTERNAL API MODULE:",
-        externalApi
-    );
-
-    console.log(
-        "EXTERNAL API EXPORTS:",
-        Object.keys(
-            externalApi
-        ).sort()
-    );
-
-    log(
-        "External API exports: " +
-        Object.keys(
-            externalApi
-        )
-        .sort()
-        .join(", ")
-    );
-
-} catch (error) {
-
-    log(
-        "STEP 1 FAILED: " +
-        formatError(error),
-        "error"
-    );
-
-    console.error(
-        "External API import failure:",
-        error
-    );
-
-    throw error;
-}
-
-
-/*
-============================================================
-STEP 2
-LOAD MAIN CTRADER SDK
-============================================================
-*/
-
-let sdk;
-
-try {
-
-    log(
-        "STEP 2: Loading main cTrader SDK..."
-    );
-
-    sdk =
-        await import(
-            "https://esm.sh/@spotware-web-team/sdk"
-        );
-
-    log(
-        "Main cTrader SDK loaded.",
-        "success"
-    );
-
-    const exports =
-        Object.keys(
-            sdk
-        ).sort();
-
-    console.log(
-        "CTRADER SDK MODULE:",
-        sdk
-    );
-
-    console.log(
-        "CTRADER SDK EXPORTS:",
-        exports
-    );
-
-    log(
-        "SDK export count: " +
-        exports.length,
-        "success"
-    );
-
-    /*
-    Print all export names into the page.
-
-    This is especially important because your
-    npm build previously reported missing exports.
-    */
-
-    log(
-        "SDK exports:"
-    );
-
-    exports.forEach(
-        name => {
-
-            log(
-                " • " + name
-            );
-        }
-    );
-
-} catch (error) {
-
-    log(
-        "STEP 2 FAILED: " +
-        formatError(error),
-        "error"
-    );
-
-    console.error(
-        "Main SDK import failure:",
-        error
-    );
-
-    throw error;
-}
-
-
-/*
-============================================================
-STEP 3
-CHECK REQUIRED FUNCTIONS
-============================================================
-*/
-
-log(
-    "STEP 3: Checking SDK functions..."
-);
-
-
-const requiredFunctions = [
-
-    "registerEvent",
-
-    "handleConfirmEvent",
-
-    "getAccountInformation",
-
-    "getLightSymbolList",
-
-    "getSymbol",
-
-    "subscribeQuotes",
-
-    "quoteEvent",
-
-    "unsubscribeQuotes"
-];
-
-
-for (
-    const name
-    of requiredFunctions
-) {
-
-    const exists =
-        typeof sdk[name]
-        ===
-        "function";
-
-    log(
-        name +
-        ": " +
-        (
-            exists
-                ? "FOUND"
-                : "MISSING"
-        ),
-        exists
-            ? "success"
-            : "error"
-    );
-}
-
-
-/*
-============================================================
-STEP 4
-CHECK EXTERNAL ADAPTER
-============================================================
-*/
-
-log(
-    "STEP 4: Checking createClientAdapter..."
-);
-
-
-if (
-    typeof externalApi.createClientAdapter
-    !==
-    "function"
-) {
-
-    log(
-        "createClientAdapter: MISSING",
-        "error"
-    );
-
-    throw new Error(
-        "createClientAdapter is not exported."
-    );
-}
-
-
-log(
-    "createClientAdapter: FOUND",
-    "success"
-);
-
-
-/*
-============================================================
-STEP 5
-CREATE MINIMAL LOGGER
-============================================================
-
-Using a minimal logger here avoids introducing
-another dependency while diagnosing the connection.
-============================================================
-*/
-
-const diagnosticLogger = {
-
-    debug: (...args) =>
-        console.debug(
-            "[cTrader DEBUG]",
-            ...args
-        ),
-
-    info: (...args) =>
-        console.info(
-            "[cTrader INFO]",
-            ...args
-        ),
-
-    warn: (...args) =>
-        console.warn(
-            "[cTrader WARN]",
-            ...args
-        ),
-
-    error: (...args) =>
-        console.error(
-            "[cTrader ERROR]",
-            ...args
-        )
-};
-
-
-/*
-============================================================
-STEP 6
-CREATE ADAPTER
-============================================================
-*/
-
-let adapter;
-
-try {
-
-    log(
-        "STEP 5: Creating client adapter..."
-    );
-
-    adapter =
-        externalApi.createClientAdapter(
-            {
-                logger:
-                    diagnosticLogger
-            }
-        );
-
-    console.log(
-        "CREATED ADAPTER:",
-        adapter
-    );
-
-    log(
-        "Client adapter created.",
-        "success"
-    );
-
-} catch (error) {
-
-    log(
-        "ADAPTER CREATION FAILED: " +
-        formatError(error),
-        "error"
-    );
-
-    console.error(
-        "Adapter creation error:",
-        error
-    );
-
-    throw error;
-}
-
-
-/*
-============================================================
-STEP 7
-VERIFY HANDSHAKE FUNCTIONS BEFORE CALLING THEM
-============================================================
-*/
-
-if (
-    typeof sdk.registerEvent
-    !==
-    "function"
-) {
-
-    log(
-        "STOPPING: registerEvent is not available.",
-        "error"
-    );
-
-    log(
-        "The SDK export list above tells us which API this package actually provides.",
-        "warning"
-    );
-
-    if (connectionUi) {
-
-        connectionUi.textContent =
-            "SDK mismatch";
-    }
-
-} else if (
-    typeof sdk.handleConfirmEvent
-    !==
-    "function"
-) {
-
-    log(
-        "STOPPING: handleConfirmEvent is not available.",
-        "error"
-    );
-
-    if (connectionUi) {
-
-        connectionUi.textContent =
-            "SDK mismatch";
-    }
-
-} else {
-
-    /*
-    ========================================================
-    STEP 8
-    REGISTER WITH CTRADER HOST
-    ========================================================
-    */
-
-    log(
-        "STEP 6: Waiting for cTrader registerEvent..."
-    );
-
-
-    try {
-
-        const registration$ =
-            sdk.registerEvent(
-                adapter
-            );
-
-
-        console.log(
-            "registerEvent observable:",
-            registration$
-        );
-
-
-        const registrationSubscription =
-            registration$
-            .subscribe({
-
-                next: value => {
-
-                    console.log(
-                        "REGISTER EVENT RECEIVED:",
-                        value
-                    );
-
-
-                    log(
-                        "REGISTER EVENT RECEIVED.",
-                        "success"
-                    );
-
-
-                    log(
-                        "Registration payload written to browser console."
-                    );
-
-
-                    if (connectionUi) {
-
-                        connectionUi.textContent =
-                            "Host detected";
-
-                        connectionUi.style.color =
-                            "#30d158";
-                    }
-
-
-                    /*
-                    ============================================
-                    CONFIRM HOST EVENT
-                    ============================================
-                    */
-
-                    try {
-
-                        log(
-                            "STEP 7: Sending/handling confirmation..."
-                        );
-
-
-                        const confirm$ =
-                            sdk.handleConfirmEvent(
-                                adapter,
-                                {}
-                            );
-
-
-                        console.log(
-                            "Confirmation observable:",
-                            confirm$
-                        );
-
-
-                        confirm$
-                        .subscribe({
-
-                            next:
-                                confirmation => {
-
-                                    console.log(
-                                        "CONFIRMATION RECEIVED:",
-                                        confirmation
-                                    );
-
-
-                                    log(
-                                        "CTRADER HANDSHAKE SUCCESS.",
-                                        "success"
-                                    );
-
-
-                                    if (
-                                        connectionUi
-                                    ) {
-
-                                        connectionUi
-                                            .textContent =
-                                            "Connected";
-
-                                        connectionUi
-                                            .style
-                                            .color =
-                                            "#30d158";
-                                    }
-                                },
-
-
-                            error:
-                                error => {
-
-                                    log(
-                                        "CONFIRM ERROR: " +
-                                        formatError(
-                                            error
-                                        ),
-                                        "error"
-                                    );
-
-
-                                    console.error(
-                                        "Confirmation error:",
-                                        error
-                                    );
-                                }
-                        });
-
-
-                    } catch (error) {
-
-                        log(
-                            "CONFIRM CALL FAILED: " +
-                            formatError(error),
-                            "error"
-                        );
-
-
-                        console.error(
-                            "Confirm call failure:",
-                            error
-                        );
-                    }
-                },
-
-
-                error: error => {
-
-                    log(
-                        "REGISTER EVENT ERROR: " +
-                        formatError(error),
-                        "error"
-                    );
-
-
-                    console.error(
-                        "registerEvent failure:",
-                        error
-                    );
-
-
-                    if (
-                        connectionUi
-                    ) {
-
-                        connectionUi.textContent =
-                            "Registration failed";
-
-                        connectionUi.style.color =
-                            "#ff453a";
-                    }
-                },
-
-
-                complete: () => {
-
-                    log(
-                        "registerEvent stream completed."
-                    );
+/* ============================================================
+   CLEAN-UP
+   ============================================================ */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if (
+            state.quotesSubscribed &&
+            state.symbolId !== null
+        ) {
+
+            unsubscribeQuotes(
+                adapter,
+                {
+                    symbolId: [
+                        Number(
+                            state.symbolId
+                        )
+                    ]
                 }
-            });
-
-
-        console.log(
-            "Registration subscription:",
-            registrationSubscription
-        );
-
-
-    } catch (error) {
-
-        log(
-            "registerEvent CALL FAILED: " +
-            formatError(error),
-            "error"
-        );
-
-
-        console.error(
-            "registerEvent call error:",
-            error
-        );
+            )
+                .pipe(
+                    take(1)
+                )
+                .subscribe();
+        }
 
 
         if (
-            connectionUi
+            state.quoteStream
         ) {
 
-            connectionUi.textContent =
-                "Registration error";
-
-            connectionUi.style.color =
-                "#ff453a";
+            state.quoteStream
+                .unsubscribe();
         }
     }
-}
-
-
-/*
-============================================================
-FINAL DIAGNOSTIC MESSAGE
-============================================================
-*/
-
-log(
-    "================================"
 );
 
-log(
-    "Diagnostic setup complete."
+
+/* ============================================================
+   START PLUGIN
+   ============================================================ */
+
+updateTradingWindow();
+
+
+setInterval(
+    updateTradingWindow,
+    30000
 );
 
-log(
-    "If the page stops at 'Waiting for cTrader registerEvent', the SDK loaded but no registration event has reached the page.",
-    "warning"
-);
+
+connect();
 
 </script>
+
+</body>
+
+</html>
