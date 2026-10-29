@@ -2,125 +2,304 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Price Move $5 + Stochastic Filter</title>
-    <style>
-        body { background-color: #1c1c1e; color: #ffffff; font-family: sans-serif; padding: 15px; margin: 0; font-size: 13px; }
-        .header { font-weight: 600; margin-bottom: 12px; color: #34c759; border-bottom: 1px solid #2c2c2e; padding-bottom: 6px; }
-        .metric-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-        .metric-value { font-family: monospace; color: #0a84ff; }
-        .log-box { margin-top: 12px; background: #2c2c2e; border-radius: 4px; padding: 8px; height: 120px; overflow-y: auto; font-family: monospace; font-size: 11px; color: #a9a9a9; }
-        .btn { width: 100%; padding: 10px; margin-top: 10px; background: #34c759; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .btn:active { background: #248a3d; }
-    </style>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        http-equiv="Content-Security-Policy"
+        content="
+            default-src 'self';
+            script-src 'self';
+            style-src 'self' 'unsafe-inline';
+            connect-src 'self';
+            img-src 'self' data:;
+            font-src 'self';
+        "
+    >
+
+    <title>Price Move + Stochastic Filter</title>
 </head>
+
 <body>
+    <main class="plugin-panel">
 
-    <div class="header">Strategy: Price Move & Stoch Filter</div>
-    <div class="metric-row">
-        <span>Target Symbol:</span>
-        <span class="metric-value" id="ui-symbol">XAUUSD</span>
-    </div>
-    <div class="metric-row">
-        <span>Ref Price:</span>
-        <span class="metric-value" id="ui-ref">--</span>
-    </div>
-    <div class="metric-row">
-        <span>Current Stoch K:</span>
-        <span class="metric-value" id="ui-stoch">--</span>
-    </div>
-    
-    <button class="btn" id="startBtn">Start Automated Strategy</button>
-    <div class="log-box" id="log">System Ready. Click the button above to run.</div>
+        <!-- Plugin heading -->
+        <div class="header">
+            Strategy: Price Move &amp; Stoch Filter
+        </div>
 
-    <script>
-        const CONFIG = { move: 10.0, profit: 7.0, stop: 7.0, lotSize: 0.01, maxOpen: 1 };
-        let referencePrice = null;
-        const stochPeriod = 14;
-        const stochSlowing = 3;
-        let priceHistory = []; 
+        <!-- cTrader host status -->
+        <div class="metric-row">
+            <span>Host Connection:</span>
 
-        function logMessage(msg) {
-            const box = document.getElementById('log');
-            box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-            box.scrollTop = box.scrollHeight;
-        }
+            <span
+                class="metric-value status-connecting"
+                id="ui-connection"
+            >
+                Connecting...
+            </span>
+        </div>
 
-        function calculateStochK(currentClose) {
-            priceHistory.push(currentClose);
-            if (priceHistory.length > stochPeriod + stochSlowing) priceHistory.shift();
-            if (priceHistory.length < stochPeriod) return null;
+        <!-- Account status -->
+        <div class="metric-row">
+            <span>Account:</span>
 
-            let rawKValues = [];
-            for (let i = 0; i <= priceHistory.length - stochPeriod; i++) {
-                const window = priceHistory.slice(i, i + stochPeriod);
-                const currentLow = Math.min(...window);
-                const currentHigh = Math.max(...window);
-                const currentCloseVal = window[window.length - 1];
-                const rawK = currentHigh === currentLow ? 50 : ((currentCloseVal - currentLow) / (currentHigh - currentLow)) * 100;
-                rawKValues.push(rawK);
-            }
-            const targetWindow = rawKValues.slice(-stochSlowing);
-            return targetWindow.reduce((a, b) => a + b, 0) / stochSlowing;
-        }
+            <span
+                class="metric-value"
+                id="ui-account"
+            >
+                --
+            </span>
+        </div>
 
-        function startStrategyPipeline(apiContext) {
-            logMessage("Connecting to market data feed...");
-            const symbol = "XAUUSD";
+        <!-- Target trading symbol -->
+        <div class="metric-row">
+            <span>Target Symbol:</span>
 
-            apiContext.marketData.subscribeTicks({ symbol: symbol }, (tick) => {
-                const currentPrice = tick.close;
-                
-                if (!referencePrice) {
-                    referencePrice = currentPrice;
-                    document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
-                    logMessage(`Initial Reference Price set: $${referencePrice.toFixed(2)}`);
-                }
+            <span
+                class="metric-value"
+                id="ui-symbol"
+            >
+                XAUUSD
+            </span>
+        </div>
 
-                const stochK = calculateStochK(currentPrice);
-                if (stochK !== null) {
-                    document.getElementById('ui-stoch').innerText = stochK.toFixed(2);
-                }
+        <!-- Broker symbol ID -->
+        <div class="metric-row">
+            <span>Symbol ID:</span>
 
-                // Singapore 20:00-24:00 window check = UTC 12:00-16:00
-                const currentUtcHour = new Date().getUTCHours();
-                const isTradeTime = currentUtcHour >= 12 && currentUtcHour < 16;
+            <span
+                class="metric-value"
+                id="ui-symbol-id"
+            >
+                --
+            </span>
+        </div>
 
-                const buyOk = stochK !== null && stochK > 80;
-                const sellOk = stochK !== null && stochK < 20;
+        <div class="section-divider"></div>
 
-                apiContext.trading.getPositions().then(positions => {
-                    const activePositionCount = positions.filter(p => p.symbol === symbol).length;
-                    const inPosition = activePositionCount >= CONFIG.maxOpen;
+        <!-- Live Bid -->
+        <div class="metric-row">
+            <span>Current Bid:</span>
 
-                    if (isTradeTime && !inPosition && stochK !== null) {
-                        
-                        // LONG Rule Evaluation
-                        if (buyOk && currentPrice <= (referencePrice - CONFIG.move)) {
-                            logMessage(`BUY Condition Triggered! Entry: ${currentPrice}`);
-                            apiContext.trading.placeMarketOrder({
-                                symbol: symbol, volume: CONFIG.lotSize * 100000, direction: 'Buy',
-                                stopLoss: currentPrice - CONFIG.stop, takeProfit: currentPrice + CONFIG.profit
-                            }).then(() => {
-                                referencePrice = currentPrice;
-                                document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
-                            }).catch(err => logMessage(`Order Error: ${err.message}`));
-                        }
+            <span
+                class="metric-value"
+                id="ui-bid"
+            >
+                --
+            </span>
+        </div>
 
-                        // SHORT Rule Evaluation
-                        if (sellOk && currentPrice >= (referencePrice + CONFIG.move)) {
-                            logMessage(`SHORT Condition Triggered! Entry: ${currentPrice}`);
-                            apiContext.trading.placeMarketOrder({
-                                symbol: symbol, volume: CONFIG.lotSize * 100000, direction: 'Sell',
-                                stopLoss: currentPrice + CONFIG.stop, takeProfit: currentPrice - CONFIG.profit
-                            }).then(() => {
-                                referencePrice = currentPrice;
-                                document.getElementById('ui-ref').innerText = referencePrice.toFixed(2);
-                            }).catch(err => logMessage(`Order Error: ${err.message}`));
-                        }
-                    }
-                });
-            });
-        }
-    </script>
+        <!-- Live Ask -->
+        <div class="metric-row">
+            <span>Current Ask:</span>
+
+            <span
+                class="metric-value"
+                id="ui-ask"
+            >
+                --
+            </span>
+        </div>
+
+        <!-- Strategy reference price -->
+        <div class="metric-row">
+            <span>Reference Price:</span>
+
+            <span
+                class="metric-value"
+                id="ui-ref"
+            >
+                --
+            </span>
+        </div>
+
+        <!-- Price movement from reference -->
+        <div class="metric-row">
+            <span>Price Movement:</span>
+
+            <span
+                class="metric-value"
+                id="ui-price-move"
+            >
+                --
+            </span>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Stochastic value -->
+        <div class="metric-row">
+            <span>Current Stoch K:</span>
+
+            <span
+                class="metric-value"
+                id="ui-stoch"
+            >
+                --
+            </span>
+        </div>
+
+        <!-- Singapore trading time status -->
+        <div class="metric-row">
+            <span>Trading Window:</span>
+
+            <span
+                class="metric-value"
+                id="ui-trading-window"
+            >
+                --
+            </span>
+        </div>
+
+        <!-- Open-position status -->
+        <div class="metric-row">
+            <span>Position:</span>
+
+            <span
+                class="metric-value"
+                id="ui-position"
+            >
+                --
+            </span>
+        </div>
+
+        <!-- Strategy status -->
+        <div class="metric-row">
+            <span>Strategy Status:</span>
+
+            <span
+                class="metric-value"
+                id="ui-strategy-status"
+            >
+                Stopped
+            </span>
+        </div>
+
+        <!-- Start button -->
+        <button
+            class="btn btn-start"
+            id="startBtn"
+            type="button"
+            disabled
+        >
+            Connecting to cTrader...
+        </button>
+
+        <!-- Stop button -->
+        <button
+            class="btn btn-stop"
+            id="stopBtn"
+            type="button"
+            disabled
+        >
+            Stop Automated Strategy
+        </button>
+
+        <!-- Reset reference price -->
+        <button
+            class="btn btn-secondary"
+            id="resetRefBtn"
+            type="button"
+            disabled
+        >
+            Reset Reference Price
+        </button>
+
+        <!-- Strategy parameters -->
+        <section class="settings-panel">
+
+            <div class="settings-title">
+                Strategy Parameters
+            </div>
+
+            <div class="metric-row">
+                <span>Required Price Move:</span>
+                <span class="setting-value">$10.00</span>
+            </div>
+
+            <div class="metric-row">
+                <span>Take Profit:</span>
+                <span class="setting-value">$7.00</span>
+            </div>
+
+            <div class="metric-row">
+                <span>Stop Loss:</span>
+                <span class="setting-value">$7.00</span>
+            </div>
+
+            <div class="metric-row">
+                <span>Trade Size:</span>
+                <span class="setting-value">0.01 lot</span>
+            </div>
+
+            <div class="metric-row">
+                <span>Maximum Positions:</span>
+                <span class="setting-value">1</span>
+            </div>
+
+            <div class="metric-row">
+                <span>Stochastic:</span>
+                <span class="setting-value">5, 3, 3</span>
+            </div>
+
+            <div class="metric-row">
+                <span>Singapore Trading Time:</span>
+                <span class="setting-value">20:00–00:00</span>
+            </div>
+
+        </section>
+
+        <!-- Strategy rules -->
+        <section class="rules-panel">
+
+            <div class="settings-title">
+                Entry Rules
+            </div>
+
+            <div class="rule rule-buy">
+                BUY when price falls $10 from the reference price
+                and Stochastic K is above 80.
+            </div>
+
+            <div class="rule rule-sell">
+                SELL when price rises $10 from the reference price
+                and Stochastic K is below 20.
+            </div>
+
+        </section>
+
+        <!-- Runtime log -->
+        <div
+            class="log-box"
+            id="log"
+            aria-live="polite"
+        >
+            <div class="log-entry">
+                System loading. Connecting to cTrader Desktop...
+            </div>
+        </div>
+
+        <!-- Safety notice -->
+        <div class="safety-notice">
+            Test the strategy on a demo account before enabling live
+            order execution.
+        </div>
+
+    </main>
+
+    <!--
+        Vite will load, bundle and deploy this JavaScript module.
+
+        Do not replace this with:
+        https://ctrader.com
+
+        The cTrader SDK imports and connection code belong in:
+        src/main.js
+    -->
+    /src/main.jsscript>
 </body>
 </html>
