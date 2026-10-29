@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Price Move $5 + Stochastic Filter</title>
-    <script src="https://ctrader.com"></script>
     <style>
         body { background-color: #1c1c1e; color: #ffffff; font-family: sans-serif; padding: 15px; margin: 0; font-size: 13px; }
         .header { font-weight: 600; margin-bottom: 12px; color: #34c759; border-bottom: 1px solid #2c2c2e; padding-bottom: 6px; }
@@ -122,24 +121,6 @@
                 });
             });
         }
-
-        // Bypasses wrapper events and directly finds the active cTrader object instance
-        document.getElementById('startBtn').addEventListener('click', () => {
-            const apiContext = window.ctrader || (window.parent && window.parent.ctrader);
-            
-            if (apiContext) {
-                document.getElementById('startBtn').style.display = 'none';
-                startStrategyPipeline(apiContext);
-            } else {
-                // Fallback trial if API loading handles asynchronously 
-                if (typeof ctrader !== 'undefined') {
-                    document.getElementById('startBtn').style.display = 'none';
-                    startStrategyPipeline(ctrader);
-                } else {
-                    logMessage("Error: Handshake blocked. Ensure plugin has 'Full Access' enabled under Algo settings.");
-                }
-            }
-        });
     </script>
 </body>
 </html>
