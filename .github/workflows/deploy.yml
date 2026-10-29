@@ -30,10 +30,27 @@ jobs:
           node-version: 20
     
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
 
-      - name: Build plugin
-        run: npm run build
+      - name: Diagnose cTrader SDK
+        run: |
+          echo "=== Installed packages ==="
+          npm list @spotware-web-team/sdk @spotware-web-team/sdk-external-api
+
+          echo "=== Main SDK package ==="
+          cat node_modules/@spotware-web-team/sdk/package.json
+
+          echo "=== External API package ==="
+          cat node_modules/@spotware-web-team/sdk-external-api/package.json
+
+          echo "=== Main SDK exports ==="
+          node -e "import('@spotware-web-team/sdk').then(m => console.log(Object.keys(m).sort()))"
+
+          echo "=== External API exports ==="
+          node -e "import('@spotware-web-team/sdk-external-api').then(m => console.log(Object.keys(m).sort()))"
+      
+      - name: Build project
+       run: npm run build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
