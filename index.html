@@ -1,42 +1,47 @@
-Strategy: Price Move & Stoch Filter
-Host Connection:
-Loading...
-Account:
---
-Target Symbol:
-XAUUSD
-Symbol ID:
---
-Current Bid:
---
-Current Ask:
---
-Reference Price:
---
-Price Movement:
---
-Current Stoch K:
---
-Trading Window:
---
-Position:
---
-Strategy Status:
-Stopped
-Connecting to cTrader...
-Stop Automated Strategy
-Reset Reference Price
-Strategy Parameters
-Required Price Move: $10.00
-Take Profit: $7.00
-Stop Loss: $7.00
-Trade Size: 0.01 lot
-Maximum Positions: 1
-Stochastic: 5, 3, 3
-Singapore Trading Time: 20:00–00:00
-Entry Rules
-BUY when price falls $10 from the reference price and Stochastic K is above 80.
-SELL when price rises $10 from the reference price and Stochastic K is below 20.
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
-        
-System loading...
+    <title>cTrader Connection Test V1</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1c1c1e;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            color: #30d158;
+        }
+
+        #status {
+            color: #ffd60a;
+            font-family: monospace;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>CTRADER CONNECTION TEST V1</h1>
+
+    <div id="status">
+        JavaScript has not started.
+    </div>
+
+    <script>
+        document.getElementById("status").textContent =
+            "JavaScript is running successfully.";
+    </script>
+
+</body>
+</html>
