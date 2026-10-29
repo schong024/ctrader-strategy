@@ -68,6 +68,7 @@
             color: #0a84ff;
             font-family: Consolas, Monaco, monospace;
             text-align: right;
+            overflow-wrap: anywhere;
         }
 
         .button {
@@ -116,7 +117,7 @@
         .log-box {
             margin-top: 15px;
             padding: 9px;
-            height: 220px;
+            height: 240px;
             overflow-y: auto;
             border-radius: 5px;
             background: #2c2c2e;
@@ -296,7 +297,7 @@
 
     <div class="notice">
         Connection and market-data test version.
-        Automatic order execution is disabled.
+        Automatic order execution and Stochastic calculation are disabled.
     </div>
 
 </div>
@@ -304,7 +305,7 @@
 <script type="module">
 
 /* ============================================================
-   BASIC UI AND LOGGING
+   CONFIGURATION AND STATE
    ============================================================ */
 
 const CONFIG = {
@@ -336,6 +337,11 @@ const state = {
     quoteSubscription: null
 };
 
+
+/* ============================================================
+   USER INTERFACE
+   ============================================================ */
+
 const ui = {
     connection: document.getElementById("connection"),
     account: document.getElementById("account"),
@@ -355,17 +361,26 @@ const ui = {
     log: document.getElementById("log")
 };
 
+
+/* ============================================================
+   LOGGING
+   ============================================================ */
+
 function log(message, type = "") {
-    const time = new Date().toLocaleTimeString(
-        "en-SG",
-        {
-            hour12: false
-        }
+    const time =
+        new Date().toLocaleTimeString(
+            "en-SG",
+            {
+                hour12: false
+            }
+        );
+
+    console.log(
+        `[${time}] ${message}`
     );
 
-    console.log(`[${time}] ${message}`);
-
-    const row = document.createElement("div");
+    const row =
+        document.createElement("div");
 
     row.textContent =
         `[${time}] ${message}`;
@@ -375,15 +390,22 @@ function log(message, type = "") {
     }
 
     ui.log.appendChild(row);
-    ui.log.scrollTop = ui.log.scrollHeight;
+
+    ui.log.scrollTop =
+        ui.log.scrollHeight;
 }
 
 function errorText(error) {
-    if (error === null || error === undefined) {
+    if (
+        error === null ||
+        error === undefined
+    ) {
         return "Unknown error";
     }
 
-    if (typeof error === "string") {
+    if (
+        typeof error === "string"
+    ) {
         return error;
     }
 
@@ -399,7 +421,10 @@ function errorText(error) {
 }
 
 function showError(prefix, error) {
-    console.error(prefix, error);
+    console.error(
+        prefix,
+        error
+    );
 
     log(
         `${prefix}: ${errorText(error)}`,
@@ -460,7 +485,8 @@ function singaporeHour() {
 }
 
 function updateTradingWindow() {
-    const hour = singaporeHour();
+    const hour =
+        singaporeHour();
 
     const open =
         hour >= CONFIG.singaporeStartHour &&
@@ -486,7 +512,7 @@ setInterval(
 
 
 /* ============================================================
-   RECURSIVE RESPONSE HELPERS
+   NESTED/PROTOBUF RESPONSE SEARCH
    ============================================================ */
 
 function visitObjects(
@@ -499,7 +525,7 @@ function visitObjects(
         value === null ||
         value === undefined ||
         typeof value !== "object" ||
-        depth > 12
+        depth > 15
     ) {
         return;
     }
@@ -549,7 +575,8 @@ function findFirstValue(
             }
 
             for (const key of keys) {
-                const value = object?.[key];
+                const value =
+                    object?.[key];
 
                 if (
                     value !== null &&
@@ -621,15 +648,17 @@ function findSymbolObjects(root) {
 }
 
 function diagnosticSummary(
-    name,
+    label,
     result
 ) {
     try {
         const keys =
-            Object.keys(result ?? {});
+            Object.keys(
+                result ?? {}
+            );
 
         log(
-            `${name} keys: ${
+            `${label} keys: ${
                 keys.length
                     ? keys.join(", ")
                     : "[none]"
@@ -642,7 +671,7 @@ function diagnosticSummary(
 
         if (text) {
             log(
-                `${name} preview: ${
+                `${label} preview: ${
                     text.length > 1800
                         ? text.substring(0, 1800) +
                           "... [truncated]"
@@ -653,7 +682,7 @@ function diagnosticSummary(
         }
     } catch (error) {
         log(
-            `${name} could not be inspected: ${
+            `${label} could not be inspected: ${
                 errorText(error)
             }`,
             "warning"
@@ -667,9 +696,12 @@ function diagnosticSummary(
    ============================================================ */
 
 function formatPrice(value) {
-    const number = Number(value);
+    const number =
+        Number(value);
 
-    if (!Number.isFinite(number)) {
+    if (
+        !Number.isFinite(number)
+    ) {
         return "--";
     }
 
@@ -679,13 +711,17 @@ function formatPrice(value) {
 }
 
 function setReferencePrice(value) {
-    const price = Number(value);
+    const price =
+        Number(value);
 
-    if (!Number.isFinite(price)) {
+    if (
+        !Number.isFinite(price)
+    ) {
         return;
     }
 
-    state.referencePrice = price;
+    state.referencePrice =
+        price;
 
     ui.reference.textContent =
         formatPrice(price);
@@ -729,7 +765,9 @@ function updatePriceMovement() {
             state.digits
         );
 
-    if (!state.strategyRunning) {
+    if (
+        !state.strategyRunning
+    ) {
         return;
     }
 
@@ -759,10 +797,7 @@ function updatePriceMovement() {
 
 
 /* ============================================================
-   DYNAMIC SDK IMPORTS
-
-   Dynamic imports allow failures to appear in the log box
-   instead of leaving the screen at Loading with no explanation.
+   SDK VARIABLES
    ============================================================ */
 
 let createClientAdapter;
@@ -787,7 +822,7 @@ let adapter;
 
 
 /* ============================================================
-   START APPLICATION
+   DYNAMIC SDK LOADING
    ============================================================ */
 
 async function startApplication() {
@@ -801,20 +836,40 @@ async function startApplication() {
                 "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5"
             );
 
+        log(
+            "External API module loaded.",
+            "success"
+        );
+
         const sdkModule =
             await import(
                 "https://esm.sh/@spotware-web-team/sdk"
             );
+
+        log(
+            "Main cTrader SDK module loaded.",
+            "success"
+        );
 
         const rxjsModule =
             await import(
                 "https://esm.sh/rxjs"
             );
 
+        log(
+            "RxJS module loaded.",
+            "success"
+        );
+
         const loggerModule =
             await import(
                 "https://esm.sh/@veksa/logger"
             );
+
+        log(
+            "Logger module loaded.",
+            "success"
+        );
 
         createClientAdapter =
             externalApiModule.createClientAdapter;
@@ -858,7 +913,7 @@ async function startApplication() {
         createLogger =
             loggerModule.createLogger;
 
-        const requiredFunctions = {
+        const functions = {
             createClientAdapter,
             getAccountInformation,
             getLightSymbolList,
@@ -877,17 +932,24 @@ async function startApplication() {
 
         for (
             const [name, value]
-            of Object.entries(requiredFunctions)
+            of Object.entries(functions)
         ) {
-            if (typeof value !== "function") {
+            if (
+                typeof value !== "function"
+            ) {
+                const availableSdkExports =
+                    Object.keys(sdkModule)
+                        .sort()
+                        .join(", ");
+
                 throw new Error(
-                    `${name} is not available from the loaded modules.`
+                    `${name} is unavailable. SDK exports: ${availableSdkExports}`
                 );
             }
         }
 
         log(
-            "cTrader SDK modules loaded.",
+            "Required SDK functions verified.",
             "success"
         );
 
@@ -1069,12 +1131,8 @@ function loadAccount() {
                     result
                 );
 
-                /*
-                 * Look specifically for a trader object,
-                 * then fall back to any embedded account ID.
-                 */
-
-                let traderObject = null;
+                let traderObject =
+                    null;
 
                 visitObjects(
                     result,
@@ -1112,7 +1170,7 @@ function loadAccount() {
                         "Connected";
 
                     log(
-                        "Account connected, but the login ID was not found in the response.",
+                        "Account response received, but the login ID was not found.",
                         "warning"
                     );
 
@@ -1182,9 +1240,11 @@ function loadSymbols() {
                     `Symbol candidates detected: ${symbols.length}`
                 );
 
-                if (!symbols.length) {
+                if (
+                    !symbols.length
+                ) {
                     log(
-                        "The symbol response was received, but no objects containing both a symbol ID and name were found.",
+                        "The response was received, but no symbol objects with both an ID and a name were found.",
                         "error"
                     );
 
@@ -1266,7 +1326,7 @@ function loadSymbols() {
                     selectedId === undefined
                 ) {
                     log(
-                        "Gold symbol was found, but the Symbol ID was unavailable.",
+                        "The Gold symbol was found, but its Symbol ID was unavailable.",
                         "error"
                     );
 
@@ -1334,7 +1394,7 @@ function loadSymbolDetails() {
                 );
 
                 diagnosticSummary(
-                    "Symbol detail",
+                    "Symbol-detail response",
                     result
                 );
 
@@ -1375,7 +1435,7 @@ function loadSymbolDetails() {
                 }
 
                 log(
-                    `Symbol details loaded. Digits: ${state.digits}`,
+                    `Symbol details loaded. Price digits: ${state.digits}`,
                     "success"
                 );
 
@@ -1387,11 +1447,6 @@ function loadSymbolDetails() {
                     `Symbol-detail warning: ${errorText(error)}`,
                     "warning"
                 );
-
-                /*
-                 * Quotes may still work without the
-                 * detailed symbol response.
-                 */
 
                 startQuoteFeed();
             }
@@ -1417,7 +1472,7 @@ function startQuoteFeed() {
     }
 
     log(
-        "Starting quote event listener..."
+        "Starting quote-event listener..."
     );
 
     state.quoteSubscription =
@@ -1507,8 +1562,11 @@ function startQuoteFeed() {
    ============================================================ */
 
 function findQuoteObject(result) {
-    let fallback = null;
-    let matching = null;
+    let matchedQuote =
+        null;
+
+    let fallbackQuote =
+        null;
 
     visitObjects(
         result,
@@ -1528,8 +1586,11 @@ function findQuoteObject(result) {
                 return;
             }
 
-            if (fallback === null) {
-                fallback = object;
+            if (
+                fallbackQuote === null
+            ) {
+                fallbackQuote =
+                    object;
             }
 
             const objectSymbolId =
@@ -1541,12 +1602,16 @@ function findQuoteObject(result) {
                 Number(objectSymbolId) ===
                 Number(state.symbolId)
             ) {
-                matching = object;
+                matchedQuote =
+                    object;
             }
         }
     );
 
-    return matching ?? fallback;
+    return (
+        matchedQuote ??
+        fallbackQuote
+    );
 }
 
 function processQuote(result) {
@@ -1557,7 +1622,7 @@ function processQuote(result) {
 
     if (!quote) {
         console.log(
-            "Quote event did not contain Bid/Ask:",
+            "Quote event without Bid/Ask:",
             result
         );
 
@@ -1587,14 +1652,18 @@ function processQuote(result) {
             quote?.askPrice
         );
 
-    if (Number.isFinite(bid)) {
+    if (
+        Number.isFinite(bid)
+    ) {
         state.bid = bid;
 
         ui.bid.textContent =
             formatPrice(bid);
     }
 
-    if (Number.isFinite(ask)) {
+    if (
+        Number.isFinite(ask)
+    ) {
         state.ask = ask;
 
         ui.ask.textContent =
@@ -1780,7 +1849,7 @@ window.addEventListener(
 
 
 /* ============================================================
-   START
+   START APPLICATION
    ============================================================ */
 
 startApplication();
