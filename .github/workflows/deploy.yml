@@ -30,31 +30,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
-
-      - name: Diagnose cTrader SDK
-        run: |
-          echo "=== Installed cTrader packages ==="
-          npm list @spotware-web-team/sdk @spotware-web-team/sdk-external-api || true
-
-          echo ""
-          echo "=== Main SDK package information ==="
-          cat node_modules/@spotware-web-team/sdk/package.json || true
-
-          echo ""
-          echo "=== External API package information ==="
-          cat node_modules/@spotware-web-team/sdk-external-api/package.json || true
-
-          echo ""
-          echo "=== Main SDK available exports ==="
-          node -e "import('@spotware-web-team/sdk').then(m => console.log(Object.keys(m).sort())).catch(e => { console.error(e); process.exit(1); })"
-
-          echo ""
-          echo "=== External API available exports ==="
-          node -e "import('@spotware-web-team/sdk-external-api').then(m => console.log(Object.keys(m).sort())).catch(e => { console.error(e); process.exit(1); })"
+        run: npm install
 
       - name: Build project
         run: npm run build
@@ -62,10 +40,11 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload GitHub Pages artifact
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
+
 
   deploy:
     environment:
@@ -73,8 +52,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs:
-      - build
+    needs: build
 
     steps:
 
