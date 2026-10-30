@@ -82,7 +82,7 @@
 
         #goldSymbols {
             min-height: 70px;
-            max-height: 150px;
+            max-height: 160px;
             padding: 9px;
             overflow-y: auto;
             border-radius: 5px;
@@ -90,6 +90,7 @@
             color: #d1d1d6;
             font-family: Consolas, Monaco, monospace;
             font-size: 11px;
+            line-height: 1.5;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
         }
@@ -125,52 +126,145 @@
 
     <div class="row">
         <span class="label">JavaScript:</span>
-        <span id="javascriptStatus" class="value">STARTING</span>
+
+        <span
+            id="javascriptStatus"
+            class="value"
+        >
+            STARTING
+        </span>
     </div>
 
     <div class="row">
         <span class="label">SDK:</span>
-        <span id="sdkStatus" class="value">--</span>
+
+        <span
+            id="sdkStatus"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">Client Adapter:</span>
-        <span id="adapterStatus" class="value">--</span>
+
+        <span
+            id="adapterStatus"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">Registration:</span>
-        <span id="registrationStatus" class="value">--</span>
+
+        <span
+            id="registrationStatus"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">Confirmation:</span>
-        <span id="confirmationStatus" class="value">--</span>
+
+        <span
+            id="confirmationStatus"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">cTrader Host:</span>
-        <span id="hostStatus" class="value">--</span>
+
+        <span
+            id="hostStatus"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">Account:</span>
-        <span id="accountStatus" class="value">--</span>
+
+        <span
+            id="accountStatus"
+            class="value"
+        >
+            --
+        </span>
+    </div>
+
+    <div class="row">
+        <span class="label">Account Type:</span>
+
+        <span
+            id="accountType"
+            class="value"
+        >
+            --
+        </span>
+    </div>
+
+    <div class="row">
+        <span class="label">Access Rights:</span>
+
+        <span
+            id="accessRights"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">Symbol Count:</span>
-        <span id="symbolCount" class="value">--</span>
+
+        <span
+            id="symbolCount"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">XAUUSD Symbol:</span>
-        <span id="xauName" class="value">--</span>
+
+        <span
+            id="xauName"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="row">
         <span class="label">XAUUSD Symbol ID:</span>
-        <span id="xauId" class="value">--</span>
+
+        <span
+            id="xauId"
+            class="value"
+        >
+            --
+        </span>
+    </div>
+
+    <div class="row">
+        <span class="label">XAUUSD Enabled:</span>
+
+        <span
+            id="xauEnabled"
+            class="value"
+        >
+            --
+        </span>
     </div>
 
     <div class="section">
@@ -190,8 +284,8 @@
     </div>
 
     <div class="note">
-        Account and symbol test only. No quotes, indicators,
-        positions, orders, or trading logic are enabled.
+        Account and symbol test only. No quote subscription,
+        indicators, positions, orders, or trading logic are enabled.
     </div>
 
 </div>
@@ -225,58 +319,110 @@ import {
 
 
 /* ============================================================
-   UI
+   UI REFERENCES
    ============================================================ */
 
 const ui = {
     javascript:
-        document.getElementById("javascriptStatus"),
+        document.getElementById(
+            "javascriptStatus"
+        ),
 
     sdk:
-        document.getElementById("sdkStatus"),
+        document.getElementById(
+            "sdkStatus"
+        ),
 
     adapter:
-        document.getElementById("adapterStatus"),
+        document.getElementById(
+            "adapterStatus"
+        ),
 
     registration:
-        document.getElementById("registrationStatus"),
+        document.getElementById(
+            "registrationStatus"
+        ),
 
     confirmation:
-        document.getElementById("confirmationStatus"),
+        document.getElementById(
+            "confirmationStatus"
+        ),
 
     host:
-        document.getElementById("hostStatus"),
+        document.getElementById(
+            "hostStatus"
+        ),
 
     account:
-        document.getElementById("accountStatus"),
+        document.getElementById(
+            "accountStatus"
+        ),
+
+    accountType:
+        document.getElementById(
+            "accountType"
+        ),
+
+    accessRights:
+        document.getElementById(
+            "accessRights"
+        ),
 
     symbolCount:
-        document.getElementById("symbolCount"),
+        document.getElementById(
+            "symbolCount"
+        ),
 
     xauName:
-        document.getElementById("xauName"),
+        document.getElementById(
+            "xauName"
+        ),
 
     xauId:
-        document.getElementById("xauId"),
+        document.getElementById(
+            "xauId"
+        ),
+
+    xauEnabled:
+        document.getElementById(
+            "xauEnabled"
+        ),
 
     goldSymbols:
-        document.getElementById("goldSymbols"),
+        document.getElementById(
+            "goldSymbols"
+        ),
 
     log:
-        document.getElementById("log")
+        document.getElementById(
+            "log"
+        )
 };
 
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
 
 function setStatus(
     element,
     value,
     type = ""
 ) {
-    element.textContent = value;
-    element.className = "value";
+    if (!element) {
+        return;
+    }
+
+    element.textContent =
+        value;
+
+    element.className =
+        "value";
 
     if (type) {
-        element.classList.add(type);
+        element.classList.add(
+            type
+        );
     }
 }
 
@@ -294,19 +440,28 @@ function log(
         );
 
     const row =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
     row.textContent =
         `[${time}] ${message}`;
 
     if (type) {
-        row.className = type;
+        row.className =
+            type;
     }
 
-    ui.log.appendChild(row);
-    ui.log.scrollTop = ui.log.scrollHeight;
+    ui.log.appendChild(
+        row
+    );
 
-    console.log(message);
+    ui.log.scrollTop =
+        ui.log.scrollHeight;
+
+    console.log(
+        message
+    );
 }
 
 
@@ -329,9 +484,13 @@ function errorText(error) {
     }
 
     try {
-        return JSON.stringify(error);
+        return JSON.stringify(
+            error
+        );
     } catch {
-        return String(error);
+        return String(
+            error
+        );
     }
 }
 
@@ -360,7 +519,9 @@ window.addEventListener(
     event => {
         log(
             "Unhandled promise error: " +
-            errorText(event.reason),
+            errorText(
+                event.reason
+            ),
             "bad"
         );
     }
@@ -368,321 +529,247 @@ window.addEventListener(
 
 
 /* ============================================================
-   RECURSIVE RESPONSE WALKER
+   ACCOUNT PARSER
+
+   Actual cTrader response:
+
+   response.payload.Trader.Login
+   response.payload.Trader.TraderId
+   response.payload.Trader.AccountType
+   response.payload.Trader.AccessRights
    ============================================================ */
 
-function walkObject(
-    value,
-    callback,
-    visited = new WeakSet(),
-    depth = 0
-) {
-    if (
-        value === null ||
-        value === undefined ||
-        typeof value !== "object" ||
-        depth > 18
-    ) {
-        return;
-    }
-
-    if (visited.has(value)) {
-        return;
-    }
-
-    visited.add(value);
-
-    callback(value);
-
-
-    /*
-     * Some protobuf objects expose a plain-object converter.
-     */
-
-    if (
-        typeof value.toObject === "function"
-    ) {
-        try {
-            const plain =
-                value.toObject();
-
-            if (
-                plain &&
-                plain !== value
-            ) {
-                walkObject(
-                    plain,
-                    callback,
-                    visited,
-                    depth + 1
-                );
-            }
-        } catch {
-            /*
-             * Continue examining the original object.
-             */
-        }
-    }
-
-
-    /*
-     * Some protobuf objects expose toJSON().
-     */
-
-    if (
-        typeof value.toJSON === "function"
-    ) {
-        try {
-            const json =
-                value.toJSON();
-
-            if (
-                json &&
-                json !== value
-            ) {
-                walkObject(
-                    json,
-                    callback,
-                    visited,
-                    depth + 1
-                );
-            }
-        } catch {
-            /*
-             * Continue examining the original object.
-             */
-        }
-    }
-
-
-    if (Array.isArray(value)) {
-        for (const child of value) {
-            walkObject(
-                child,
-                callback,
-                visited,
-                depth + 1
-            );
-        }
-
-        return;
-    }
-
-
-    /*
-     * Handle iterable repeated fields.
-     */
-
-    if (
-        typeof value[Symbol.iterator] === "function" &&
-        typeof value !== "string"
-    ) {
-        try {
-            for (const child of value) {
-                walkObject(
-                    child,
-                    callback,
-                    visited,
-                    depth + 1
-                );
-            }
-        } catch {
-            /*
-             * Ignore unsupported iterators.
-             */
-        }
-    }
-
-
-    for (const child of Object.values(value)) {
-        walkObject(
-            child,
-            callback,
-            visited,
-            depth + 1
-        );
-    }
-}
-
-
-/* ============================================================
-   RESPONSE DIAGNOSTICS
-   ============================================================ */
-
-function logResponseSummary(
-    label,
+function findAccountInformation(
     response
 ) {
-    try {
-        const keys =
-            Object.keys(
-                response ?? {}
-            );
+    const trader =
+        response?.payload?.Trader ??
+        response?.payload?.trader ??
+        response?.Trader ??
+        response?.trader ??
+        null;
 
-        log(
-            `${label} keys: ${
-                keys.length
-                    ? keys.join(", ")
-                    : "[none]"
-            }`,
-            "warn"
-        );
-
-        const text =
-            JSON.stringify(response);
-
-        if (text) {
-            log(
-                `${label} preview: ${
-                    text.length > 1400
-                        ? text.substring(0, 1400) +
-                          "... [truncated]"
-                        : text
-                }`,
-                "warn"
-            );
-        }
-    } catch (error) {
-        log(
-            `${label} could not be inspected: ` +
-            errorText(error),
-            "warn"
-        );
+    if (!trader) {
+        return null;
     }
-}
 
+    const login =
+        trader.Login ??
+        trader.login ??
+        trader.AccountId ??
+        trader.accountId ??
+        trader.TraderId ??
+        trader.traderId;
 
-/* ============================================================
-   ACCOUNT PARSER
-   ============================================================ */
+    if (
+        login === null ||
+        login === undefined
+    ) {
+        return null;
+    }
 
-function findAccountInformation(response) {
-    let selected = null;
+    return {
+        login:
+            login,
 
-    walkObject(
-        response,
-        object => {
-            if (selected !== null) {
-                return;
-            }
+        traderId:
+            trader.TraderId ??
+            trader.traderId ??
+            null,
 
-            const login =
-                object?.login ??
-                object?.accountId ??
-                object?.ctidTraderAccountId ??
-                object?.traderId;
+        accountType:
+            trader.AccountType ??
+            trader.accountType ??
+            null,
 
-            if (
-                login !== null &&
-                login !== undefined &&
-                login !== ""
-            ) {
-                selected = {
-                    login,
-
-                    broker:
-                        object?.brokerName ??
-                        object?.broker ??
-                        null,
-
-                    currency:
-                        object?.depositAssetId ??
-                        object?.currency ??
-                        null
-                };
-            }
-        }
-    );
-
-    return selected;
+        accessRights:
+            trader.AccessRights ??
+            trader.accessRights ??
+            null
+    };
 }
 
 
 /* ============================================================
    SYMBOL PARSER
+
+   Actual cTrader response:
+
+   response.payload.Symbol[]
+
+   Each record includes:
+
+   Id
+   Name
+   Description
+   Enabled
+   BaseAssetId
+   QuoteAssetId
    ============================================================ */
 
-function extractSymbols(response) {
-    const symbols = [];
-    const seen = new Set();
+function extractSymbols(
+    response
+) {
+    const rawSymbols =
+        response?.payload?.Symbol ??
+        response?.payload?.symbol ??
+        response?.Symbol ??
+        response?.symbol ??
+        [];
 
-    walkObject(
-        response,
-        object => {
-            const id =
-                object?.symbolId ??
-                object?.id;
+    const symbols =
+        [];
 
-            const name =
-                object?.symbolName ??
-                object?.name ??
-                object?.ticker;
+    const seen =
+        new Set();
 
-            if (
-                id === null ||
-                id === undefined ||
-                name === null ||
-                name === undefined
-            ) {
-                return;
-            }
 
-            const normalizedName =
-                String(name)
-                    .trim()
-                    .toUpperCase();
-
-            if (
-                !normalizedName ||
-                normalizedName.length > 40
-            ) {
-                return;
-            }
-
-            /*
-             * Symbol names should resemble broker tickers,
-             * rather than ordinary text labels.
-             */
-
-            if (
-                !/^[A-Z0-9._/#-]+$/
-                    .test(normalizedName)
-            ) {
-                return;
-            }
-
-            const key =
-                `${id}:${normalizedName}`;
-
-            if (seen.has(key)) {
-                return;
-            }
-
-            seen.add(key);
-
-            symbols.push({
-                id,
-                name:
-                    normalizedName,
-                source:
-                    object
-            });
+    function addSymbol(
+        object
+    ) {
+        if (
+            !object ||
+            typeof object !== "object"
+        ) {
+            return;
         }
-    );
+
+        const id =
+            object.Id ??
+            object.id ??
+            object.SymbolId ??
+            object.symbolId;
+
+        const name =
+            object.Name ??
+            object.name ??
+            object.SymbolName ??
+            object.symbolName;
+
+        if (
+            id === null ||
+            id === undefined ||
+            name === null ||
+            name === undefined
+        ) {
+            return;
+        }
+
+        const normalizedName =
+            String(name)
+                .trim()
+                .toUpperCase();
+
+        if (!normalizedName) {
+            return;
+        }
+
+        const key =
+            `${id}:${normalizedName}`;
+
+        if (
+            seen.has(key)
+        ) {
+            return;
+        }
+
+        seen.add(key);
+
+        symbols.push({
+            id:
+                Number(id),
+
+            name:
+                normalizedName,
+
+            description:
+                object.Description ??
+                object.description ??
+                "",
+
+            enabled:
+                object.Enabled ??
+                object.enabled ??
+                null,
+
+            baseAssetId:
+                object.BaseAssetId ??
+                object.baseAssetId ??
+                null,
+
+            quoteAssetId:
+                object.QuoteAssetId ??
+                object.quoteAssetId ??
+                null
+        });
+    }
+
+
+    if (
+        Array.isArray(
+            rawSymbols
+        )
+    ) {
+        for (
+            const object
+            of rawSymbols
+        ) {
+            addSymbol(
+                object
+            );
+        }
+
+        return symbols;
+    }
+
+
+    if (
+        rawSymbols &&
+        typeof rawSymbols[
+            Symbol.iterator
+        ] === "function"
+    ) {
+        try {
+            for (
+                const object
+                of rawSymbols
+            ) {
+                addSymbol(
+                    object
+                );
+            }
+        } catch {
+            /*
+             * Return whatever was successfully parsed.
+             */
+        }
+    }
 
     return symbols;
 }
 
 
 /* ============================================================
-   LOAD ACCOUNT
+   LOAD ACCOUNT INFORMATION
    ============================================================ */
 
-function loadAccount(adapter) {
+function loadAccount(
+    adapter
+) {
     setStatus(
         ui.account,
         "LOADING",
         "warn"
+    );
+
+    setStatus(
+        ui.accountType,
+        "--"
+    );
+
+    setStatus(
+        ui.accessRights,
+        "--"
     );
 
     log(
@@ -722,13 +809,7 @@ function loadAccount(adapter) {
                 }
 
                 console.log(
-                    "ACCOUNT RESPONSE:",
-                    response
-                );
-
-                logResponseSummary(
-                    "Account response",
-                    response
+                    "ACCOUNT RESPONSE RECEIVED"
                 );
 
                 const account =
@@ -739,13 +820,13 @@ function loadAccount(adapter) {
                 if (!account) {
                     setStatus(
                         ui.account,
-                        "RESPONSE RECEIVED",
-                        "warn"
+                        "NOT FOUND",
+                        "bad"
                     );
 
                     log(
-                        "Account response received, but no account identifier was found.",
-                        "warn"
+                        "Account response received, but payload.Trader.Login was not found.",
+                        "bad"
                     );
 
                     return;
@@ -757,9 +838,26 @@ function loadAccount(adapter) {
                     "good"
                 );
 
+                setStatus(
+                    ui.accountType,
+                    account.accountType ??
+                    "--",
+                    account.accountType
+                        ? "good"
+                        : ""
+                );
+
+                setStatus(
+                    ui.accessRights,
+                    account.accessRights ??
+                    "--",
+                    account.accessRights
+                        ? "good"
+                        : ""
+                );
+
                 log(
-                    "Account loaded: " +
-                    account.login,
+                    "Account information loaded successfully.",
                     "good"
                 );
             }
@@ -768,15 +866,35 @@ function loadAccount(adapter) {
 
 
 /* ============================================================
-   LOAD SYMBOLS
+   LOAD AVAILABLE SYMBOLS
    ============================================================ */
 
-function loadSymbols(adapter) {
+function loadSymbols(
+    adapter
+) {
     setStatus(
         ui.symbolCount,
         "LOADING",
         "warn"
     );
+
+    setStatus(
+        ui.xauName,
+        "--"
+    );
+
+    setStatus(
+        ui.xauId,
+        "--"
+    );
+
+    setStatus(
+        ui.xauEnabled,
+        "--"
+    );
+
+    ui.goldSymbols.textContent =
+        "Requesting symbol list...";
 
     log(
         "Requesting available symbols..."
@@ -818,13 +936,7 @@ function loadSymbols(adapter) {
                 }
 
                 console.log(
-                    "SYMBOL RESPONSE:",
-                    response
-                );
-
-                logResponseSummary(
-                    "Symbol response",
-                    response
+                    "SYMBOL RESPONSE RECEIVED"
                 );
 
                 const symbols =
@@ -834,7 +946,9 @@ function loadSymbols(adapter) {
 
                 setStatus(
                     ui.symbolCount,
-                    String(symbols.length),
+                    String(
+                        symbols.length
+                    ),
                     symbols.length
                         ? "good"
                         : "warn"
@@ -850,22 +964,39 @@ function loadSymbols(adapter) {
 
 
                 /*
-                 * List all XAU or GOLD candidates.
+                 * Find all symbols potentially related to Gold.
                  */
 
                 const goldCandidates =
                     symbols.filter(
                         symbol =>
-                            symbol.name.includes("XAU") ||
-                            symbol.name.includes("GOLD")
+                            symbol.name.includes(
+                                "XAU"
+                            ) ||
+                            symbol.name.includes(
+                                "GOLD"
+                            )
                     );
 
-                if (goldCandidates.length) {
+
+                if (
+                    goldCandidates.length > 0
+                ) {
                     ui.goldSymbols.textContent =
                         goldCandidates
                             .map(
-                                symbol =>
-                                    `${symbol.name} | ID ${symbol.id}`
+                                symbol => {
+                                    const status =
+                                        symbol.enabled === false
+                                            ? "DISABLED"
+                                            : "ENABLED";
+
+                                    return (
+                                        `${symbol.name} | ` +
+                                        `ID ${symbol.id} | ` +
+                                        status
+                                    );
+                                }
                             )
                             .join("\n");
                 } else {
@@ -881,12 +1012,18 @@ function loadSymbols(adapter) {
                 let selected =
                     symbols.find(
                         symbol =>
-                            symbol.name === "XAUUSD"
+                            symbol.name ===
+                            "XAUUSD"
                     );
 
 
                 /*
-                 * Priority 2: broker suffix/prefix variation.
+                 * Priority 2: XAUUSD with broker suffix.
+                 *
+                 * Examples:
+                 * XAUUSD.c
+                 * XAUUSDm
+                 * XAUUSD-STD
                  */
 
                 if (!selected) {
@@ -901,14 +1038,16 @@ function loadSymbols(adapter) {
 
 
                 /*
-                 * Priority 3: another XAU instrument.
+                 * Priority 3: another XAU symbol.
                  */
 
                 if (!selected) {
                     selected =
                         symbols.find(
                             symbol =>
-                                symbol.name.includes("XAU")
+                                symbol.name.includes(
+                                    "XAU"
+                                )
                         );
                 }
 
@@ -921,7 +1060,9 @@ function loadSymbols(adapter) {
                     selected =
                         symbols.find(
                             symbol =>
-                                symbol.name.includes("GOLD")
+                                symbol.name.includes(
+                                    "GOLD"
+                                )
                         );
                 }
 
@@ -939,8 +1080,14 @@ function loadSymbols(adapter) {
                         "bad"
                     );
 
+                    setStatus(
+                        ui.xauEnabled,
+                        "--",
+                        "bad"
+                    );
+
                     log(
-                        "XAUUSD/Gold symbol was not found.",
+                        "XAUUSD or another Gold instrument was not found.",
                         "bad"
                     );
 
@@ -956,9 +1103,36 @@ function loadSymbols(adapter) {
 
                 setStatus(
                     ui.xauId,
-                    String(selected.id),
+                    String(
+                        selected.id
+                    ),
                     "good"
                 );
+
+                if (
+                    selected.enabled === false
+                ) {
+                    setStatus(
+                        ui.xauEnabled,
+                        "NO",
+                        "bad"
+                    );
+                } else if (
+                    selected.enabled === true
+                ) {
+                    setStatus(
+                        ui.xauEnabled,
+                        "YES",
+                        "good"
+                    );
+                } else {
+                    setStatus(
+                        ui.xauEnabled,
+                        "UNKNOWN",
+                        "warn"
+                    );
+                }
+
 
                 log(
                     "XAUUSD selected: " +
@@ -976,7 +1150,8 @@ function loadSymbols(adapter) {
    CREATE CLIENT ADAPTER
    ============================================================ */
 
-let adapter = null;
+let adapter =
+    null;
 
 try {
     const logger =
@@ -1022,6 +1197,12 @@ try {
 
 } catch (error) {
     setStatus(
+        ui.javascript,
+        "ERROR",
+        "bad"
+    );
+
+    setStatus(
         ui.adapter,
         "FAILED",
         "bad"
@@ -1043,11 +1224,6 @@ try {
 
 /* ============================================================
    CONNECT TO CTRADER
-
-   Registration is the decisive host event.
-   Account/symbol requests begin immediately after registration.
-   The post-registration confirmation is still started, but it
-   no longer blocks the application from proceeding.
    ============================================================ */
 
 function connect() {
@@ -1185,10 +1361,10 @@ function connect() {
 
 
                 /*
-                 * Start post-registration confirmation.
+                 * Start confirmation after registration.
                  *
-                 * Do not wait for another emitted value before
-                 * marking the registered host as connected.
+                 * The confirmation response is not allowed
+                 * to block account and symbol retrieval.
                  */
 
                 try {
@@ -1217,7 +1393,7 @@ function connect() {
                                 );
 
                                 log(
-                                    "Post-registration confirmation response received.",
+                                    "Post-registration confirmation received.",
                                     "good"
                                 );
                             },
@@ -1236,6 +1412,7 @@ function connect() {
                                 );
                             }
                         });
+
 
                     setStatus(
                         ui.confirmation,
@@ -1264,8 +1441,8 @@ function connect() {
 
 
                 /*
-                 * Registration proves that the cTrader host has
-                 * connected to this hosted plugin.
+                 * Registration confirms that the cTrader host
+                 * has connected to the hosted plugin.
                  */
 
                 setStatus(
@@ -1281,7 +1458,7 @@ function connect() {
 
 
                 /*
-                 * Request account and symbols once only.
+                 * Request account and symbol information.
                  */
 
                 loadAccount(
