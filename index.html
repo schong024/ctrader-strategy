@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1"
     >
 
-    <title>cTrader Connection Test</title>
+    <title>cTrader Account and Symbol Test</title>
 
     <style>
         * {
@@ -20,7 +20,6 @@
         body {
             margin: 0;
             padding: 0;
-            min-height: 100%;
             background: #1c1c1e;
             color: #ffffff;
             font-family: Arial, Helvetica, sans-serif;
@@ -36,23 +35,19 @@
             max-width: 520px;
         }
 
-        .header {
-            color: #34c759;
-            font-size: 17px;
-            font-weight: bold;
-
-            padding-bottom: 10px;
-            margin-bottom: 16px;
-
+        h1 {
+            margin: 0 0 16px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #3a3a3c;
+            color: #30d158;
+            font-size: 17px;
         }
 
         .row {
             display: flex;
             justify-content: space-between;
-            gap: 20px;
-
-            padding: 7px 0;
+            gap: 18px;
+            margin-bottom: 9px;
         }
 
         .label {
@@ -63,826 +58,1271 @@
             color: #0a84ff;
             font-family: Consolas, Monaco, monospace;
             text-align: right;
+            overflow-wrap: anywhere;
         }
 
         .good {
-            color: #30d158 !important;
+            color: #30d158;
         }
 
         .warn {
-            color: #ffd60a !important;
+            color: #ffd60a;
         }
 
         .bad {
-            color: #ff453a !important;
+            color: #ff453a;
         }
 
-        .divider {
-            border-top: 1px solid #3a3a3c;
-            margin: 12px 0;
+        .section {
+            margin-top: 18px;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: bold;
         }
 
-        .log {
-            height: 280px;
-
-            margin-top: 15px;
-            padding: 10px;
-
+        #symbols {
+            max-height: 140px;
+            padding: 9px;
             overflow-y: auto;
-
+            border-radius: 5px;
             background: #2c2c2e;
-
-            border-radius: 6px;
-
             color: #d1d1d6;
-
             font-family: Consolas, Monaco, monospace;
-
             font-size: 11px;
-            line-height: 1.5;
-
             white-space: pre-wrap;
             overflow-wrap: anywhere;
         }
 
-        .log-good {
-            color: #30d158;
+        #log {
+            height: 280px;
+            margin-top: 10px;
+            padding: 9px;
+            overflow-y: auto;
+            border-radius: 5px;
+            background: #2c2c2e;
+            color: #d1d1d6;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
 
-        .log-warn {
-            color: #ffd60a;
-        }
-
-        .log-bad {
-            color: #ff453a;
-        }
-
-        .notice {
-            color: #8e8e93;
+        .note {
             margin-top: 12px;
+            color: #8e8e93;
             font-size: 11px;
             line-height: 1.4;
         }
     </style>
 </head>
 
-
 <body>
 
 <div class="panel">
 
-    <div class="header">
-        cTrader Plugin Connection Test
-    </div>
-
+    <h1>cTrader Account and Symbol Test</h1>
 
     <div class="row">
-
-        <span class="label">
-            Page:
-        </span>
-
-        <span
-            id="pageStatus"
-            class="value"
-        >
-            Loading...
-        </span>
-
+        <span class="label">JavaScript:</span>
+        <span id="jsStatus" class="value">Starting...</span>
     </div>
-
 
     <div class="row">
-
-        <span class="label">
-            JavaScript:
-        </span>
-
-        <span
-            id="jsStatus"
-            class="value"
-        >
-            Starting...
-        </span>
-
+        <span class="label">External API:</span>
+        <span id="externalStatus" class="value">--</span>
     </div>
-
-
-    <div class="divider"></div>
-
 
     <div class="row">
-
-        <span class="label">
-            cTrader Host:
-        </span>
-
-        <span
-            id="hostStatus"
-            class="value"
-        >
-            Waiting...
-        </span>
-
+        <span class="label">cTrader SDK:</span>
+        <span id="sdkStatus" class="value">--</span>
     </div>
-
 
     <div class="row">
-
-        <span class="label">
-            Registration:
-        </span>
-
-        <span
-            id="registrationStatus"
-            class="value"
-        >
-            Waiting...
-        </span>
-
+        <span class="label">Client Adapter:</span>
+        <span id="adapterStatus" class="value">--</span>
     </div>
-
 
     <div class="row">
-
-        <span class="label">
-            Confirmation:
-        </span>
-
-        <span
-            id="confirmationStatus"
-            class="value"
-        >
-            Not Sent
-        </span>
-
+        <span class="label">Host Connection:</span>
+        <span id="hostStatus" class="value">--</span>
     </div>
-
-
-    <div class="divider"></div>
-
 
     <div class="row">
-
-        <span class="label">
-            Connection:
-        </span>
-
-        <span
-            id="connectionStatus"
-            class="value"
-        >
-            NOT CONNECTED
-        </span>
-
+        <span class="label">Account:</span>
+        <span id="accountStatus" class="value">--</span>
     </div>
 
-
-    <div
-        id="log"
-        class="log"
-    >
+    <div class="row">
+        <span class="label">Symbols Found:</span>
+        <span id="symbolCount" class="value">--</span>
     </div>
 
+    <div class="row">
+        <span class="label">Gold Symbol:</span>
+        <span id="goldName" class="value">--</span>
+    </div>
 
-    <div class="notice">
+    <div class="row">
+        <span class="label">Gold Symbol ID:</span>
+        <span id="goldId" class="value">--</span>
+    </div>
 
-        Connection test only.
+    <div class="section">
+        Gold-related symbols
+    </div>
 
-        No market data, account information,
-        strategy logic or trading functions are enabled.
+    <div id="symbols">
+        Waiting for symbol list...
+    </div>
 
+    <div class="section">
+        Connection log
+    </div>
+
+    <div id="log">
+        Page loaded.
+    </div>
+
+    <div class="note">
+        This version only connects to cTrader, retrieves account
+        information, reads the available symbols and finds XAUUSD.
+        It does not subscribe to prices or place trades.
     </div>
 
 </div>
 
+<script type="module">
 
-<script>
+/* ============================================================
+   UI
+   ============================================================ */
 
-/*
-============================================================
-UI
-============================================================
-*/
+const ui = {
+    js:
+        document.getElementById("jsStatus"),
 
-const pageStatus =
-    document.getElementById(
-        "pageStatus"
-    );
+    external:
+        document.getElementById("externalStatus"),
 
-const jsStatus =
-    document.getElementById(
-        "jsStatus"
-    );
+    sdk:
+        document.getElementById("sdkStatus"),
 
-const hostStatus =
-    document.getElementById(
-        "hostStatus"
-    );
+    adapter:
+        document.getElementById("adapterStatus"),
 
-const registrationStatus =
-    document.getElementById(
-        "registrationStatus"
-    );
+    host:
+        document.getElementById("hostStatus"),
 
-const confirmationStatus =
-    document.getElementById(
-        "confirmationStatus"
-    );
+    account:
+        document.getElementById("accountStatus"),
 
-const connectionStatus =
-    document.getElementById(
-        "connectionStatus"
-    );
+    symbolCount:
+        document.getElementById("symbolCount"),
 
-const logBox =
-    document.getElementById(
-        "log"
-    );
+    goldName:
+        document.getElementById("goldName"),
 
+    goldId:
+        document.getElementById("goldId"),
 
-/*
-============================================================
-LOGGING
-============================================================
-*/
+    symbols:
+        document.getElementById("symbols"),
 
-function log(
-    message,
-    type = ""
-) {
+    log:
+        document.getElementById("log")
+};
 
-    const time =
-        new Date()
-            .toLocaleTimeString(
-                "en-SG",
-                {
-                    hour12: false
-                }
-            );
-
-
-    const row =
-        document.createElement(
-            "div"
-        );
-
-
-    row.textContent =
-        "[" +
-        time +
-        "] " +
-        message;
-
-
-    if (
-        type === "good"
-    ) {
-
-        row.className =
-            "log-good";
-
-    }
-
-
-    if (
-        type === "warn"
-    ) {
-
-        row.className =
-            "log-warn";
-
-    }
-
-
-    if (
-        type === "bad"
-    ) {
-
-        row.className =
-            "log-bad";
-
-    }
-
-
-    logBox.appendChild(
-        row
-    );
-
-
-    logBox.scrollTop =
-        logBox.scrollHeight;
-
-
-    console.log(
-        message
-    );
-
-}
-
-
-/*
-============================================================
-SET STATUS
-============================================================
-*/
 
 function setStatus(
     element,
-    message,
-    type = ""
+    text,
+    className = ""
 ) {
+    element.textContent = text;
+    element.className = "value";
 
-    element.textContent =
-        message;
-
-
-    element.className =
-        "value";
-
-
-    if (
-        type === "good"
-    ) {
-
-        element.classList.add(
-            "good"
-        );
-
+    if (className) {
+        element.classList.add(className);
     }
-
-
-    if (
-        type === "warn"
-    ) {
-
-        element.classList.add(
-            "warn"
-        );
-
-    }
-
-
-    if (
-        type === "bad"
-    ) {
-
-        element.classList.add(
-            "bad"
-        );
-
-    }
-
 }
 
 
-/*
-============================================================
-PAGE / JAVASCRIPT TEST
-============================================================
-*/
-
-setStatus(
-    pageStatus,
-    "LOADED",
-    "good"
-);
-
-
-setStatus(
-    jsStatus,
-    "RUNNING",
-    "good"
-);
-
-
-log(
-    "Page loaded successfully.",
-    "good"
-);
-
-
-log(
-    "JavaScript is running.",
-    "good"
-);
-
-
-log(
-    "Waiting for cTrader host registration event..."
-);
-
-
-/*
-============================================================
-CONNECTION STATE
-============================================================
-
-Important:
-
-cTrader warns that sending multiple confirmations can
-trigger repeated registration events.
-
-Therefore confirmation is sent ONLY ONCE.
-============================================================
-*/
-
-let confirmationSent =
-    false;
-
-
-let connected =
-    false;
-
-
-/*
-============================================================
-CTRADER HOST EVENT LISTENER
-============================================================
-
-According to cTrader documentation, the host dispatches:
-
-message-from-host
-
-Registration uses:
-
-payloadType = 2000
-============================================================
-*/
-
-window.addEventListener(
-
-    "message-from-host",
-
-    function (
-        event
-    ) {
-
-        log(
-            "Message received from cTrader host.",
-            "good"
-        );
-
-
-        setStatus(
-            hostStatus,
-            "DETECTED",
-            "good"
-        );
-
-
-        let data =
-            event.data;
-
-
-        /*
-        Some WebView bridges may deliver serialised data.
-
-        If so, attempt to parse it.
-        */
-
-        if (
-            typeof data === "string"
-        ) {
-
-            try {
-
-                data =
-                    JSON.parse(
-                        data
-                    );
-
+function log(
+    message,
+    className = ""
+) {
+    const time =
+        new Date().toLocaleTimeString(
+            "en-SG",
+            {
+                hour12: false
             }
-
-            catch (
-                parseError
-            ) {
-
-                log(
-                    "Host message received as text.",
-                    "warn"
-                );
-
-            }
-
-        }
-
-
-        console.log(
-            "cTrader host message:",
-            data
         );
 
+    const row =
+        document.createElement("div");
 
-        if (
-            !data ||
-            typeof data !== "object"
-        ) {
+    row.textContent =
+        `[${time}] ${message}`;
 
-            log(
-                "Host message did not contain an object payload.",
-                "warn"
-            );
-
-
-            return;
-
-        }
-
-
-        log(
-            "Host payload type: " +
-            String(
-                data.payloadType
-            )
-        );
-
-
-        /*
-        ========================================================
-        REGISTRATION EVENT
-        ========================================================
-
-        cTrader registration payloadType = 2000
-        ========================================================
-        */
-
-        if (
-            Number(
-                data.payloadType
-            ) !== 2000
-        ) {
-
-            log(
-                "Non-registration host message received."
-            );
-
-
-            return;
-
-        }
-
-
-        setStatus(
-            registrationStatus,
-            "RECEIVED",
-            "good"
-        );
-
-
-        log(
-            "cTrader registration event received.",
-            "good"
-        );
-
-
-        /*
-        ========================================================
-        DO NOT CONFIRM MORE THAN ONCE
-        ========================================================
-        */
-
-        if (
-            confirmationSent
-        ) {
-
-            log(
-                "Confirmation already sent. Ignoring repeated registration.",
-                "warn"
-            );
-
-
-            return;
-
-        }
-
-
-        confirmationSent =
-            true;
-
-
-        /*
-        ========================================================
-        SEND CONFIRMATION
-        ========================================================
-
-        cTrader confirmation payloadType = 2001.
-
-        Use the same clientMsgId received from registration.
-        ========================================================
-        */
-
-        const confirmation =
-        {
-
-            clientMsgId:
-                data.clientMsgId,
-
-            payload:
-                {},
-
-            payloadType:
-                2001
-
-        };
-
-
-        try {
-
-            window.dispatchEvent(
-
-                new MessageEvent(
-
-                    "message-to-host",
-
-                    {
-
-                        data:
-                            confirmation
-
-                    }
-
-                )
-
-            );
-
-
-            setStatus(
-                confirmationStatus,
-                "SENT",
-                "good"
-            );
-
-
-            log(
-                "Confirmation sent to cTrader.",
-                "good"
-            );
-
-
-            connected =
-                true;
-
-
-            setStatus(
-                connectionStatus,
-                "CONNECTED",
-                "good"
-            );
-
-
-            setStatus(
-                hostStatus,
-                "CONNECTED",
-                "good"
-            );
-
-
-            log(
-                "CTRADER CONNECTION ESTABLISHED.",
-                "good"
-            );
-
-        }
-
-        catch (
-            error
-        ) {
-
-            setStatus(
-                confirmationStatus,
-                "FAILED",
-                "bad"
-            );
-
-
-            setStatus(
-                connectionStatus,
-                "FAILED",
-                "bad"
-            );
-
-
-            log(
-                "Unable to send confirmation: " +
-                (
-                    error.message ||
-                    String(
-                        error
-                    )
-                ),
-                "bad"
-            );
-
-        }
-
+    if (className) {
+        row.className = className;
     }
 
-);
+    ui.log.appendChild(row);
+    ui.log.scrollTop = ui.log.scrollHeight;
+
+    console.log(message);
+}
 
 
-/*
-============================================================
-GLOBAL JAVASCRIPT ERROR TEST
-============================================================
-*/
+function getErrorText(error) {
+    if (
+        error === null ||
+        error === undefined
+    ) {
+        return "Unknown error";
+    }
+
+    if (
+        typeof error === "string"
+    ) {
+        return error;
+    }
+
+    if (error.message) {
+        return error.message;
+    }
+
+    try {
+        return JSON.stringify(error);
+    } catch {
+        return String(error);
+    }
+}
+
+
+/* ============================================================
+   MODULE FUNCTION RESOLVER
+
+   The SDK may expose functions directly, under default,
+   or under ServerInterfaces.
+   ============================================================ */
+
+function resolveFunction(
+    module,
+    functionName
+) {
+    const candidates = [
+        module?.[functionName],
+
+        module?.default?.[functionName],
+
+        module?.ServerInterfaces?.[functionName],
+
+        module?.default
+            ?.ServerInterfaces
+            ?.[functionName]
+    ];
+
+    return candidates.find(
+        candidate =>
+            typeof candidate === "function"
+    );
+}
+
+
+/* ============================================================
+   OBJECT SEARCH HELPERS
+   ============================================================ */
+
+function visitObjects(
+    value,
+    visitor,
+    visited = new WeakSet(),
+    depth = 0
+) {
+    if (
+        value === null ||
+        value === undefined ||
+        typeof value !== "object" ||
+        depth > 15
+    ) {
+        return;
+    }
+
+    if (visited.has(value)) {
+        return;
+    }
+
+    visited.add(value);
+    visitor(value);
+
+    /*
+     * Some protobuf objects provide a toObject()
+     * method containing easier-to-read values.
+     */
+    if (
+        typeof value.toObject === "function"
+    ) {
+        try {
+            const converted =
+                value.toObject();
+
+            if (
+                converted &&
+                converted !== value
+            ) {
+                visitObjects(
+                    converted,
+                    visitor,
+                    visited,
+                    depth + 1
+                );
+            }
+        } catch {
+            /*
+             * Ignore conversion failures and
+             * continue examining the original object.
+             */
+        }
+    }
+
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            visitObjects(
+                item,
+                visitor,
+                visited,
+                depth + 1
+            );
+        }
+
+        return;
+    }
+
+    if (
+        typeof value[Symbol.iterator] ===
+            "function" &&
+        typeof value !== "string"
+    ) {
+        try {
+            for (const item of value) {
+                visitObjects(
+                    item,
+                    visitor,
+                    visited,
+                    depth + 1
+                );
+            }
+        } catch {
+            /*
+             * Ignore unsupported iterators.
+             */
+        }
+    }
+
+    for (const child of Object.values(value)) {
+        visitObjects(
+            child,
+            visitor,
+            visited,
+            depth + 1
+        );
+    }
+}
+
+
+function findFirstValue(
+    root,
+    propertyNames
+) {
+    let found;
+
+    visitObjects(
+        root,
+        object => {
+            if (found !== undefined) {
+                return;
+            }
+
+            for (
+                const propertyName
+                of propertyNames
+            ) {
+                const value =
+                    object?.[propertyName];
+
+                if (
+                    value !== null &&
+                    value !== undefined &&
+                    value !== ""
+                ) {
+                    found = value;
+                    return;
+                }
+            }
+        }
+    );
+
+    return found;
+}
+
+
+/* ============================================================
+   SYMBOL EXTRACTION
+   ============================================================ */
+
+function getSymbolName(symbol) {
+    return String(
+        symbol?.name ??
+        symbol?.symbolName ??
+        symbol?.ticker ??
+        symbol?.symbol ??
+        ""
+    ).toUpperCase();
+}
+
+
+function extractSymbolObjects(root) {
+    const results = [];
+    const seen = new Set();
+
+    visitObjects(
+        root,
+        object => {
+            const id =
+                object?.id ??
+                object?.symbolId;
+
+            const name =
+                object?.name ??
+                object?.symbolName ??
+                object?.ticker;
+
+            if (
+                id === null ||
+                id === undefined ||
+                name === null ||
+                name === undefined
+            ) {
+                return;
+            }
+
+            const normalizedName =
+                String(name).toUpperCase();
+
+            /*
+             * Prevent unrelated objects with generic
+             * id/name fields from being accepted.
+             */
+            const looksLikeSymbol =
+                /^[A-Z0-9._-]{3,30}$/
+                    .test(normalizedName);
+
+            if (!looksLikeSymbol) {
+                return;
+            }
+
+            const key =
+                `${id}:${normalizedName}`;
+
+            if (seen.has(key)) {
+                return;
+            }
+
+            seen.add(key);
+            results.push(object);
+        }
+    );
+
+    return results;
+}
+
+
+/* ============================================================
+   GLOBAL ERRORS
+   ============================================================ */
 
 window.addEventListener(
-
     "error",
-
-    function (
-        event
-    ) {
-
+    event => {
         log(
             "JavaScript error: " +
             (
-                event.message ||
+                event.message ??
                 "Unknown error"
             ),
             "bad"
         );
-
     }
-
 );
 
 
 window.addEventListener(
-
     "unhandledrejection",
-
-    function (
-        event
-    ) {
-
-        let message =
-            event.reason;
-
-
-        if (
-            event.reason &&
-            event.reason.message
-        ) {
-
-            message =
-                event.reason.message;
-
-        }
-
-
+    event => {
         log(
             "Unhandled rejection: " +
-            String(
-                message
-            ),
+            getErrorText(event.reason),
+            "bad"
+        );
+    }
+);
+
+
+/* ============================================================
+   INITIAL JAVASCRIPT TEST
+   ============================================================ */
+
+setStatus(
+    ui.js,
+    "RUNNING",
+    "good"
+);
+
+log(
+    "JavaScript started.",
+    "good"
+);
+
+
+/* ============================================================
+   APPLICATION
+   ============================================================ */
+
+async function boot() {
+    let externalModule;
+    let sdkModule;
+    let rxjsModule;
+
+    let createClientAdapter;
+    let handleConfirmEvent;
+    let registerEvent;
+    let getAccountInformation;
+    let getLightSymbolList;
+
+    let take;
+
+
+    /*
+     * Load cTrader external adapter.
+     */
+    try {
+        setStatus(
+            ui.external,
+            "LOADING",
+            "warn"
+        );
+
+        log(
+            "Loading external adapter..."
+        );
+
+        externalModule =
+            await import(
+                "https://esm.sh/@spotware-web-team/sdk-external-api@0.0.5"
+            );
+
+        createClientAdapter =
+            resolveFunction(
+                externalModule,
+                "createClientAdapter"
+            );
+
+        if (!createClientAdapter) {
+            throw new Error(
+                "createClientAdapter was not found."
+            );
+        }
+
+        setStatus(
+            ui.external,
+            "LOADED",
+            "good"
+        );
+
+        log(
+            "External adapter loaded.",
+            "good"
+        );
+
+    } catch (error) {
+        setStatus(
+            ui.external,
+            "FAILED",
             "bad"
         );
 
+        log(
+            "External adapter error: " +
+            getErrorText(error),
+            "bad"
+        );
+
+        return;
     }
 
-);
 
+    /*
+     * Load the cTrader SDK.
+     */
+    try {
+        setStatus(
+            ui.sdk,
+            "LOADING",
+            "warn"
+        );
 
-/*
-============================================================
-HOST WAIT STATUS
-============================================================
-*/
+        log(
+            "Loading cTrader SDK..."
+        );
 
-setTimeout(
-
-    function () {
-
-        if (
-            !connected
-        ) {
-
-            setStatus(
-                hostStatus,
-                "WAITING",
-                "warn"
+        sdkModule =
+            await import(
+                "https://esm.sh/@spotware-web-team/sdk"
             );
 
+        log(
+            "SDK root exports: " +
+            Object.keys(sdkModule)
+                .sort()
+                .join(", ")
+        );
 
-            log(
-                "Still waiting for cTrader registration event.",
-                "warn"
+        handleConfirmEvent =
+            resolveFunction(
+                sdkModule,
+                "handleConfirmEvent"
             );
 
+        registerEvent =
+            resolveFunction(
+                sdkModule,
+                "registerEvent"
+            );
+
+        getAccountInformation =
+            resolveFunction(
+                sdkModule,
+                "getAccountInformation"
+            );
+
+        getLightSymbolList =
+            resolveFunction(
+                sdkModule,
+                "getLightSymbolList"
+            );
+
+        const missing = [];
+
+        if (!handleConfirmEvent) {
+            missing.push(
+                "handleConfirmEvent"
+            );
         }
 
-    },
+        if (!registerEvent) {
+            missing.push(
+                "registerEvent"
+            );
+        }
 
-    3000
+        if (!getAccountInformation) {
+            missing.push(
+                "getAccountInformation"
+            );
+        }
 
-);
+        if (!getLightSymbolList) {
+            missing.push(
+                "getLightSymbolList"
+            );
+        }
 
+        if (missing.length) {
+            throw new Error(
+                "Missing SDK functions: " +
+                missing.join(", ")
+            );
+        }
+
+        setStatus(
+            ui.sdk,
+            "LOADED",
+            "good"
+        );
+
+        log(
+            "Required SDK functions found.",
+            "good"
+        );
+
+    } catch (error) {
+        setStatus(
+            ui.sdk,
+            "FAILED",
+            "bad"
+        );
+
+        log(
+            "SDK error: " +
+            getErrorText(error),
+            "bad"
+        );
+
+        return;
+    }
+
+
+    /*
+     * Load RxJS.
+     */
+    try {
+        log(
+            "Loading RxJS..."
+        );
+
+        rxjsModule =
+            await import(
+                "https://esm.sh/rxjs@7.8.2"
+            );
+
+        take =
+            rxjsModule.take;
+
+        if (
+            typeof take !== "function"
+        ) {
+            throw new Error(
+                "RxJS take() was not found."
+            );
+        }
+
+        log(
+            "RxJS loaded.",
+            "good"
+        );
+
+    } catch (error) {
+        log(
+            "RxJS error: " +
+            getErrorText(error),
+            "bad"
+        );
+
+        return;
+    }
+
+
+    /*
+     * Create the client adapter.
+     */
+    let adapter;
+
+    try {
+        setStatus(
+            ui.adapter,
+            "CREATING",
+            "warn"
+        );
+
+        const logger = {
+            trace:
+                (...args) =>
+                    console.debug(...args),
+
+            debug:
+                (...args) =>
+                    console.debug(...args),
+
+            info:
+                (...args) =>
+                    console.info(...args),
+
+            warn:
+                (...args) =>
+                    console.warn(...args),
+
+            error:
+                (...args) =>
+                    console.error(...args),
+
+            log:
+                (...args) =>
+                    console.log(...args)
+        };
+
+        adapter =
+            createClientAdapter({
+                logger
+            });
+
+        setStatus(
+            ui.adapter,
+            "CREATED",
+            "good"
+        );
+
+        log(
+            "Client adapter created.",
+            "good"
+        );
+
+    } catch (error) {
+        setStatus(
+            ui.adapter,
+            "FAILED",
+            "bad"
+        );
+
+        log(
+            "Adapter creation error: " +
+            getErrorText(error),
+            "bad"
+        );
+
+        return;
+    }
+
+
+    /*
+     * Connect to the cTrader host.
+     */
+    try {
+        setStatus(
+            ui.host,
+            "CONNECTING",
+            "warn"
+        );
+
+        log(
+            "Starting cTrader host connection..."
+        );
+
+        handleConfirmEvent(
+            adapter,
+            {}
+        )
+            .pipe(
+                take(1)
+            )
+            .subscribe({
+
+                next: value => {
+                    console.log(
+                        "Initial confirmation:",
+                        value
+                    );
+
+                    log(
+                        "Initial confirmation received.",
+                        "good"
+                    );
+                },
+
+                error: error => {
+                    log(
+                        "Initial confirmation warning: " +
+                        getErrorText(error),
+                        "warn"
+                    );
+                }
+            });
+
+        log(
+            "Waiting for cTrader registration..."
+        );
+
+        registerEvent(
+            adapter
+        )
+            .pipe(
+                take(1)
+            )
+            .subscribe({
+
+                next: registration => {
+                    console.log(
+                        "Registration result:",
+                        registration
+                    );
+
+                    log(
+                        "Registration received.",
+                        "good"
+                    );
+
+                    handleConfirmEvent(
+                        adapter,
+                        {}
+                    )
+                        .pipe(
+                            take(1)
+                        )
+                        .subscribe({
+
+                            next: confirmation => {
+                                console.log(
+                                    "Second confirmation:",
+                                    confirmation
+                                );
+
+                                setStatus(
+                                    ui.host,
+                                    "CONNECTED",
+                                    "good"
+                                );
+
+                                log(
+                                    "cTrader host connected.",
+                                    "good"
+                                );
+
+                                loadAccountAndSymbols(
+                                    adapter,
+                                    getAccountInformation,
+                                    getLightSymbolList,
+                                    take
+                                );
+                            },
+
+                            error: error => {
+                                setStatus(
+                                    ui.host,
+                                    "CONFIRM FAILED",
+                                    "bad"
+                                );
+
+                                log(
+                                    "Second confirmation error: " +
+                                    getErrorText(error),
+                                    "bad"
+                                );
+                            }
+                        });
+                },
+
+                error: error => {
+                    setStatus(
+                        ui.host,
+                        "FAILED",
+                        "bad"
+                    );
+
+                    log(
+                        "Registration error: " +
+                        getErrorText(error),
+                        "bad"
+                    );
+                }
+            });
+
+    } catch (error) {
+        setStatus(
+            ui.host,
+            "FAILED",
+            "bad"
+        );
+
+        log(
+            "Host connection error: " +
+            getErrorText(error),
+            "bad"
+        );
+    }
+}
+
+
+/* ============================================================
+   ACCOUNT AND SYMBOLS
+   ============================================================ */
+
+function loadAccountAndSymbols(
+    adapter,
+    getAccountInformation,
+    getLightSymbolList,
+    take
+) {
+    /*
+     * Account information.
+     */
+    setStatus(
+        ui.account,
+        "LOADING",
+        "warn"
+    );
+
+    log(
+        "Requesting account information..."
+    );
+
+    getAccountInformation(
+        adapter,
+        {}
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: result => {
+                console.log(
+                    "Account response:",
+                    result
+                );
+
+                const accountId =
+                    findFirstValue(
+                        result,
+                        [
+                            "login",
+                            "accountId",
+                            "ctidTraderAccountId",
+                            "traderId"
+                        ]
+                    );
+
+                if (
+                    accountId === null ||
+                    accountId === undefined
+                ) {
+                    setStatus(
+                        ui.account,
+                        "RESPONSE RECEIVED",
+                        "warn"
+                    );
+
+                    log(
+                        "Account response received, but the account identifier was not found.",
+                        "warn"
+                    );
+
+                    return;
+                }
+
+                setStatus(
+                    ui.account,
+                    String(accountId),
+                    "good"
+                );
+
+                log(
+                    "Account loaded: " +
+                    accountId,
+                    "good"
+                );
+            },
+
+            error: error => {
+                setStatus(
+                    ui.account,
+                    "FAILED",
+                    "bad"
+                );
+
+                log(
+                    "Account request error: " +
+                    getErrorText(error),
+                    "bad"
+                );
+            }
+        });
+
+
+    /*
+     * Available symbols.
+     */
+    setStatus(
+        ui.symbolCount,
+        "LOADING",
+        "warn"
+    );
+
+    log(
+        "Requesting available symbols..."
+    );
+
+    getLightSymbolList(
+        adapter,
+        {}
+    )
+        .pipe(
+            take(1)
+        )
+        .subscribe({
+
+            next: result => {
+                console.log(
+                    "Symbol response:",
+                    result
+                );
+
+                const symbols =
+                    extractSymbolObjects(
+                        result
+                    );
+
+                setStatus(
+                    ui.symbolCount,
+                    String(symbols.length),
+                    symbols.length
+                        ? "good"
+                        : "warn"
+                );
+
+                log(
+                    "Symbol objects detected: " +
+                    symbols.length,
+                    symbols.length
+                        ? "good"
+                        : "warn"
+                );
+
+                if (!symbols.length) {
+                    ui.symbols.textContent =
+                        "A symbol response was received, but no readable symbol objects were detected.";
+
+                    return;
+                }
+
+                const names =
+                    symbols
+                        .map(
+                            getSymbolName
+                        )
+                        .filter(Boolean);
+
+                ui.symbols.textContent =
+                    names
+                        .slice(0, 200)
+                        .join("\n");
+
+
+                /*
+                 * Find exact XAUUSD first.
+                 */
+                let gold =
+                    symbols.find(
+                        symbol =>
+                            getSymbolName(symbol) ===
+                            "XAUUSD"
+                    );
+
+
+                /*
+                 * Broker suffix fallback.
+                 */
+                if (!gold) {
+                    gold =
+                        symbols.find(
+                            symbol =>
+                                getSymbolName(symbol)
+                                    .startsWith(
+                                        "XAUUSD"
+                                    )
+                        );
+                }
+
+
+                /*
+                 * GOLD or XAU fallback.
+                 */
+                if (!gold) {
+                    gold =
+                        symbols.find(
+                            symbol => {
+                                const name =
+                                    getSymbolName(symbol);
+
+                                return (
+                                    name.includes("XAU") ||
+                                    name.includes("GOLD")
+                                );
+                            }
+                        );
+                }
+
+
+                if (!gold) {
+                    setStatus(
+                        ui.goldName,
+                        "NOT FOUND",
+                        "bad"
+                    );
+
+                    setStatus(
+                        ui.goldId,
+                        "--",
+                        "bad"
+                    );
+
+                    log(
+                        "No XAUUSD/XAU/GOLD symbol was found.",
+                        "bad"
+                    );
+
+                    return;
+                }
+
+
+                const goldName =
+                    getSymbolName(gold);
+
+
+                const goldId =
+                    gold?.id ??
+                    gold?.symbolId;
+
+
+                setStatus(
+                    ui.goldName,
+                    goldName,
+                    "good"
+                );
+
+
+                setStatus(
+                    ui.goldId,
+                    String(goldId),
+                    "good"
+                );
+
+
+                log(
+                    `Gold symbol found: ${goldName}, ID ${goldId}`,
+                    "good"
+                );
+            },
+
+            error: error => {
+                setStatus(
+                    ui.symbolCount,
+                    "FAILED",
+                    "bad"
+                );
+
+                ui.symbols.textContent =
+                    "Symbol request failed.";
+
+                log(
+                    "Symbol request error: " +
+                    getErrorText(error),
+                    "bad"
+                );
+            }
+        });
+}
+
+
+/* ============================================================
+   START
+   ============================================================ */
+
+boot();
 
 </script>
 
-
 </body>
-
 </html>
