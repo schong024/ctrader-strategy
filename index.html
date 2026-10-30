@@ -12,42 +12,116 @@
     <title>cTrader Connection Test</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
             margin: 0;
-            padding: 20px;
-
+            padding: 0;
+            min-height: 100%;
             background: #1c1c1e;
-            color: white;
-
+            color: #ffffff;
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        h1 {
-            color: #30d158;
-            font-size: 20px;
+        body {
+            padding: 18px;
+            font-size: 13px;
         }
 
-        .box {
-            margin-top: 20px;
-            padding: 15px;
+        .panel {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .header {
+            color: #34c759;
+            font-size: 17px;
+            font-weight: bold;
+
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+
+            padding: 7px 0;
+        }
+
+        .label {
+            color: #d1d1d6;
+        }
+
+        .value {
+            color: #0a84ff;
+            font-family: Consolas, Monaco, monospace;
+            text-align: right;
+        }
+
+        .good {
+            color: #30d158 !important;
+        }
+
+        .warn {
+            color: #ffd60a !important;
+        }
+
+        .bad {
+            color: #ff453a !important;
+        }
+
+        .divider {
+            border-top: 1px solid #3a3a3c;
+            margin: 12px 0;
+        }
+
+        .log {
+            height: 280px;
+
+            margin-top: 15px;
+            padding: 10px;
+
+            overflow-y: auto;
 
             background: #2c2c2e;
+
             border-radius: 6px;
+
+            color: #d1d1d6;
+
+            font-family: Consolas, Monaco, monospace;
+
+            font-size: 11px;
+            line-height: 1.5;
+
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
 
-        #status {
+        .log-good {
+            color: #30d158;
+        }
+
+        .log-warn {
             color: #ffd60a;
-
-            font-family: Consolas, monospace;
-            font-size: 16px;
         }
 
-        #time {
-            margin-top: 10px;
+        .log-bad {
+            color: #ff453a;
+        }
 
-            color: #0a84ff;
-
-            font-family: Consolas, monospace;
+        .notice {
+            color: #8e8e93;
+            margin-top: 12px;
+            font-size: 11px;
+            line-height: 1.4;
         }
     </style>
 </head>
@@ -55,57 +129,759 @@
 
 <body>
 
-    <h1>
-        CTRADER NEW PAGE TEST 001
-    </h1>
+<div class="panel">
+
+    <div class="header">
+        cTrader Plugin Connection Test
+    </div>
 
 
-    <div class="box">
+    <div class="row">
 
-        <div>
-            JavaScript Status:
-        </div>
+        <span class="label">
+            Page:
+        </span>
 
-        <div id="status">
-            JavaScript has NOT started.
-        </div>
-
-
-        <div id="time">
-            --
-        </div>
+        <span
+            id="pageStatus"
+            class="value"
+        >
+            Loading...
+        </span>
 
     </div>
 
 
-    <script>
+    <div class="row">
 
-        const status =
-            document.getElementById("status");
+        <span class="label">
+            JavaScript:
+        </span>
 
+        <span
+            id="jsStatus"
+            class="value"
+        >
+            Starting...
+        </span>
 
-        const time =
-            document.getElementById("time");
-
-
-        status.textContent =
-            "JavaScript is running successfully.";
-
-
-        status.style.color =
-            "#30d158";
+    </div>
 
 
-        time.textContent =
-            "Page loaded: " +
-            new Date().toLocaleString();
+    <div class="divider"></div>
+
+
+    <div class="row">
+
+        <span class="label">
+            cTrader Host:
+        </span>
+
+        <span
+            id="hostStatus"
+            class="value"
+        >
+            Waiting...
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span class="label">
+            Registration:
+        </span>
+
+        <span
+            id="registrationStatus"
+            class="value"
+        >
+            Waiting...
+        </span>
+
+    </div>
+
+
+    <div class="row">
+
+        <span class="label">
+            Confirmation:
+        </span>
+
+        <span
+            id="confirmationStatus"
+            class="value"
+        >
+            Not Sent
+        </span>
+
+    </div>
+
+
+    <div class="divider"></div>
+
+
+    <div class="row">
+
+        <span class="label">
+            Connection:
+        </span>
+
+        <span
+            id="connectionStatus"
+            class="value"
+        >
+            NOT CONNECTED
+        </span>
+
+    </div>
+
+
+    <div
+        id="log"
+        class="log"
+    >
+    </div>
+
+
+    <div class="notice">
+
+        Connection test only.
+
+        No market data, account information,
+        strategy logic or trading functions are enabled.
+
+    </div>
+
+</div>
+
+
+<script>
+
+/*
+============================================================
+UI
+============================================================
+*/
+
+const pageStatus =
+    document.getElementById(
+        "pageStatus"
+    );
+
+const jsStatus =
+    document.getElementById(
+        "jsStatus"
+    );
+
+const hostStatus =
+    document.getElementById(
+        "hostStatus"
+    );
+
+const registrationStatus =
+    document.getElementById(
+        "registrationStatus"
+    );
+
+const confirmationStatus =
+    document.getElementById(
+        "confirmationStatus"
+    );
+
+const connectionStatus =
+    document.getElementById(
+        "connectionStatus"
+    );
+
+const logBox =
+    document.getElementById(
+        "log"
+    );
+
+
+/*
+============================================================
+LOGGING
+============================================================
+*/
+
+function log(
+    message,
+    type = ""
+) {
+
+    const time =
+        new Date()
+            .toLocaleTimeString(
+                "en-SG",
+                {
+                    hour12: false
+                }
+            );
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.textContent =
+        "[" +
+        time +
+        "] " +
+        message;
+
+
+    if (
+        type === "good"
+    ) {
+
+        row.className =
+            "log-good";
+
+    }
+
+
+    if (
+        type === "warn"
+    ) {
+
+        row.className =
+            "log-warn";
+
+    }
+
+
+    if (
+        type === "bad"
+    ) {
+
+        row.className =
+            "log-bad";
+
+    }
+
+
+    logBox.appendChild(
+        row
+    );
+
+
+    logBox.scrollTop =
+        logBox.scrollHeight;
+
+
+    console.log(
+        message
+    );
+
+}
+
+
+/*
+============================================================
+SET STATUS
+============================================================
+*/
+
+function setStatus(
+    element,
+    message,
+    type = ""
+) {
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        "value";
+
+
+    if (
+        type === "good"
+    ) {
+
+        element.classList.add(
+            "good"
+        );
+
+    }
+
+
+    if (
+        type === "warn"
+    ) {
+
+        element.classList.add(
+            "warn"
+        );
+
+    }
+
+
+    if (
+        type === "bad"
+    ) {
+
+        element.classList.add(
+            "bad"
+        );
+
+    }
+
+}
+
+
+/*
+============================================================
+PAGE / JAVASCRIPT TEST
+============================================================
+*/
+
+setStatus(
+    pageStatus,
+    "LOADED",
+    "good"
+);
+
+
+setStatus(
+    jsStatus,
+    "RUNNING",
+    "good"
+);
+
+
+log(
+    "Page loaded successfully.",
+    "good"
+);
+
+
+log(
+    "JavaScript is running.",
+    "good"
+);
+
+
+log(
+    "Waiting for cTrader host registration event..."
+);
+
+
+/*
+============================================================
+CONNECTION STATE
+============================================================
+
+Important:
+
+cTrader warns that sending multiple confirmations can
+trigger repeated registration events.
+
+Therefore confirmation is sent ONLY ONCE.
+============================================================
+*/
+
+let confirmationSent =
+    false;
+
+
+let connected =
+    false;
+
+
+/*
+============================================================
+CTRADER HOST EVENT LISTENER
+============================================================
+
+According to cTrader documentation, the host dispatches:
+
+message-from-host
+
+Registration uses:
+
+payloadType = 2000
+============================================================
+*/
+
+window.addEventListener(
+
+    "message-from-host",
+
+    function (
+        event
+    ) {
+
+        log(
+            "Message received from cTrader host.",
+            "good"
+        );
+
+
+        setStatus(
+            hostStatus,
+            "DETECTED",
+            "good"
+        );
+
+
+        let data =
+            event.data;
+
+
+        /*
+        Some WebView bridges may deliver serialised data.
+
+        If so, attempt to parse it.
+        */
+
+        if (
+            typeof data === "string"
+        ) {
+
+            try {
+
+                data =
+                    JSON.parse(
+                        data
+                    );
+
+            }
+
+            catch (
+                parseError
+            ) {
+
+                log(
+                    "Host message received as text.",
+                    "warn"
+                );
+
+            }
+
+        }
 
 
         console.log(
-            "CTRADER TEST PAGE JAVASCRIPT RUNNING"
+            "cTrader host message:",
+            data
         );
 
-    </script>
+
+        if (
+            !data ||
+            typeof data !== "object"
+        ) {
+
+            log(
+                "Host message did not contain an object payload.",
+                "warn"
+            );
+
+
+            return;
+
+        }
+
+
+        log(
+            "Host payload type: " +
+            String(
+                data.payloadType
+            )
+        );
+
+
+        /*
+        ========================================================
+        REGISTRATION EVENT
+        ========================================================
+
+        cTrader registration payloadType = 2000
+        ========================================================
+        */
+
+        if (
+            Number(
+                data.payloadType
+            ) !== 2000
+        ) {
+
+            log(
+                "Non-registration host message received."
+            );
+
+
+            return;
+
+        }
+
+
+        setStatus(
+            registrationStatus,
+            "RECEIVED",
+            "good"
+        );
+
+
+        log(
+            "cTrader registration event received.",
+            "good"
+        );
+
+
+        /*
+        ========================================================
+        DO NOT CONFIRM MORE THAN ONCE
+        ========================================================
+        */
+
+        if (
+            confirmationSent
+        ) {
+
+            log(
+                "Confirmation already sent. Ignoring repeated registration.",
+                "warn"
+            );
+
+
+            return;
+
+        }
+
+
+        confirmationSent =
+            true;
+
+
+        /*
+        ========================================================
+        SEND CONFIRMATION
+        ========================================================
+
+        cTrader confirmation payloadType = 2001.
+
+        Use the same clientMsgId received from registration.
+        ========================================================
+        */
+
+        const confirmation =
+        {
+
+            clientMsgId:
+                data.clientMsgId,
+
+            payload:
+                {},
+
+            payloadType:
+                2001
+
+        };
+
+
+        try {
+
+            window.dispatchEvent(
+
+                new MessageEvent(
+
+                    "message-to-host",
+
+                    {
+
+                        data:
+                            confirmation
+
+                    }
+
+                )
+
+            );
+
+
+            setStatus(
+                confirmationStatus,
+                "SENT",
+                "good"
+            );
+
+
+            log(
+                "Confirmation sent to cTrader.",
+                "good"
+            );
+
+
+            connected =
+                true;
+
+
+            setStatus(
+                connectionStatus,
+                "CONNECTED",
+                "good"
+            );
+
+
+            setStatus(
+                hostStatus,
+                "CONNECTED",
+                "good"
+            );
+
+
+            log(
+                "CTRADER CONNECTION ESTABLISHED.",
+                "good"
+            );
+
+        }
+
+        catch (
+            error
+        ) {
+
+            setStatus(
+                confirmationStatus,
+                "FAILED",
+                "bad"
+            );
+
+
+            setStatus(
+                connectionStatus,
+                "FAILED",
+                "bad"
+            );
+
+
+            log(
+                "Unable to send confirmation: " +
+                (
+                    error.message ||
+                    String(
+                        error
+                    )
+                ),
+                "bad"
+            );
+
+        }
+
+    }
+
+);
+
+
+/*
+============================================================
+GLOBAL JAVASCRIPT ERROR TEST
+============================================================
+*/
+
+window.addEventListener(
+
+    "error",
+
+    function (
+        event
+    ) {
+
+        log(
+            "JavaScript error: " +
+            (
+                event.message ||
+                "Unknown error"
+            ),
+            "bad"
+        );
+
+    }
+
+);
+
+
+window.addEventListener(
+
+    "unhandledrejection",
+
+    function (
+        event
+    ) {
+
+        let message =
+            event.reason;
+
+
+        if (
+            event.reason &&
+            event.reason.message
+        ) {
+
+            message =
+                event.reason.message;
+
+        }
+
+
+        log(
+            "Unhandled rejection: " +
+            String(
+                message
+            ),
+            "bad"
+        );
+
+    }
+
+);
+
+
+/*
+============================================================
+HOST WAIT STATUS
+============================================================
+*/
+
+setTimeout(
+
+    function () {
+
+        if (
+            !connected
+        ) {
+
+            setStatus(
+                hostStatus,
+                "WAITING",
+                "warn"
+            );
+
+
+            log(
+                "Still waiting for cTrader registration event.",
+                "warn"
+            );
+
+        }
+
+    },
+
+    3000
+
+);
+
+
+</script>
+
 
 </body>
 
