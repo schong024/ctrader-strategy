@@ -9,7 +9,7 @@
         content="width=device-width, initial-scale=1"
     >
 
-    <title>cTrader XAUUSD Demo Automation V6</title>
+    <title>cTrader XAUUSD Demo Automation V6.1</title>
 
     <style>
         * {
@@ -22,7 +22,7 @@
             padding: 0;
             min-height: 100%;
             background: #1c1c1e;
-            color: #ffffff;
+            color: white;
             font-family: Arial, Helvetica, sans-serif;
         }
 
@@ -37,16 +37,16 @@
         }
 
         h1 {
+            color: #30d158;
+            font-size: 18px;
             margin: 0 0 16px;
             padding-bottom: 8px;
             border-bottom: 1px solid #3a3a3c;
-            color: #30d158;
-            font-size: 17px;
         }
 
         .section {
             margin-top: 18px;
-            margin-bottom: 8px;
+            margin-bottom: 9px;
             padding-bottom: 5px;
             border-bottom: 1px solid #3a3a3c;
             font-weight: bold;
@@ -67,7 +67,6 @@
             color: #0a84ff;
             font-family: Consolas, Monaco, monospace;
             text-align: right;
-            overflow-wrap: anywhere;
         }
 
         .good {
@@ -82,49 +81,48 @@
             color: #ff453a;
         }
 
-        .acknowledgement {
-            display: block;
-            margin: 10px 0;
-            color: #ffd60a;
-            line-height: 1.4;
-        }
-
-        .acknowledgement input {
-            margin-right: 7px;
-        }
-
-        .button {
+        button {
             width: 100%;
             margin-top: 9px;
             padding: 11px;
             border: 0;
             border-radius: 5px;
             background: #34c759;
-            color: #ffffff;
+            color: white;
             font-weight: bold;
             cursor: pointer;
         }
 
-        .button.secondary {
+        button.secondary {
             background: #636366;
         }
 
-        .button.danger {
+        button.danger {
             background: #ff453a;
         }
 
-        .button:disabled {
+        button:disabled {
             background: #3a3a3c;
             color: #8e8e93;
             cursor: not-allowed;
         }
 
+        .ack {
+            display: block;
+            margin: 12px 0;
+            color: #ffd60a;
+        }
+
+        .ack input {
+            margin-right: 7px;
+        }
+
         #log {
-            height: 360px;
+            height: 350px;
             padding: 9px;
             overflow-y: auto;
-            border-radius: 5px;
             background: #2c2c2e;
+            border-radius: 5px;
             color: #d1d1d6;
             font-family: Consolas, Monaco, monospace;
             font-size: 11px;
@@ -164,7 +162,7 @@
     </div>
 
     <div class="row">
-        <span class="label">Client Adapter:</span>
+        <span class="label">Adapter:</span>
         <span id="adapterStatus" class="value">--</span>
     </div>
 
@@ -174,16 +172,11 @@
     </div>
 
     <div class="row">
-        <span class="label">Confirmation:</span>
-        <span id="confirmationStatus" class="value">--</span>
-    </div>
-
-    <div class="row">
         <span class="label">cTrader Host:</span>
         <span id="hostStatus" class="value">--</span>
     </div>
 
-    <div class="section">Account and XAUUSD</div>
+    <div class="section">Account / XAUUSD</div>
 
     <div class="row">
         <span class="label">Account:</span>
@@ -196,36 +189,16 @@
     </div>
 
     <div class="row">
-        <span class="label">Access Rights:</span>
-        <span id="accessRights" class="value">--</span>
-    </div>
-
-    <div class="row">
-        <span class="label">Symbol Count:</span>
-        <span id="symbolCount" class="value">--</span>
-    </div>
-
-    <div class="row">
         <span class="label">XAUUSD Symbol:</span>
         <span id="xauName" class="value">--</span>
     </div>
 
     <div class="row">
-        <span class="label">XAUUSD Symbol ID:</span>
+        <span class="label">Symbol ID:</span>
         <span id="xauId" class="value">--</span>
     </div>
 
-    <div class="row">
-        <span class="label">XAUUSD Enabled:</span>
-        <span id="xauEnabled" class="value">--</span>
-    </div>
-
-    <div class="section">Live quote data</div>
-
-    <div class="row">
-        <span class="label">Quote Listener:</span>
-        <span id="quoteListener" class="value">--</span>
-    </div>
+    <div class="section">Live XAUUSD</div>
 
     <div class="row">
         <span class="label">Quote Subscription:</span>
@@ -233,13 +206,13 @@
     </div>
 
     <div class="row">
-        <span class="label">Current Bid:</span>
-        <span id="currentBid" class="value">--</span>
+        <span class="label">Bid:</span>
+        <span id="bid" class="value">--</span>
     </div>
 
     <div class="row">
-        <span class="label">Current Ask:</span>
-        <span id="currentAsk" class="value">--</span>
+        <span class="label">Ask:</span>
+        <span id="ask" class="value">--</span>
     </div>
 
     <div class="row">
@@ -248,30 +221,29 @@
     </div>
 
     <div class="row">
-        <span class="label">Reference Price:</span>
-        <span id="referencePrice" class="value">--</span>
+        <span class="label">Reference:</span>
+        <span id="reference" class="value">--</span>
     </div>
 
     <div class="row">
-        <span class="label">Price Movement:</span>
-        <span id="priceMovement" class="value">--</span>
-    </div>
-
-    <div class="row">
-        <span class="label">Last Quote:</span>
-        <span id="lastQuote" class="value">--</span>
+        <span class="label">Movement:</span>
+        <span id="movement" class="value">--</span>
     </div>
 
     <button
-        id="resetReferenceBtn"
-        class="button secondary"
-        type="button"
+        id="resetReference"
+        class="secondary"
         disabled
     >
         Reset Reference Price
     </button>
 
-    <div class="section">Contract and order parameters</div>
+    <div class="section">Demo Strategy</div>
+
+    <div class="row">
+        <span class="label">Price Trigger:</span>
+        <span class="value">±$5.00</span>
+    </div>
 
     <div class="row">
         <span class="label">Requested Size:</span>
@@ -279,50 +251,47 @@
     </div>
 
     <div class="row">
-        <span class="label">Contract Lot Size:</span>
+        <span class="label">Take Profit:</span>
+        <span class="value">$1.00</span>
+    </div>
+
+    <div class="row">
+        <span class="label">Stop Loss:</span>
+        <span class="value">$10.00</span>
+    </div>
+
+    <div class="row">
+        <span class="label">Trading Window:</span>
+        <span class="value good">OPEN - ALL DAY</span>
+    </div>
+
+    <div class="section">Contract Validation</div>
+
+    <div class="row">
+        <span class="label">Lot Size:</span>
         <span id="lotSize" class="value">--</span>
     </div>
 
     <div class="row">
         <span class="label">Minimum Volume:</span>
-        <span id="minimumVolume" class="value">--</span>
+        <span id="minVolume" class="value">--</span>
     </div>
 
     <div class="row">
         <span class="label">Volume Step:</span>
-        <span id="volumeStep" class="value">--</span>
+        <span id="stepVolume" class="value">--</span>
     </div>
 
     <div class="row">
-        <span class="label">Calculated Order Volume:</span>
-        <span id="calculatedVolume" class="value">--</span>
+        <span class="label">Calculated Volume:</span>
+        <span id="orderVolume" class="value">--</span>
     </div>
 
-    <div class="row">
-        <span class="label">Price Trigger:</span>
-        <span class="value">±$10.00</span>
-    </div>
-
-    <div class="row">
-        <span class="label">Stop Loss Distance:</span>
-        <span class="value">$7.00</span>
-    </div>
-
-    <div class="row">
-        <span class="label">Take Profit Distance:</span>
-        <span class="value">$7.00</span>
-    </div>
-
-    <div class="row">
-        <span class="label">Trading Window:</span>
-        <span id="tradingWindow" class="value">--</span>
-    </div>
-
-    <div class="section">Demo automation</div>
+    <div class="section">Automation</div>
 
     <div class="row">
         <span class="label">Automation:</span>
-        <span id="automationStatus" class="value">DISARMED</span>
+        <span id="automationStatus" class="value warn">DISARMED</span>
     </div>
 
     <div class="row">
@@ -331,39 +300,36 @@
     </div>
 
     <div class="row">
-        <span class="label">Order Status:</span>
+        <span class="label">Order:</span>
         <span id="orderStatus" class="value">--</span>
     </div>
 
-    <label class="acknowledgement">
+    <label class="ack">
         <input
-            id="demoAcknowledgement"
+            id="demoCheck"
             type="checkbox"
         >
-        I confirm that cTrader shows this as a DEMO account.
+        I confirm cTrader shows this account as DEMO.
     </label>
 
-    <label class="acknowledgement">
+    <label class="ack">
         <input
-            id="positionAcknowledgement"
+            id="positionCheck"
             type="checkbox"
         >
-        I confirm there is no existing open XAUUSD position.
+        I confirm there is no existing XAUUSD position.
     </label>
 
     <button
-        id="armAutomationBtn"
-        class="button"
-        type="button"
+        id="armButton"
         disabled
     >
         Arm Demo Automation
     </button>
 
     <button
-        id="stopAutomationBtn"
-        class="button danger"
-        type="button"
+        id="stopButton"
+        class="danger"
         disabled
     >
         Emergency Stop
@@ -371,12 +337,14 @@
 
     <div class="section">Log</div>
 
-    <div id="log">Page loaded.</div>
+    <div id="log">
+        Page loaded.
+    </div>
 
     <div class="notice">
-        DEMO USE ONLY. This version can submit one XAUUSD market
-        order per page session after the two acknowledgements are
-        checked and automation is armed. Stochastic is not included.
+        DEMO ONLY. V6 can submit one XAUUSD market order per
+        page session after both acknowledgements are checked
+        and automation is armed. Stochastic is not enabled.
     </div>
 
 </div>
@@ -416,16 +384,17 @@ import {
 
 
 /* ============================================================
-   CONFIGURATION
+   CONFIG
    ============================================================ */
 
 const CONFIG = {
-    requestedLots: 0.01,
-    requiredMove: 10.0,
-    stopLossDistance: 7.0,
-    takeProfitDistance: 7.0,
-    singaporeStartHour: 20,
-    singaporeEndHour: 24
+    lots: 0.01,
+
+    move: 5.0,
+
+    stopLoss: 10.0,
+
+    takeProfit: 1.0
 };
 
 
@@ -435,33 +404,40 @@ const CONFIG = {
 
 const state = {
     adapter: null,
+
     connected: false,
 
-    accountLogin: null,
-
     symbolId: null,
-    symbolName: null,
-
-    lotSize: null,
-    minimumVolume: null,
-    maximumVolume: null,
-    stepVolume: null,
-    orderVolume: null,
-
-    quoteListenerSubscription: null,
-    quoteSubscriptionAccepted: false,
-
-    executionSubscription: null,
 
     bid: null,
-    ask: null,
-    referencePrice: null,
-    firstQuoteReceived: false,
-    digits: 2,
 
-    automationArmed: false,
+    ask: null,
+
+    reference: null,
+
+    quoteSub: null,
+
+    quoteAccepted: false,
+
+    executionSub: null,
+
+    lotSize: null,
+
+    minVolume: null,
+
+    maxVolume: null,
+
+    stepVolume: null,
+
+    orderVolume: null,
+
+    armed: false,
+
     orderPending: false,
-    orderSubmitted: false
+
+    orderSubmitted: false,
+
+    digits: 2
 };
 
 
@@ -469,56 +445,63 @@ const state = {
    UI
    ============================================================ */
 
+const $ =
+    id =>
+        document.getElementById(id);
+
+
 const ui = {
-    javascript: document.getElementById("javascriptStatus"),
-    sdk: document.getElementById("sdkStatus"),
-    adapter: document.getElementById("adapterStatus"),
-    registration: document.getElementById("registrationStatus"),
-    confirmation: document.getElementById("confirmationStatus"),
-    host: document.getElementById("hostStatus"),
+    js: $("javascriptStatus"),
+    sdk: $("sdkStatus"),
+    adapter: $("adapterStatus"),
+    registration: $("registrationStatus"),
+    host: $("hostStatus"),
 
-    account: document.getElementById("accountStatus"),
-    accountType: document.getElementById("accountType"),
-    accessRights: document.getElementById("accessRights"),
+    account: $("accountStatus"),
+    accountType: $("accountType"),
 
-    symbolCount: document.getElementById("symbolCount"),
-    xauName: document.getElementById("xauName"),
-    xauId: document.getElementById("xauId"),
-    xauEnabled: document.getElementById("xauEnabled"),
+    xauName: $("xauName"),
+    xauId: $("xauId"),
 
-    quoteListener: document.getElementById("quoteListener"),
-    quoteSubscription: document.getElementById("quoteSubscription"),
-    currentBid: document.getElementById("currentBid"),
-    currentAsk: document.getElementById("currentAsk"),
-    spread: document.getElementById("spread"),
-    referencePrice: document.getElementById("referencePrice"),
-    priceMovement: document.getElementById("priceMovement"),
-    lastQuote: document.getElementById("lastQuote"),
-    resetReferenceBtn: document.getElementById("resetReferenceBtn"),
+    quoteSubscription:
+        $("quoteSubscription"),
 
-    lotSize: document.getElementById("lotSize"),
-    minimumVolume: document.getElementById("minimumVolume"),
-    volumeStep: document.getElementById("volumeStep"),
-    calculatedVolume: document.getElementById("calculatedVolume"),
-    tradingWindow: document.getElementById("tradingWindow"),
+    bid: $("bid"),
+    ask: $("ask"),
+    spread: $("spread"),
+    reference: $("reference"),
+    movement: $("movement"),
 
-    automationStatus: document.getElementById("automationStatus"),
-    triggerStatus: document.getElementById("triggerStatus"),
-    orderStatus: document.getElementById("orderStatus"),
+    resetReference:
+        $("resetReference"),
 
-    demoAcknowledgement:
-        document.getElementById("demoAcknowledgement"),
+    lotSize: $("lotSize"),
+    minVolume: $("minVolume"),
+    stepVolume: $("stepVolume"),
+    orderVolume: $("orderVolume"),
 
-    positionAcknowledgement:
-        document.getElementById("positionAcknowledgement"),
+    automation:
+        $("automationStatus"),
 
-    armAutomationBtn:
-        document.getElementById("armAutomationBtn"),
+    trigger:
+        $("triggerStatus"),
 
-    stopAutomationBtn:
-        document.getElementById("stopAutomationBtn"),
+    order:
+        $("orderStatus"),
 
-    log: document.getElementById("log")
+    demoCheck:
+        $("demoCheck"),
+
+    positionCheck:
+        $("positionCheck"),
+
+    armButton:
+        $("armButton"),
+
+    stopButton:
+        $("stopButton"),
+
+    log: $("log")
 };
 
 
@@ -526,468 +509,271 @@ const ui = {
    HELPERS
    ============================================================ */
 
-function setStatus(
+function status(
     element,
     value,
-    type = ""
+    className = ""
 ) {
-    if (!element) {
-        return;
-    }
+    element.textContent =
+        value;
 
-    element.textContent = value;
-    element.className = "value";
+    element.className =
+        "value";
 
-    if (type) {
-        element.classList.add(type);
+    if (className) {
+        element.classList.add(
+            className
+        );
     }
 }
 
 
 function log(
     message,
-    type = ""
+    className = ""
 ) {
-    const time =
-        new Date().toLocaleTimeString(
-            "en-SG",
-            {
-                hour12: false
-            }
+    const line =
+        document.createElement(
+            "div"
         );
 
-    const row =
-        document.createElement("div");
+    line.textContent =
+        `[${new Date()
+            .toLocaleTimeString(
+                "en-SG",
+                {
+                    hour12: false
+                }
+            )}] ${message}`;
 
-    row.textContent =
-        `[${time}] ${message}`;
-
-    if (type) {
-        row.className = type;
+    if (className) {
+        line.className =
+            className;
     }
 
-    ui.log.appendChild(row);
-    ui.log.scrollTop = ui.log.scrollHeight;
+    ui.log.appendChild(
+        line
+    );
 
-    console.log(message);
+    ui.log.scrollTop =
+        ui.log.scrollHeight;
+
+    console.log(
+        message
+    );
 }
 
 
-function errorText(error) {
-    if (
-        error === null ||
-        error === undefined
-    ) {
-        return "Unknown error";
-    }
-
-    if (
-        typeof error === "string"
-    ) {
-        return error;
-    }
-
-    if (error.message) {
+function err(error) {
+    if (error?.message) {
         return error.message;
     }
 
     try {
-        return JSON.stringify(error);
+        return JSON.stringify(
+            error
+        );
     } catch {
-        return String(error);
+        return String(
+            error
+        );
     }
 }
 
 
-window.addEventListener(
-    "error",
-    event => {
-        log(
-            "JavaScript error: " +
-            (
-                event.message ||
-                "Unknown error"
-            ),
-            "bad"
-        );
-    }
-);
-
-
-window.addEventListener(
-    "unhandledrejection",
-    event => {
-        log(
-            "Unhandled promise error: " +
-            errorText(event.reason),
-            "bad"
-        );
-    }
-);
-
-
 /* ============================================================
-   ACCOUNT AND SYMBOL PARSERS
+   ACCOUNT / SYMBOL PARSERS
    ============================================================ */
 
-function findAccountInformation(response) {
+function parseAccount(response) {
     const trader =
-        response?.payload?.Trader ??
-        response?.payload?.trader ??
-        null;
+        response?.payload?.Trader;
 
     if (!trader) {
         return null;
     }
 
-    const login =
-        trader.Login ??
-        trader.login ??
-        trader.TraderId ??
-        trader.traderId;
-
-    if (
-        login === null ||
-        login === undefined
-    ) {
-        return null;
-    }
-
     return {
-        login,
+        login:
+            trader.Login,
 
         accountType:
-            trader.AccountType ??
-            trader.accountType ??
-            null,
+            trader.AccountType,
 
         accessRights:
-            trader.AccessRights ??
-            trader.accessRights ??
-            null
+            trader.AccessRights
     };
 }
 
 
-function extractSymbols(response) {
-    const rawSymbols =
-        response?.payload?.Symbol ??
-        response?.payload?.symbol ??
-        [];
+function parseSymbols(response) {
+    const list =
+        response?.payload?.Symbol;
 
-    if (!Array.isArray(rawSymbols)) {
+    if (!Array.isArray(list)) {
         return [];
     }
 
-    return rawSymbols
-        .filter(
-            symbol =>
-                (
-                    symbol?.Id !== undefined ||
-                    symbol?.id !== undefined
-                ) &&
-                (
-                    symbol?.Name !== undefined ||
-                    symbol?.name !== undefined
-                )
-        )
-        .map(
-            symbol => ({
-                id:
-                    Number(
-                        symbol.Id ??
-                        symbol.id
-                    ),
+    return list.map(
+        symbol => ({
+            id:
+                Number(
+                    symbol.Id
+                ),
 
-                name:
-                    String(
-                        symbol.Name ??
-                        symbol.name
-                    )
-                        .trim()
-                        .toUpperCase(),
+            name:
+                String(
+                    symbol.Name
+                ).toUpperCase(),
 
-                enabled:
-                    symbol.Enabled ??
-                    symbol.enabled ??
-                    null
-            })
-        );
+            enabled:
+                symbol.Enabled
+        })
+    );
 }
 
 
 /* ============================================================
-   TIME WINDOW
-   ============================================================ */
-
-function singaporeHour() {
-    const parts =
-        new Intl.DateTimeFormat(
-            "en-SG",
-            {
-                timeZone: "Asia/Singapore",
-                hour: "2-digit",
-                hourCycle: "h23"
-            }
-        )
-        .formatToParts(
-            new Date()
-        );
-
-    return Number(
-        parts.find(
-            part =>
-                part.type === "hour"
-        )?.value ?? 0
-    );
-}
-
-
-function tradingWindowIsOpen() {
-    const hour =
-        singaporeHour();
-
-    return (
-        hour >= CONFIG.singaporeStartHour &&
-        hour < CONFIG.singaporeEndHour
-    );
-}
-
-
-function updateTradingWindow() {
-    const open =
-        tradingWindowIsOpen();
-
-    setStatus(
-        ui.tradingWindow,
-        open
-            ? "OPEN"
-            : "CLOSED",
-        open
-            ? "good"
-            : "warn"
-    );
-
-    return open;
-}
-
-
-/* ============================================================
-   PRICE AND QUOTE FUNCTIONS
+   PRICE
    ============================================================ */
 
 function normalizePrice(value) {
-    const numericValue =
+    const n =
         Number(value);
 
-    if (!Number.isFinite(numericValue)) {
+    if (!Number.isFinite(n)) {
         return null;
     }
 
-    if (
-        Math.abs(numericValue) >
-        1000000
-    ) {
-        return numericValue / 100000;
-    }
-
-    return numericValue;
-}
-
-
-function formatPrice(value) {
-    if (
-        value === null ||
-        value === undefined ||
-        !Number.isFinite(Number(value))
-    ) {
-        return "--";
-    }
-
-    return Number(value).toFixed(
-        state.digits
+    return (
+        Math.abs(n) > 1000000
+            ? n / 100000
+            : n
     );
 }
 
 
-function findQuotePayload(response) {
-    const payload =
-        response?.payload ??
-        response?.Payload ??
-        response;
-
-    if (!payload) {
-        return null;
-    }
-
-    const symbolId =
-        payload.SymbolId ??
-        payload.symbolId ??
-        response?.SymbolId ??
-        response?.symbolId;
-
-    const bid =
-        payload.Bid ??
-        payload.bid ??
-        payload.BidPrice ??
-        payload.bidPrice ??
-        response?.Bid ??
-        response?.bid;
-
-    const ask =
-        payload.Ask ??
-        payload.ask ??
-        payload.AskPrice ??
-        payload.askPrice ??
-        response?.Ask ??
-        response?.ask;
-
-    if (
-        symbolId === undefined &&
-        bid === undefined &&
-        ask === undefined
-    ) {
-        return null;
-    }
-
-    return {
-        symbolId,
-        bid,
-        ask
-    };
+function price(value) {
+    return Number.isFinite(
+        Number(value)
+    )
+        ? Number(value)
+            .toFixed(
+                state.digits
+            )
+        : "--";
 }
 
 
-function setReferencePrice(value) {
-    const price =
-        Number(value);
-
-    if (!Number.isFinite(price)) {
+function setReference(value) {
+    if (
+        !Number.isFinite(
+            Number(value)
+        )
+    ) {
         return;
     }
 
-    state.referencePrice =
-        price;
+    state.reference =
+        Number(value);
 
-    setStatus(
-        ui.referencePrice,
-        formatPrice(price),
+    status(
+        ui.reference,
+        price(
+            state.reference
+        ),
         "good"
     );
 
-    setStatus(
-        ui.priceMovement,
-        Number(0).toFixed(
-            state.digits
-        )
+    status(
+        ui.movement,
+        "0.00"
     );
 
     log(
-        "Reference price set: " +
-        formatPrice(price),
-        "good"
-    );
-}
-
-
-function updateQuoteDisplay() {
-    setStatus(
-        ui.currentBid,
-        formatPrice(state.bid),
-        Number.isFinite(state.bid)
-            ? "good"
-            : ""
-    );
-
-    setStatus(
-        ui.currentAsk,
-        formatPrice(state.ask),
-        Number.isFinite(state.ask)
-            ? "good"
-            : ""
-    );
-
-    if (
-        Number.isFinite(state.bid) &&
-        Number.isFinite(state.ask)
-    ) {
-        setStatus(
-            ui.spread,
-            (
-                state.ask -
-                state.bid
-            ).toFixed(state.digits)
-        );
-    }
-
-    const currentPrice =
-        state.bid ??
-        state.ask;
-
-    if (
-        Number.isFinite(currentPrice) &&
-        state.referencePrice === null
-    ) {
-        setReferencePrice(
-            currentPrice
-        );
-    }
-
-    if (
-        Number.isFinite(currentPrice) &&
-        Number.isFinite(
-            state.referencePrice
-        )
-    ) {
-        const movement =
-            currentPrice -
-            state.referencePrice;
-
-        const prefix =
-            movement > 0
-                ? "+"
-                : "";
-
-        setStatus(
-            ui.priceMovement,
-            prefix +
-            movement.toFixed(
-                state.digits
-            ),
-            movement > 0
-                ? "good"
-                : movement < 0
-                    ? "warn"
-                    : ""
-        );
-    }
-
-    setStatus(
-        ui.lastQuote,
-        new Date().toLocaleTimeString(
-            "en-SG",
-            {
-                hour12: false
-            }
+        "Reference set: " +
+        price(
+            state.reference
         ),
         "good"
     );
 }
 
 
-function processQuoteEvent(response) {
-    const quote =
-        findQuotePayload(
-            response
-        );
+function updatePrices() {
+    status(
+        ui.bid,
+        price(state.bid),
+        "good"
+    );
 
-    if (!quote) {
-        return;
+    status(
+        ui.ask,
+        price(state.ask),
+        "good"
+    );
+
+    if (
+        Number.isFinite(state.bid) &&
+        Number.isFinite(state.ask)
+    ) {
+        status(
+            ui.spread,
+            (
+                state.ask -
+                state.bid
+            ).toFixed(2)
+        );
     }
 
     if (
-        quote.symbolId !== undefined &&
-        Number(quote.symbolId) !==
+        state.reference === null &&
+        Number.isFinite(state.bid)
+    ) {
+        setReference(
+            state.bid
+        );
+    }
+
+    if (
+        Number.isFinite(state.bid) &&
+        Number.isFinite(
+            state.reference
+        )
+    ) {
+        const movement =
+            state.bid -
+            state.reference;
+
+        status(
+            ui.movement,
+            (
+                movement > 0
+                    ? "+"
+                    : ""
+            ) +
+            movement.toFixed(2)
+        );
+    }
+}
+
+
+/* ============================================================
+   QUOTES
+   ============================================================ */
+
+function processQuote(response) {
+    const payload =
+        response?.payload ??
+        response;
+
+    const symbolId =
+        payload?.SymbolId ??
+        payload?.symbolId;
+
+    if (
+        symbolId !== undefined &&
+        Number(symbolId) !==
         Number(state.symbolId)
     ) {
         return;
@@ -995,12 +781,14 @@ function processQuoteEvent(response) {
 
     const bid =
         normalizePrice(
-            quote.bid
+            payload?.Bid ??
+            payload?.bid
         );
 
     const ask =
         normalizePrice(
-            quote.ask
+            payload?.Ask ??
+            payload?.ask
         );
 
     if (bid !== null) {
@@ -1018,32 +806,126 @@ function processQuoteEvent(response) {
         return;
     }
 
-    updateQuoteDisplay();
+    updatePrices();
     updateArmButton();
-    evaluateAutomationTrigger();
+    checkTrigger();
+}
+
+
+function startQuotes() {
+    const quoteAdapter =
+        state.adapter.current ??
+        state.adapter;
+
+    try {
+        state.quoteSub =
+            quoteEvent(
+                quoteAdapter
+            )
+                .subscribe({
+                    next:
+                        processQuote,
+
+                    error:
+                        error => {
+
+                            status(
+                                ui.quoteSubscription,
+                                "ERROR",
+                                "bad"
+                            );
+
+                            log(
+                                "Quote error: " +
+                                err(error),
+                                "bad"
+                            );
+                        }
+                });
+
+    } catch (error) {
+        log(
+            "Quote listener failed: " +
+            err(error),
+            "bad"
+        );
+
+        return;
+    }
+
+
+    subscribeQuotes(
+        state.adapter,
+        {
+            symbolId: [
+                Number(
+                    state.symbolId
+                )
+            ]
+        }
+    )
+        .pipe(
+            take(1),
+
+            catchError(
+                error => {
+                    status(
+                        ui.quoteSubscription,
+                        "FAILED",
+                        "bad"
+                    );
+
+                    log(
+                        "Quote subscription failed: " +
+                        err(error),
+                        "bad"
+                    );
+
+                    return of(null);
+                }
+            )
+        )
+        .subscribe({
+
+            next:
+                response => {
+
+                    if (!response) {
+                        return;
+                    }
+
+                    state.quoteAccepted =
+                        true;
+
+                    status(
+                        ui.quoteSubscription,
+                        "ACCEPTED",
+                        "good"
+                    );
+
+                    ui.resetReference.disabled =
+                        false;
+
+                    log(
+                        "XAUUSD live quotes accepted.",
+                        "good"
+                    );
+                }
+        });
 }
 
 
 /* ============================================================
-   CONTRACT INFORMATION AND VOLUME
+   CONTRACT
    ============================================================ */
 
-function normalizeOrderVolume(
-    requestedVolume,
-    minimumVolume,
-    stepVolume
+function calculateVolume(
+    requested,
+    minimum,
+    step
 ) {
-    let volume =
-        Number(requestedVolume);
-
-    const minimum =
-        Number(minimumVolume);
-
-    const step =
-        Number(stepVolume);
-
     if (
-        !Number.isFinite(volume) ||
+        !Number.isFinite(requested) ||
         !Number.isFinite(minimum) ||
         !Number.isFinite(step) ||
         step <= 0
@@ -1051,9 +933,9 @@ function normalizeOrderVolume(
         return null;
     }
 
-    volume =
+    let volume =
         Math.max(
-            volume,
+            requested,
             minimum
         );
 
@@ -1062,54 +944,20 @@ function normalizeOrderVolume(
             volume / step
         ) * step;
 
-    return Math.round(volume);
-}
-
-
-function extractDetailedSymbol(response) {
-    const collection =
-        response?.payload?.Symbol ??
-        response?.payload?.symbol ??
-        response?.Symbol ??
-        response?.symbol ??
-        [];
-
-    if (Array.isArray(collection)) {
-        return (
-            collection.find(
-                symbol =>
-                    Number(
-                        symbol.Id ??
-                        symbol.id
-                    ) ===
-                    Number(state.symbolId)
-            ) ??
-            collection[0] ??
-            null
-        );
-    }
-
-    if (
-        collection &&
-        typeof collection === "object"
-    ) {
-        return collection;
-    }
-
-    return null;
-}
-
-
-function loadDetailedXauSymbol() {
-    log(
-        "Requesting detailed XAUUSD contract information..."
+    return Math.round(
+        volume
     );
+}
 
+
+function loadContract() {
     getSymbol(
         state.adapter,
         {
             symbolId: [
-                Number(state.symbolId)
+                Number(
+                    state.symbolId
+                )
             ]
         }
     )
@@ -1119,8 +967,8 @@ function loadDetailedXauSymbol() {
             catchError(
                 error => {
                     log(
-                        "Detailed symbol request failed: " +
-                        errorText(error),
+                        "Contract request failed: " +
+                        err(error),
                         "bad"
                     );
 
@@ -1130,291 +978,157 @@ function loadDetailedXauSymbol() {
         )
         .subscribe({
 
-            next: response => {
-                if (!response) {
-                    return;
-                }
+            next:
+                response => {
 
-                const symbol =
-                    extractDetailedSymbol(
-                        response
-                    );
-
-                if (!symbol) {
-                    log(
-                        "Detailed XAUUSD symbol was not found.",
-                        "bad"
-                    );
-
-                    return;
-                }
-
-                const lotSize =
-                    Number(
-                        symbol.LotSize ??
-                        symbol.lotSize
-                    );
-
-                const minimumVolume =
-                    Number(
-                        symbol.MinVolume ??
-                        symbol.minVolume
-                    );
-
-                const maximumVolume =
-                    Number(
-                        symbol.MaxVolume ??
-                        symbol.maxVolume
-                    );
-
-                const stepVolume =
-                    Number(
-                        symbol.StepVolume ??
-                        symbol.stepVolume
-                    );
-
-                if (
-                    !Number.isFinite(lotSize) ||
-                    !Number.isFinite(minimumVolume) ||
-                    !Number.isFinite(stepVolume)
-                ) {
-                    log(
-                        "Detailed contract values are incomplete. Automation remains blocked.",
-                        "bad"
-                    );
-
-                    console.log(
-                        "Detailed XAUUSD symbol:",
-                        symbol
-                    );
-
-                    return;
-                }
-
-                state.lotSize =
-                    lotSize;
-
-                state.minimumVolume =
-                    minimumVolume;
-
-                state.maximumVolume =
-                    maximumVolume;
-
-                state.stepVolume =
-                    stepVolume;
-
-                /*
-                 * cTrader represents lotSize and order volume
-                 * in cents. Therefore:
-                 *
-                 * 0.01 lot = lotSize * 0.01
-                 */
-
-                const requestedVolume =
-                    lotSize *
-                    CONFIG.requestedLots;
-
-                state.orderVolume =
-                    normalizeOrderVolume(
-                        requestedVolume,
-                        minimumVolume,
-                        stepVolume
-                    );
-
-                if (
-                    Number.isFinite(maximumVolume) &&
-                    Number.isFinite(state.orderVolume) &&
-                    state.orderVolume > maximumVolume
-                ) {
-                    state.orderVolume =
-                        null;
-                }
-
-                setStatus(
-                    ui.lotSize,
-                    String(lotSize),
-                    "good"
-                );
-
-                setStatus(
-                    ui.minimumVolume,
-                    String(minimumVolume),
-                    "good"
-                );
-
-                setStatus(
-                    ui.volumeStep,
-                    String(stepVolume),
-                    "good"
-                );
-
-                setStatus(
-                    ui.calculatedVolume,
-                    state.orderVolume !== null
-                        ? String(state.orderVolume)
-                        : "INVALID",
-                    state.orderVolume !== null
-                        ? "good"
-                        : "bad"
-                );
-
-                log(
-                    "XAUUSD contract loaded. Calculated order volume: " +
-                    state.orderVolume,
-                    state.orderVolume !== null
-                        ? "good"
-                        : "bad"
-                );
-
-                updateArmButton();
-            }
-        });
-}
-
-
-/* ============================================================
-   QUOTE SUBSCRIPTION
-   ============================================================ */
-
-function startXauQuotes() {
-    const quoteAdapter =
-        state.adapter.current ??
-        state.adapter;
-
-    setStatus(
-        ui.quoteListener,
-        "STARTING",
-        "warn"
-    );
-
-    setStatus(
-        ui.quoteSubscription,
-        "SUBSCRIBING",
-        "warn"
-    );
-
-    try {
-        state.quoteListenerSubscription =
-            quoteEvent(
-                quoteAdapter
-            )
-                .subscribe({
-
-                    next: response => {
-                        processQuoteEvent(
-                            response
-                        );
-                    },
-
-                    error: error => {
-                        setStatus(
-                            ui.quoteListener,
-                            "FAILED",
-                            "bad"
-                        );
-
-                        log(
-                            "Quote listener failed: " +
-                            errorText(error),
-                            "bad"
-                        );
+                    if (!response) {
+                        return;
                     }
-                });
 
-        setStatus(
-            ui.quoteListener,
-            "LISTENING",
-            "good"
-        );
+                    const list =
+                        response?.payload?.Symbol;
 
-        log(
-            "XAUUSD quote listener started.",
-            "good"
-        );
+                    const symbol =
+                        Array.isArray(list)
+                            ? list[0]
+                            : list;
 
-    } catch (error) {
-        setStatus(
-            ui.quoteListener,
-            "FAILED",
-            "bad"
-        );
+                    if (!symbol) {
+                        log(
+                            "Detailed XAUUSD contract not found.",
+                            "bad"
+                        );
 
-        log(
-            "Quote listener setup failed: " +
-            errorText(error),
-            "bad"
-        );
+                        return;
+                    }
 
-        return;
-    }
+                    state.lotSize =
+                        Number(
+                            symbol.LotSize
+                        );
 
-    subscribeQuotes(
-        state.adapter,
-        {
-            symbolId: [
-                Number(state.symbolId)
-            ]
-        }
-    )
-        .pipe(
-            take(1),
+                    state.minVolume =
+                        Number(
+                            symbol.MinVolume
+                        );
 
-            catchError(
-                error => {
-                    setStatus(
-                        ui.quoteSubscription,
-                        "FAILED",
-                        "bad"
+                    state.maxVolume =
+                        Number(
+                            symbol.MaxVolume
+                        );
+
+                    state.stepVolume =
+                        Number(
+                            symbol.StepVolume
+                        );
+
+                    if (
+                        !Number.isFinite(
+                            state.lotSize
+                        ) ||
+                        !Number.isFinite(
+                            state.minVolume
+                        ) ||
+                        !Number.isFinite(
+                            state.stepVolume
+                        )
+                    ) {
+                        log(
+                            "Contract volume fields are incomplete.",
+                            "bad"
+                        );
+
+                        console.log(
+                            "Detailed contract:",
+                            symbol
+                        );
+
+                        return;
+                    }
+
+                    /*
+                     * 0.01 lot request.
+                     *
+                     * Normalize against broker minimum
+                     * and volume step before arming.
+                     */
+
+                    const requested =
+                        state.lotSize *
+                        CONFIG.lots;
+
+                    state.orderVolume =
+                        calculateVolume(
+                            requested,
+                            state.minVolume,
+                            state.stepVolume
+                        );
+
+                    if (
+                        Number.isFinite(
+                            state.maxVolume
+                        ) &&
+                        state.orderVolume >
+                        state.maxVolume
+                    ) {
+                        state.orderVolume =
+                            null;
+                    }
+
+                    status(
+                        ui.lotSize,
+                        String(
+                            state.lotSize
+                        ),
+                        "good"
+                    );
+
+                    status(
+                        ui.minVolume,
+                        String(
+                            state.minVolume
+                        ),
+                        "good"
+                    );
+
+                    status(
+                        ui.stepVolume,
+                        String(
+                            state.stepVolume
+                        ),
+                        "good"
+                    );
+
+                    status(
+                        ui.orderVolume,
+                        state.orderVolume !== null
+                            ? String(
+                                state.orderVolume
+                            )
+                            : "INVALID",
+                        state.orderVolume !== null
+                            ? "good"
+                            : "bad"
                     );
 
                     log(
-                        "Quote subscription failed: " +
-                        errorText(error),
-                        "bad"
+                        "Contract volume validated.",
+                        "good"
                     );
 
-                    return of(null);
+                    updateArmButton();
                 }
-            )
-        )
-        .subscribe({
-
-            next: response => {
-                if (!response) {
-                    return;
-                }
-
-                state.quoteSubscriptionAccepted =
-                    true;
-
-                ui.resetReferenceBtn.disabled =
-                    false;
-
-                setStatus(
-                    ui.quoteSubscription,
-                    "ACCEPTED",
-                    "good"
-                );
-
-                log(
-                    "XAUUSD quote subscription accepted.",
-                    "good"
-                );
-
-                updateArmButton();
-            }
         });
 }
 
 
 /* ============================================================
-   EXECUTION LISTENER
+   EXECUTION EVENTS
    ============================================================ */
 
-function startExecutionListener() {
+function startExecutionEvents() {
     if (
-        state.executionSubscription ||
-        !state.adapter
+        state.executionSub
     ) {
         return;
     }
@@ -1424,79 +1138,70 @@ function startExecutionListener() {
         state.adapter;
 
     try {
-        state.executionSubscription =
+        state.executionSub =
             executionEvent(
                 eventAdapter
             )
                 .subscribe({
 
-                    next: event => {
-                        console.log(
-                            "EXECUTION EVENT:",
-                            event
-                        );
+                    next:
+                        event => {
 
-                        const payload =
-                            event?.payload ??
-                            event?.Payload ??
-                            event;
+                            console.log(
+                                "EXECUTION EVENT:",
+                                event
+                            );
 
-                        const executionType =
-                            payload?.ExecutionType ??
-                            payload?.executionType ??
-                            "RECEIVED";
+                            const payload =
+                                event?.payload ??
+                                event;
 
-                        state.orderPending =
-                            false;
+                            const type =
+                                payload?.ExecutionType ??
+                                payload?.executionType ??
+                                "RECEIVED";
 
-                        state.orderSubmitted =
-                            true;
+                            state.orderPending =
+                                false;
 
-                        setStatus(
-                            ui.orderStatus,
-                            String(executionType),
-                            "good"
-                        );
+                            state.orderSubmitted =
+                                true;
 
-                        log(
-                            "Execution event received: " +
-                            executionType,
-                            "good"
-                        );
+                            status(
+                                ui.order,
+                                String(type),
+                                "good"
+                            );
 
-                        stopAutomation(
-                            "One-shot order event received. Automation stopped."
-                        );
+                            log(
+                                "Execution event: " +
+                                type,
+                                "good"
+                            );
 
-                        const currentPrice =
-                            state.bid ??
-                            state.ask;
+                            disarm(
+                                "One-shot order event received."
+                            );
+                        },
 
-                        if (
-                            Number.isFinite(currentPrice)
-                        ) {
-                            setReferencePrice(
-                                currentPrice
+                    error:
+                        error => {
+
+                            state.orderPending =
+                                false;
+
+                            status(
+                                ui.order,
+                                "EVENT ERROR",
+                                "bad"
+                            );
+
+                            log(
+                                "Execution event error: " +
+                                err(error),
+                                "bad"
                             );
                         }
-                    },
-
-                    error: error => {
-                        state.orderPending =
-                            false;
-
-                        setStatus(
-                            ui.orderStatus,
-                            "EVENT ERROR",
-                            "bad"
-                        );
-
-                        log(
-                            "Execution event error: " +
-                            errorText(error),
-                            "bad"
-                        );
-                    }
                 });
 
         log(
@@ -1505,15 +1210,15 @@ function startExecutionListener() {
         );
 
     } catch (error) {
-        setStatus(
-            ui.orderStatus,
+        status(
+            ui.order,
             "LISTENER FAILED",
             "bad"
         );
 
         log(
-            "Execution-listener setup failed: " +
-            errorText(error),
+            "Execution listener failed: " +
+            err(error),
             "bad"
         );
     }
@@ -1521,32 +1226,46 @@ function startExecutionListener() {
 
 
 /* ============================================================
-   AUTOMATION CONTROL
+   ARM / STOP
    ============================================================ */
 
 function updateArmButton() {
     const ready =
         state.connected &&
-        state.quoteSubscriptionAccepted &&
-        Number.isFinite(state.bid) &&
-        Number.isFinite(state.ask) &&
-        Number.isFinite(state.orderVolume) &&
-        ui.demoAcknowledgement.checked &&
-        ui.positionAcknowledgement.checked &&
+        state.quoteAccepted &&
+        Number.isFinite(
+            state.bid
+        ) &&
+        Number.isFinite(
+            state.ask
+        ) &&
+        Number.isFinite(
+            state.orderVolume
+        ) &&
+        ui.demoCheck.checked &&
+        ui.positionCheck.checked &&
         !state.orderSubmitted;
 
-    ui.armAutomationBtn.disabled =
+    ui.armButton.disabled =
         !ready;
 }
 
 
-function armAutomation() {
+function arm() {
     if (
-        !ui.demoAcknowledgement.checked ||
-        !ui.positionAcknowledgement.checked
+        !ui.demoCheck.checked ||
+        !ui.positionCheck.checked
+    ) {
+        return;
+    }
+
+    if (
+        !Number.isFinite(
+            state.orderVolume
+        )
     ) {
         log(
-            "Both safety acknowledgements are required.",
+            "Order volume is not ready.",
             "bad"
         );
 
@@ -1554,86 +1273,62 @@ function armAutomation() {
     }
 
     if (
-        !Number.isFinite(state.orderVolume)
+        !Number.isFinite(
+            state.reference
+        )
     ) {
-        log(
-            "Automation cannot be armed because order volume is invalid.",
-            "bad"
-        );
-
-        return;
-    }
-
-    if (
-        !updateTradingWindow()
-    ) {
-        log(
-            "Automation cannot be armed outside 20:00-00:00 Singapore time.",
-            "bad"
-        );
-
-        return;
-    }
-
-    if (
-        !Number.isFinite(state.referencePrice)
-    ) {
-        setReferencePrice(
-            state.bid ??
-            state.ask
+        setReference(
+            state.bid
         );
     }
 
-    state.automationArmed =
+    state.armed =
         true;
 
-    state.orderPending =
-        false;
-
-    setStatus(
-        ui.automationStatus,
+    status(
+        ui.automation,
         "ARMED",
         "good"
     );
 
-    setStatus(
-        ui.triggerStatus,
+    status(
+        ui.trigger,
         "MONITORING"
     );
 
-    setStatus(
-        ui.orderStatus,
+    status(
+        ui.order,
         "READY"
     );
 
-    ui.armAutomationBtn.disabled =
+    ui.armButton.disabled =
         true;
 
-    ui.stopAutomationBtn.disabled =
+    ui.stopButton.disabled =
         false;
 
-    startExecutionListener();
+    startExecutionEvents();
 
     log(
-        "V6 demo automation armed.",
+        "Demo automation ARMED.",
         "good"
     );
 }
 
 
-function stopAutomation(
+function disarm(
     reason = "Automation stopped."
 ) {
-    state.automationArmed =
+    state.armed =
         false;
 
-    setStatus(
-        ui.automationStatus,
+    status(
+        ui.automation,
         "DISARMED",
         "warn"
     );
 
-    ui.stopAutomationBtn.disabled =
+    ui.stopButton.disabled =
         true;
 
     updateArmButton();
@@ -1646,14 +1341,14 @@ function stopAutomation(
 
 
 /* ============================================================
-   ORDER SUBMISSION
+   ORDER
    ============================================================ */
 
-function submitDemoOrder(
-    tradeSide
+function submitOrder(
+    side
 ) {
     if (
-        !state.automationArmed ||
+        !state.armed ||
         state.orderPending ||
         state.orderSubmitted
     ) {
@@ -1661,29 +1356,11 @@ function submitDemoOrder(
     }
 
     if (
-        !ui.demoAcknowledgement.checked ||
-        !ui.positionAcknowledgement.checked
+        !ui.demoCheck.checked ||
+        !ui.positionCheck.checked
     ) {
-        stopAutomation(
-            "Safety acknowledgement was removed."
-        );
-
-        return;
-    }
-
-    if (!updateTradingWindow()) {
-        stopAutomation(
-            "Trading window closed before order submission."
-        );
-
-        return;
-    }
-
-    if (
-        !Number.isFinite(state.orderVolume)
-    ) {
-        stopAutomation(
-            "Order volume is invalid."
+        disarm(
+            "Safety acknowledgement removed."
         );
 
         return;
@@ -1692,38 +1369,28 @@ function submitDemoOrder(
     state.orderPending =
         true;
 
-    setStatus(
-        ui.orderStatus,
+    status(
+        ui.order,
         "SUBMITTING",
         "warn"
     );
 
-    const relativeStopLoss =
+    const relativeSL =
         Math.round(
-            CONFIG.stopLossDistance *
+            CONFIG.stopLoss *
             100000
         );
 
-    const relativeTakeProfit =
+    const relativeTP =
         Math.round(
-            CONFIG.takeProfitDistance *
+            CONFIG.takeProfit *
             100000
         );
-
-    const clientOrderId =
-        "V6-" +
-        tradeSide +
-        "-" +
-        Date.now();
 
     log(
         "Submitting DEMO " +
-        tradeSide +
-        " order. Symbol ID " +
-        state.symbolId +
-        ", volume " +
-        state.orderVolume +
-        "...",
+        side +
+        " XAUUSD order...",
         "warn"
     );
 
@@ -1731,31 +1398,38 @@ function submitDemoOrder(
         state.adapter,
         {
             symbolId:
-                Number(state.symbolId),
+                Number(
+                    state.symbolId
+                ),
 
             orderType:
                 "MARKET",
 
             tradeSide:
-                tradeSide,
+                side,
 
             volume:
-                Number(state.orderVolume),
+                Number(
+                    state.orderVolume
+                ),
 
             relativeStopLoss:
-                relativeStopLoss,
+                relativeSL,
 
             relativeTakeProfit:
-                relativeTakeProfit,
+                relativeTP,
 
             clientOrderId:
-                clientOrderId,
+                "V6-" +
+                side +
+                "-" +
+                Date.now(),
 
             label:
                 "V6_DEMO_XAUUSD",
 
             comment:
-                "V6 demo movement test"
+                "V6 demo-only test"
         }
     )
         .pipe(
@@ -1766,20 +1440,20 @@ function submitDemoOrder(
                     state.orderPending =
                         false;
 
-                    setStatus(
-                        ui.orderStatus,
+                    status(
+                        ui.order,
                         "REJECTED",
                         "bad"
                     );
 
                     log(
-                        "Order request failed: " +
-                        errorText(error),
+                        "Order rejected: " +
+                        err(error),
                         "bad"
                     );
 
-                    stopAutomation(
-                        "Automation stopped after order failure."
+                    disarm(
+                        "Automation stopped after order error."
                     );
 
                     return of(null);
@@ -1788,122 +1462,124 @@ function submitDemoOrder(
         )
         .subscribe({
 
-            next: response => {
-                if (!response) {
-                    return;
+            next:
+                response => {
+
+                    if (!response) {
+                        return;
+                    }
+
+                    console.log(
+                        "ORDER RESPONSE:",
+                        response
+                    );
+
+                    status(
+                        ui.order,
+                        "REQUEST SENT",
+                        "warn"
+                    );
+
+                    log(
+                        "Order request sent.",
+                        "good"
+                    );
                 }
-
-                console.log(
-                    "CREATE ORDER RESPONSE:",
-                    response
-                );
-
-                setStatus(
-                    ui.orderStatus,
-                    "REQUEST SENT",
-                    "warn"
-                );
-
-                log(
-                    "Order request sent. Waiting for execution event.",
-                    "good"
-                );
-            }
         });
 }
 
 
 /* ============================================================
-   ±$10 TRIGGER
+   ±$5 TRIGGER
    ============================================================ */
 
-function evaluateAutomationTrigger() {
+function checkTrigger() {
     if (
-        !state.automationArmed ||
+        !state.armed ||
         state.orderPending ||
         state.orderSubmitted ||
-        !Number.isFinite(state.bid) ||
-        !Number.isFinite(state.referencePrice)
+        !Number.isFinite(
+            state.bid
+        ) ||
+        !Number.isFinite(
+            state.reference
+        )
     ) {
-        return;
-    }
-
-    if (!updateTradingWindow()) {
-        stopAutomation(
-            "Trading window closed."
-        );
-
         return;
     }
 
     const movement =
         state.bid -
-        state.referencePrice;
+        state.reference;
+
+    /*
+     * Price falls $5 from reference:
+     * BUY.
+     */
 
     if (
         movement <=
-        -CONFIG.requiredMove
+        -CONFIG.move
     ) {
-        setStatus(
-            ui.triggerStatus,
+        status(
+            ui.trigger,
             "BUY TRIGGER",
             "good"
         );
 
         log(
-            "BUY trigger reached at movement " +
+            "BUY threshold reached: " +
             movement.toFixed(2),
             "good"
         );
 
-        submitDemoOrder(
+        submitOrder(
             "BUY"
         );
 
         return;
     }
 
+    /*
+     * Price rises $5 from reference:
+     * SELL.
+     */
+
     if (
         movement >=
-        CONFIG.requiredMove
+        CONFIG.move
     ) {
-        setStatus(
-            ui.triggerStatus,
+        status(
+            ui.trigger,
             "SELL TRIGGER",
             "good"
         );
 
         log(
-            "SELL trigger reached at movement +" +
+            "SELL threshold reached: +" +
             movement.toFixed(2),
             "good"
         );
 
-        submitDemoOrder(
+        submitOrder(
             "SELL"
         );
 
         return;
     }
 
-    setStatus(
-        ui.triggerStatus,
+    status(
+        ui.trigger,
         "MONITORING"
     );
 }
 
 
 /* ============================================================
-   ACCOUNT AND SYMBOL LOADING
+   ACCOUNT
    ============================================================ */
 
 function loadAccount() {
-    setStatus(
-        ui.account,
-        "LOADING",
-        "warn"
-    );
-
     getAccountInformation(
         state.adapter,
         {}
@@ -1913,15 +1589,9 @@ function loadAccount() {
 
             catchError(
                 error => {
-                    setStatus(
-                        ui.account,
-                        "FAILED",
-                        "bad"
-                    );
-
                     log(
-                        "Account request failed: " +
-                        errorText(error),
+                        "Account error: " +
+                        err(error),
                         "bad"
                     );
 
@@ -1931,65 +1601,47 @@ function loadAccount() {
         )
         .subscribe({
 
-            next: response => {
-                if (!response) {
-                    return;
-                }
+            next:
+                response => {
 
-                const account =
-                    findAccountInformation(
-                        response
-                    );
+                    const account =
+                        parseAccount(
+                            response
+                        );
 
-                if (!account) {
-                    setStatus(
+                    if (!account) {
+                        return;
+                    }
+
+                    status(
                         ui.account,
-                        "NOT FOUND",
-                        "bad"
+                        String(
+                            account.login
+                        ),
+                        "good"
                     );
 
-                    return;
+                    status(
+                        ui.accountType,
+                        account.accountType ??
+                        "--",
+                        "good"
+                    );
+
+                    log(
+                        "Account loaded.",
+                        "good"
+                    );
                 }
-
-                state.accountLogin =
-                    account.login;
-
-                setStatus(
-                    ui.account,
-                    String(account.login),
-                    "good"
-                );
-
-                setStatus(
-                    ui.accountType,
-                    account.accountType ??
-                    "--",
-                    "good"
-                );
-
-                setStatus(
-                    ui.accessRights,
-                    account.accessRights ??
-                    "--",
-                    "good"
-                );
-
-                log(
-                    "Account information loaded.",
-                    "good"
-                );
-            }
         });
 }
 
 
-function loadSymbols() {
-    setStatus(
-        ui.symbolCount,
-        "LOADING",
-        "warn"
-    );
+/* ============================================================
+   SYMBOLS
+   ============================================================ */
 
+function loadSymbols() {
     getLightSymbolList(
         state.adapter,
         {}
@@ -1999,15 +1651,9 @@ function loadSymbols() {
 
             catchError(
                 error => {
-                    setStatus(
-                        ui.symbolCount,
-                        "FAILED",
-                        "bad"
-                    );
-
                     log(
-                        "Symbol request failed: " +
-                        errorText(error),
+                        "Symbol error: " +
+                        err(error),
                         "bad"
                     );
 
@@ -2017,76 +1663,58 @@ function loadSymbols() {
         )
         .subscribe({
 
-            next: response => {
-                if (!response) {
-                    return;
-                }
+            next:
+                response => {
 
-                const symbols =
-                    extractSymbols(
-                        response
-                    );
+                    const symbols =
+                        parseSymbols(
+                            response
+                        );
 
-                setStatus(
-                    ui.symbolCount,
-                    String(symbols.length),
-                    "good"
-                );
+                    const xau =
+                        symbols.find(
+                            symbol =>
+                                symbol.name ===
+                                "XAUUSD"
+                        );
 
-                const selected =
-                    symbols.find(
-                        symbol =>
-                            symbol.name ===
-                            "XAUUSD"
-                    );
+                    if (!xau) {
+                        status(
+                            ui.xauName,
+                            "NOT FOUND",
+                            "bad"
+                        );
 
-                if (!selected) {
-                    setStatus(
+                        return;
+                    }
+
+                    state.symbolId =
+                        xau.id;
+
+                    status(
                         ui.xauName,
-                        "NOT FOUND",
-                        "bad"
+                        xau.name,
+                        "good"
                     );
 
-                    return;
+                    status(
+                        ui.xauId,
+                        String(
+                            xau.id
+                        ),
+                        "good"
+                    );
+
+                    log(
+                        "XAUUSD found. ID: " +
+                        xau.id,
+                        "good"
+                    );
+
+                    startQuotes();
+
+                    loadContract();
                 }
-
-                state.symbolId =
-                    selected.id;
-
-                state.symbolName =
-                    selected.name;
-
-                setStatus(
-                    ui.xauName,
-                    selected.name,
-                    "good"
-                );
-
-                setStatus(
-                    ui.xauId,
-                    String(selected.id),
-                    "good"
-                );
-
-                setStatus(
-                    ui.xauEnabled,
-                    selected.enabled === false
-                        ? "NO"
-                        : "YES",
-                    selected.enabled === false
-                        ? "bad"
-                        : "good"
-                );
-
-                log(
-                    "XAUUSD selected. Symbol ID: " +
-                    selected.id,
-                    "good"
-                );
-
-                startXauQuotes();
-                loadDetailedXauSymbol();
-            }
         });
 }
 
@@ -2104,19 +1732,19 @@ try {
             logger
         });
 
-    setStatus(
-        ui.javascript,
+    status(
+        ui.js,
         "RUNNING",
         "good"
     );
 
-    setStatus(
+    status(
         ui.sdk,
         "LOADED",
         "good"
     );
 
-    setStatus(
+    status(
         ui.adapter,
         "CREATED",
         "good"
@@ -2128,15 +1756,15 @@ try {
     );
 
 } catch (error) {
-    setStatus(
+    status(
         ui.adapter,
         "FAILED",
         "bad"
     );
 
     log(
-        "Adapter creation failed: " +
-        errorText(error),
+        "Adapter error: " +
+        err(error),
         "bad"
     );
 }
@@ -2147,21 +1775,9 @@ function connect() {
         return;
     }
 
-    setStatus(
+    status(
         ui.host,
         "CONNECTING",
-        "warn"
-    );
-
-    setStatus(
-        ui.registration,
-        "WAITING",
-        "warn"
-    );
-
-    setStatus(
-        ui.confirmation,
-        "WAITING",
         "warn"
     );
 
@@ -2174,12 +1790,11 @@ function connect() {
                 take(1)
             )
             .subscribe();
-    } catch (error) {
-        log(
-            "Initial confirmation warning: " +
-            errorText(error),
-            "warn"
-        );
+
+    } catch {
+        /*
+         * Registration remains the decisive host event.
+         */
     }
 
     registerEvent(
@@ -2190,21 +1805,21 @@ function connect() {
 
             catchError(
                 error => {
-                    setStatus(
+                    status(
                         ui.registration,
                         "FAILED",
                         "bad"
                     );
 
-                    setStatus(
+                    status(
                         ui.host,
                         "FAILED",
                         "bad"
                     );
 
                     log(
-                        "Registration failed: " +
-                        errorText(error),
+                        "Registration error: " +
+                        err(error),
                         "bad"
                     );
 
@@ -2214,58 +1829,53 @@ function connect() {
         )
         .subscribe({
 
-            next: registration => {
-                if (!registration) {
-                    return;
-                }
+            next:
+                registration => {
 
-                setStatus(
-                    ui.registration,
-                    "RECEIVED",
-                    "good"
-                );
+                    if (!registration) {
+                        return;
+                    }
 
-                try {
-                    handleConfirmEvent(
-                        state.adapter,
-                        {}
-                    )
-                        .pipe(
-                            take(1)
-                        )
-                        .subscribe();
-
-                    setStatus(
-                        ui.confirmation,
-                        "STARTED",
+                    status(
+                        ui.registration,
+                        "RECEIVED",
                         "good"
                     );
 
-                } catch (error) {
-                    setStatus(
-                        ui.confirmation,
-                        "WARNING",
-                        "warn"
+                    try {
+                        handleConfirmEvent(
+                            state.adapter,
+                            {}
+                        )
+                            .pipe(
+                                take(1)
+                            )
+                            .subscribe();
+
+                    } catch {
+                        /*
+                         * Do not block on confirmation.
+                         */
+                    }
+
+                    state.connected =
+                        true;
+
+                    status(
+                        ui.host,
+                        "CONNECTED",
+                        "good"
                     );
+
+                    log(
+                        "CTRADER CONNECTION ESTABLISHED.",
+                        "good"
+                    );
+
+                    loadAccount();
+
+                    loadSymbols();
                 }
-
-                state.connected =
-                    true;
-
-                setStatus(
-                    ui.host,
-                    "CONNECTED",
-                    "good"
-                );
-
-                log(
-                    "CTRADER CONNECTION ESTABLISHED.",
-                    "good"
-                );
-
-                loadAccount();
-                loadSymbols();
-            }
         });
 }
 
@@ -2274,49 +1884,45 @@ function connect() {
    BUTTONS
    ============================================================ */
 
-ui.resetReferenceBtn.addEventListener(
+ui.resetReference.addEventListener(
     "click",
     () => {
-        const price =
-            state.bid ??
-            state.ask;
-
         if (
-            !Number.isFinite(price)
+            Number.isFinite(
+                state.bid
+            )
         ) {
-            return;
+            setReference(
+                state.bid
+            );
         }
-
-        setReferencePrice(
-            price
-        );
     }
 );
 
 
-ui.demoAcknowledgement.addEventListener(
+ui.demoCheck.addEventListener(
     "change",
     updateArmButton
 );
 
 
-ui.positionAcknowledgement.addEventListener(
+ui.positionCheck.addEventListener(
     "change",
     updateArmButton
 );
 
 
-ui.armAutomationBtn.addEventListener(
+ui.armButton.addEventListener(
     "click",
-    armAutomation
+    arm
 );
 
 
-ui.stopAutomationBtn.addEventListener(
+ui.stopButton.addEventListener(
     "click",
     () => {
-        stopAutomation(
-            "Emergency stop activated by user."
+        disarm(
+            "Emergency stop activated."
         );
     }
 );
@@ -2329,16 +1935,18 @@ ui.stopAutomationBtn.addEventListener(
 window.addEventListener(
     "beforeunload",
     () => {
+
         if (
-            state.quoteSubscriptionAccepted &&
-            state.adapter &&
+            state.quoteAccepted &&
             state.symbolId !== null
         ) {
             unsubscribeQuotes(
                 state.adapter,
                 {
                     symbolId: [
-                        Number(state.symbolId)
+                        Number(
+                            state.symbolId
+                        )
                     ]
                 }
             )
@@ -2348,19 +1956,11 @@ window.addEventListener(
                 .subscribe();
         }
 
-        if (
-            state.quoteListenerSubscription
-        ) {
-            state.quoteListenerSubscription
-                .unsubscribe();
-        }
+        state.quoteSub
+            ?.unsubscribe();
 
-        if (
-            state.executionSubscription
-        ) {
-            state.executionSubscription
-                .unsubscribe();
-        }
+        state.executionSub
+            ?.unsubscribe();
     }
 );
 
@@ -2368,13 +1968,6 @@ window.addEventListener(
 /* ============================================================
    START
    ============================================================ */
-
-updateTradingWindow();
-
-setInterval(
-    updateTradingWindow,
-    30000
-);
 
 connect();
 
